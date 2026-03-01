@@ -17,7 +17,7 @@ interface AuthModalsProps {
 }
 
 export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
-  const { auth } = useAuth();
+  const auth = useAuth();
   const rtdb = useRTDB();
   const { toast } = useToast();
 
@@ -29,6 +29,7 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
   const [role, setRole] = useState("korjob");
 
   const handleAction = async () => {
+    if (!auth || !rtdb) return;
     setLoading(true);
     try {
       if (mode === "login") {

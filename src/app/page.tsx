@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Plus, MessageCircle, User, LogOut, Briefcase, TrendingUp, Filter } from "lucide-react";
+import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, TrendingUp, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,7 +24,7 @@ const CITIES = ["Ҳама шаҳрҳо", "Душанбе", "Роғун", "Бох
 const CATEGORIES = ["Муҳосиб", "Ронанда", "Муаллим", "Ошпаз", "Муҳофиз", "Дизайнер"];
 
 export default function KoryobTJ() {
-  const { auth } = useAuth();
+  const auth = useAuth();
   const rtdb = useRTDB();
   const { user } = useUser();
   const { toast } = useToast();
@@ -47,12 +47,13 @@ export default function KoryobTJ() {
   const { data: currentUserProfile } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
 
   useEffect(() => {
-    if (user && userEncodedEmail) {
+    if (user && userEncodedEmail && rtdb) {
       update(ref(rtdb, `users/${userEncodedEmail}`), { lastSeen: Date.now() });
     }
   }, [user, userEncodedEmail, rtdb]);
 
   const filteredJobs = useMemo(() => {
+    if (!jobsData) return [];
     let list = jobsData.filter(j => j.active);
     
     if (searchQuery) {
@@ -72,6 +73,7 @@ export default function KoryobTJ() {
   const selectedJob = jobsData.find(j => j.id === selectedJobId);
 
   const handleLogout = async () => {
+    if (!auth) return;
     await signOut(auth);
     setActiveView("jobs");
     toast({ title: "Шумо баромадед", description: "То дидор!" });
@@ -109,7 +111,7 @@ export default function KoryobTJ() {
                 <MessageCircle size={22} />
               </Button>
               <Button variant="ghost" size="icon" onClick={() => setActiveView("profile")} className={`rounded-xl ${activeView === 'profile' ? 'bg-primary/10 text-primary' : ''}`}>
-                <User size={22} />
+                <UserIcon size={22} />
               </Button>
               <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-xl text-destructive hover:bg-destructive/10">
                 <LogOut size={22} />
