@@ -1,7 +1,12 @@
-# Settings to manage and configure a Firebase App Hosting backend.
-# https://firebase.google.com/docs/app-hosting/configure
+# Танзимот барои Firebase App Hosting
+# Ин файл ба Firebase мегӯяд, ки чӣ тавр барномаро созад ва кор фармояд.
 
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
-  maxInstances: 1
+  # Шумораи ҳадди ақали инстансияҳо барои суръати баланд
+  minInstances: 0
+  # Шумораи ҳадди аксар барои сарфаи маблағ
+  maxInstances: 10
+  # Хотираи ҷудошуда
+  memoryMiB: 512
+
+# Танзимоти муҳити зист (Environment Variables) дар консоли Firebase илова карда мешаванд

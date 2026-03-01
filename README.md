@@ -2,35 +2,17 @@
 
 Ин лоиҳа бо истифода аз Next.js ва Firebase сохта шудааст.
 
-## Чӣ тавр ба GitHub бор кардан (Инструксияи ислоҳшуда):
+## Чӣ тавр сайт кардан (Deployment):
 
-Агар шумо хатогиҳои "rejected" ё "remote origin already exists"-ро бинед, ин қадамҳоро иҷро кунед:
+Азбаски код аллакай дар GitHub аст, ин қадамҳоро иҷро кунед:
 
-1. **Илова кардани ҳамаи файлҳо**:
-   ```bash
-   git add .
-   ```
-
-2. **Захира кардани тағйирот (Commit)**:
-   ```bash
-   git commit -m "Initial commit - Koryob.tj version 1.0"
-   ```
-
-3. **Агар "remote origin already exists" гӯяд**, аввал онро тоза кунед:
-   ```bash
-   git remote remove origin
-   ```
-
-4. **Пайваст кардани нав**:
-   ```bash
-   git remote add origin https://github.com/bobojonov07/KORYOB-TJ.git
-   ```
-
-5. **Бор кардан (Маҷбурӣ)**:
-   Агар хатогии "rejected" барояд, аз ин фармон истифода баред (ин файлҳои дурдастро бо файлҳои шумо иваз мекунад):
-   ```bash
-   git push -u origin main --force
-   ```
+1. **Ба Консоли Firebase гузаред**: [console.firebase.google.com](https://console.firebase.google.com/)
+2. **Лоиҳаи худро интихоб кунед**: "koryob-tj".
+3. **App Hosting-ро кушоед**: Дар менюи чап ба бахши "Build" ва баъд "App Hosting" гузаред.
+4. **"Get Started"**-ро пахш кунед.
+5. **GitHub-ро пайваст кунед**: Репозиторияи `bobojonov07/KORYOB-TJ`-ро интихоб кунед.
+6. **Танзимоти деплой**: Шохаи (branch) `main`-ро интихоб кунед.
+7. **Пайваст кардани Домен**: Баъди он ки сайт сохта шуд, дар танзимоти App Hosting тугмаи "Connect Domain"-ро пахш карда, домени худро ворид кунед.
 
 ## Имкониятҳои барнома:
 - Ҷустуҷӯи кор дар тамоми шаҳрҳои Тоҷикистон.
