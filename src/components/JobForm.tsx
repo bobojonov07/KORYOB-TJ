@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -125,8 +124,8 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
               <Input placeholder="Шаҳр" className="h-12 rounded-xl" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Маош</label>
-              <Input placeholder="Масалан: 1200 - 1800" className="h-12 rounded-xl" value={formData.salary} onChange={e => setFormData({ ...formData, salary: e.target.value })} />
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Маош (сомонӣ)</label>
+              <Input placeholder="Масалан: 2500" className="h-12 rounded-xl" value={formData.salary} onChange={e => setFormData({ ...formData, salary: e.target.value })} />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Телефон</label>

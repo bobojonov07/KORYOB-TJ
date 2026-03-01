@@ -4,7 +4,7 @@ import { JobListing } from "@/app/lib/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, MapPin, MessageCircle, Clock, DollarSign, Building2 } from "lucide-react";
+import { Eye, Clock, Banknote, Building2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface JobCardProps {
@@ -46,8 +46,8 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
       <CardContent className="pb-6 space-y-4 cursor-pointer flex-1" onClick={onClick}>
         <div className="flex flex-wrap gap-3">
           <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-xl border border-primary/10">
-            <DollarSign className="w-4 h-4 text-primary font-bold" />
-            <span className="text-sm font-black text-primary">{job.salary || '—'}</span>
+            <Banknote className="w-4 h-4 text-primary font-bold" />
+            <span className="text-sm font-black text-primary">{job.salary ? `${job.salary} сомонӣ` : 'Маош —'}</span>
           </div>
           <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-xl">
             <Eye className="w-4 h-4 text-muted-foreground" />
@@ -63,11 +63,6 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
         <Button variant="ghost" size="lg" className="flex-1 rounded-2xl border font-bold hover:bg-white" onClick={onClick}>
           Тафсилот
         </Button>
-        {!isOwner && (
-          <Button size="lg" className="flex-1 rounded-2xl gap-2 font-bold shadow-lg shadow-primary/20" onClick={onChat}>
-            <MessageCircle size={18} /> Чат
-          </Button>
-        )}
       </CardFooter>
     </Card>
   );

@@ -5,7 +5,7 @@ import { JobListing } from "@/app/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Building, Phone, Calendar, User, MessageCircle, DollarSign, Clock, Users } from "lucide-react";
+import { MapPin, Building, Phone, Calendar, User, MessageCircle, Banknote, Clock, Users } from "lucide-react";
 import { useUser, useRTDB } from "@/firebase";
 import { ref, runTransaction } from "firebase/database";
 
@@ -43,7 +43,7 @@ export function JobDetails({ job, onClose, onChat }: JobDetailsProps) {
 
         <div className="p-6 md:p-8 space-y-8">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <DetailItem icon={<DollarSign className="text-primary w-5 h-5" />} label="Маош" value={job.salary || '—'} />
+            <DetailItem icon={<Banknote className="text-primary w-5 h-5" />} label="Маош" value={job.salary ? `${job.salary} сомонӣ` : '—'} />
             <DetailItem icon={<Clock className="text-primary w-5 h-5" />} label="Соатҳои корӣ" value={job.hours || '—'} />
             <DetailItem icon={<Calendar className="text-primary w-5 h-5" />} label="Синну сол" value={job.age || '—'} />
             <DetailItem icon={<Users className="text-primary w-5 h-5" />} label="Ҷинс" value={job.gender} />
