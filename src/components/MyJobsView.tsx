@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -12,11 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 interface MyJobsViewProps {
-  onEditJob: (job: JobListing) => void;
   onBack: () => void;
 }
 
-export function MyJobsView({ onEditJob, onBack }: MyJobsViewProps) {
+export function MyJobsView({ onBack }: MyJobsViewProps) {
   const rtdb = useRTDB();
   const { user } = useUser();
   const { toast } = useToast();
@@ -48,7 +48,7 @@ export function MyJobsView({ onEditJob, onBack }: MyJobsViewProps) {
         <Button variant="ghost" size="icon" onClick={onBack} className="rounded-xl">
           <ArrowLeft />
         </Button>
-        <h2 className="text-2xl font-black">Эълонҳои ман</h2>
+        <h2 className="text-3xl font-black">Эълонҳои ман</h2>
       </div>
 
       <div className="grid gap-4">

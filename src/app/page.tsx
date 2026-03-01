@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, TrendingUp, Filter, Menu, Home, List, Info, ShieldAlert } from "lucide-react";
+import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, TrendingUp, Filter, Menu, Home, List, Info, ShieldAlert, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,11 +18,11 @@ import { ChatWindow } from "@/components/ChatWindow";
 import { ProfileView } from "@/components/ProfileView";
 import { MyJobsView } from "@/components/MyJobsView";
 import { AboutView } from "@/components/AboutView";
+import { FavoritesView } from "@/components/FavoritesView";
 import { useToast } from "@/hooks/use-toast";
 import { signOut } from "firebase/auth";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Alert, AlertTitle, AlertDescription } from "@/alert";
 
 const CITIES = ["Ҳама шаҳрҳо", "Душанбе", "Хуҷанд", "Бохтар", "Кӯлоб", "Истаравшан", "Исфара", "Конибодом", "Турсунзода", "Ваҳдат", "Роғун", "Норак", "Панҷакент", "Ҳисор"];
 
@@ -35,7 +35,7 @@ export default function KoryobTJ() {
   const [searchQuery, setSearchQuery] = useState("");
   const [cityFilter, setCityFilter] = useState("Ҳама шаҳрҳо");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<"jobs" | "chat" | "profile" | "my-jobs" | "create-job" | "about">("jobs");
+  const [activeView, setActiveView] = useState<"jobs" | "chat" | "profile" | "my-jobs" | "create-job" | "about" | "favorites">("jobs");
   const [activeChatEmail, setActiveChatEmail] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
@@ -94,14 +94,6 @@ export default function KoryobTJ() {
     setActiveView("chat");
   };
 
-  const handleViewDetails = (jobId: string) => {
-    if (!user) {
-      setIsAuthModalOpen(true);
-      return;
-    }
-    setSelectedJobId(jobId);
-  };
-
   if (currentUserProfile?.isBlocked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -139,6 +131,7 @@ export default function KoryobTJ() {
               <div className="hidden md:flex items-center gap-2 mr-4 bg-secondary/30 p-1 rounded-2xl">
                 <Button variant={activeView === 'jobs' ? 'default' : 'ghost'} onClick={() => setActiveView("jobs")} className="rounded-xl font-bold">Асосӣ</Button>
                 <Button variant={activeView === 'chat' ? 'default' : 'ghost'} onClick={() => setActiveView("chat")} className="rounded-xl font-bold">Чат</Button>
+                <Button variant={activeView === 'favorites' ? 'default' : 'ghost'} onClick={() => setActiveView("favorites")} className="rounded-xl font-bold">Писандида</Button>
                 {currentUserProfile?.role === 'korfarmo' && (
                   <Button variant={activeView === 'my-jobs' ? 'default' : 'ghost'} onClick={() => setActiveView("my-jobs")} className="rounded-xl font-bold">Эълонҳо</Button>
                 )}
@@ -175,6 +168,7 @@ export default function KoryobTJ() {
                       <div className="flex flex-col gap-4 mt-10">
                         <MobileNavItem icon={<Home />} label="Асосӣ" active={activeView === 'jobs'} onClick={() => setActiveView("jobs")} />
                         <MobileNavItem icon={<MessageCircle />} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
+                        <MobileNavItem icon={<Heart />} label="Писандидаҳо" active={activeView === 'favorites'} onClick={() => setActiveView("favorites")} />
                         <MobileNavItem icon={<Info />} label="Оиди барнома" active={activeView === 'about'} onClick={() => setActiveView("about")} />
                         {currentUserProfile?.role === 'korfarmo' && (
                           <MobileNavItem icon={<List />} label="Эълонҳои ман" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} />
@@ -271,7 +265,10 @@ export default function KoryobTJ() {
                     <JobCard 
                       key={job.id} 
                       job={job} 
-                      onClick={() => handleViewDetails(job.id)} 
+                      onClick={() => {
+                        if (!user) { setIsAuthModalOpen(true); return; }
+                        setSelectedJobId(job.id);
+                      }} 
                       onChat={() => handleStartChat(job.postedEmail)}
                       isOwner={user?.uid === job.postedUid}
                     />
@@ -337,9 +334,15 @@ export default function KoryobTJ() {
           />
         )}
 
+        {activeView === "favorites" && (
+          <FavoritesView 
+            onSelectJob={(id) => { setSelectedJobId(id); setActiveView("jobs"); }}
+            onBack={() => setActiveView("jobs")}
+          />
+        )}
+
         {activeView === "my-jobs" && (
           <MyJobsView 
-            onEditJob={(job) => { setSelectedJobId(job.id); setActiveView("create-job"); }} 
             onBack={() => setActiveView("profile")}
           />
         )}
@@ -367,7 +370,7 @@ export default function KoryobTJ() {
               <Plus size={32} />
             </button>
           ) : (
-            <MobileNavTab icon={<Info size={26} />} label="Оиди мо" active={activeView === 'about'} onClick={() => setActiveView("about")} />
+            <MobileNavTab icon={<Heart size={26} />} label="Писанд" active={activeView === 'favorites'} onClick={() => setActiveView("favorites")} />
           )}
 
           <MobileNavTab icon={<List size={26} />} label="Эълонҳо" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} hidden={currentUserProfile?.role !== 'korfarmo'} />

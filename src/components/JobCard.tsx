@@ -1,12 +1,15 @@
 
 "use client";
 
-import { JobListing } from "@/app/lib/types";
+import { JobListing, UserProfile } from "@/app/lib/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Clock, Banknote, Building2, MapPin } from "lucide-react";
+import { Eye, Clock, Banknote, Building2, MapPin, Heart } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useUser, useRTDB, useRTDBData } from "@/firebase";
+import { ref, update, runTransaction } from "firebase/database";
+import { cn } from "@/lib/utils";
 
 interface JobCardProps {
   job: JobListing;
@@ -16,6 +19,32 @@ interface JobCardProps {
 }
 
 export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
+  const { user } = useUser();
+  const rtdb = useRTDB();
+  
+  const userEncodedEmail = user?.email ? encodeURIComponent(user.email).replace(/\./g, '%2E') : null;
+  const { data: profile } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null) as { data: UserProfile | null };
+
+  const isFavorite = profile?.favorites?.includes(job.id);
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user || !userEncodedEmail || !rtdb) return;
+
+    const userRef = ref(rtdb, `users/${userEncodedEmail}`);
+    await runTransaction(userRef, (userData) => {
+      if (userData) {
+        if (!userData.favorites) userData.favorites = [];
+        if (userData.favorites.includes(job.id)) {
+          userData.favorites = userData.favorites.filter((id: string) => id !== job.id);
+        } else {
+          userData.favorites.push(job.id);
+        }
+      }
+      return userData;
+    });
+  };
+
   const safeDate = (dateStr: string) => {
     const d = new Date(dateStr);
     return isNaN(d.getTime()) ? new Date() : d;
@@ -28,9 +57,21 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
           <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-4 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-1.5">
             <MapPin size={12} /> {job.city}
           </Badge>
-          <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase font-black tracking-widest bg-secondary/50 px-3 py-1.5 rounded-xl border border-primary/5">
-            <Clock className="w-3.5 h-3.5" />
-            {formatDistanceToNow(safeDate(job.postedAt), { addSuffix: true })}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase font-black tracking-widest bg-secondary/50 px-3 py-1.5 rounded-xl border border-primary/5">
+              <Clock className="w-3.5 h-3.5" />
+              {formatDistanceToNow(safeDate(job.postedAt), { addSuffix: true })}
+            </div>
+            {user && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleFavorite}
+                className={cn("rounded-xl h-8 w-8", isFavorite ? "text-red-500 bg-red-50" : "text-muted-foreground")}
+              >
+                <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
+              </Button>
+            )}
           </div>
         </div>
         <div className="space-y-2">

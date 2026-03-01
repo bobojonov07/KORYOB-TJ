@@ -12,6 +12,7 @@ export interface UserProfile {
   warningCount?: number;
   reportsCount?: number;
   isBlocked?: boolean;
+  favorites?: string[]; // Array of job IDs
 }
 
 export interface JobListing {
