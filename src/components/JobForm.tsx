@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { UserProfile } from "@/app/lib/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,7 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
   const { data: profile } = useRTDBData(encodedEmail ? `users/${encodedEmail}` : null) as { data: UserProfile | null };
 
   useEffect(() => {
-    if (jobId) {
+    if (jobId && rtdb) {
       const loadJob = async () => {
         const snap = await get(ref(rtdb, `jobs/${jobId}`));
         if (snap.exists()) {
@@ -64,7 +65,7 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !profile) return;
+    if (!user || !profile || !rtdb) return;
 
     if (!formData.title || !formData.company || !formData.city) {
       toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан майдонҳои асосиро пур кунед." });
@@ -82,6 +83,7 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
           ...formData,
           postedBy: profile.name,
           postedEmail: profile.email,
+          postedUid: user.uid,
           postedAt: new Date().toISOString(),
           active: true,
           views: 0,
@@ -99,49 +101,41 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
-      <Button variant="ghost" onClick={onCancel} className="mb-4 gap-2">
+    <div className="max-w-2xl mx-auto py-4 md:py-8">
+      <Button variant="ghost" onClick={onCancel} className="mb-4 gap-2 font-bold">
         <ArrowLeft size={16} /> Бозгашт
       </Button>
 
-      <Card className="border-primary/10 shadow-xl overflow-hidden">
-        <CardHeader className="bg-primary text-white">
-          <CardTitle className="text-2xl">{jobId ? "Таҳрири эълон" : "Эълони нав эҷод кунед"}</CardTitle>
+      <Card className="border-primary/10 shadow-2xl rounded-[2.5rem] overflow-hidden">
+        <CardHeader className="bg-primary text-white p-8">
+          <CardTitle className="text-2xl font-black">{jobId ? "Таҳрири эълон" : "Эълони нав эҷод кунед"}</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6 space-y-4">
-          <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
+        <CardContent className="p-6 md:p-10 space-y-6">
+          <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold">Номи вазифа *</label>
-              <Input placeholder="Масалан: Муҳандис" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Номи вазифа *</label>
+              <Input placeholder="Масалан: Муҳандис" className="h-12 rounded-xl" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold">Ширкат *</label>
-              <Input placeholder="Номи ширкат" value={formData.company} onChange={e => setFormData({ ...formData, company: e.target.value })} />
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Ширкат *</label>
+              <Input placeholder="Номи ширкат" className="h-12 rounded-xl" value={formData.company} onChange={e => setFormData({ ...formData, company: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold">Шаҳр *</label>
-              <Input placeholder="Шаҳр" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Шаҳр *</label>
+              <Input placeholder="Шаҳр" className="h-12 rounded-xl" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold">Маош</label>
-              <Input placeholder="Масалан: 1200 - 1800" value={formData.salary} onChange={e => setFormData({ ...formData, salary: e.target.value })} />
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Маош</label>
+              <Input placeholder="Масалан: 1200 - 1800" className="h-12 rounded-xl" value={formData.salary} onChange={e => setFormData({ ...formData, salary: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold">Соатҳои корӣ</label>
-              <Input placeholder="Масалан: 07:00 - 18:00" value={formData.hours} onChange={e => setFormData({ ...formData, hours: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-semibold">Синну сол</label>
-              <Input placeholder="Масалан: аз 20 то 25" value={formData.age} onChange={e => setFormData({ ...formData, age: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-semibold">Телефон</label>
-              <Input placeholder="+992 93 123 45 67" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Телефон</label>
+              <Input placeholder="+992 93 123 45 67" className="h-12 rounded-xl" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold">Ҷинс</label>
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Ҷинс</label>
               <Select value={formData.gender} onValueChange={val => setFormData({ ...formData, gender: val })}>
-                <SelectTrigger>
+                <SelectTrigger className="h-12 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -152,14 +146,14 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
               </Select>
             </div>
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold">Тавсифи вазифа *</label>
-              <Textarea placeholder="Маълумоти пурра оиди кор..." rows={5} value={formData.desc} onChange={e => setFormData({ ...formData, desc: e.target.value })} />
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Тавсифи вазифа *</label>
+              <Textarea placeholder="Маълумоти пурра оиди кор..." rows={6} className="rounded-2xl" value={formData.desc} onChange={e => setFormData({ ...formData, desc: e.target.value })} />
             </div>
 
             <div className="md:col-span-2 pt-4">
-              <Button type="submit" disabled={loading} className="w-full h-12 text-lg rounded-full gap-2">
+              <Button type="submit" disabled={loading} className="w-full h-14 text-lg font-black rounded-2xl gap-3 shadow-xl shadow-primary/20">
                 {loading ? "Сабт мешавад..." : jobId ? "Навсозӣ" : "Нашр кардан"}
-                {!loading && <Send size={18} />}
+                {!loading && <Send size={20} />}
               </Button>
             </div>
           </form>

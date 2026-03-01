@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, TrendingUp, Filter } from "lucide-react";
+import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, TrendingUp, Filter, Menu, Home, Heart, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,6 +20,7 @@ import { MyJobsView } from "@/components/MyJobsView";
 import { useToast } from "@/hooks/use-toast";
 import { signOut } from "firebase/auth";
 import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const CITIES = ["Ҳама шаҳрҳо", "Душанбе", "Роғун", "Бохтар", "Истаравшан", "Исфара", "Конибодом", "Кӯлоб", "Турсунзода", "Ваҳдат", "Хуҷанд"];
 const CATEGORIES = ["Муҳосиб", "Ронанда", "Муаллим", "Ошпаз", "Муҳофиз", "Дизайнер"];
@@ -36,7 +38,6 @@ export default function KoryobTJ() {
   const [activeChatEmail, setActiveChatEmail] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // RTDB Queries
   const { data: jobsObj } = useRTDBData("jobs");
   const jobsData = useMemo(() => {
     if (!jobsObj) return [];
@@ -88,8 +89,16 @@ export default function KoryobTJ() {
     setActiveView("chat");
   };
 
+  const handleViewDetails = (jobId: string) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setSelectedJobId(jobId);
+  };
+
   return (
-    <div className="min-h-screen bg-[#FDFCFB] flex flex-col">
+    <div className="min-h-screen bg-[#FDFCFB] flex flex-col pb-20 md:pb-0">
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b px-4 md:px-8 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2 cursor-pointer group" onClick={() => setActiveView("jobs")}>
           <div className="bg-primary text-white p-2 rounded-xl shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
@@ -98,25 +107,73 @@ export default function KoryobTJ() {
           <h1 className="text-2xl font-black text-primary tracking-tighter">KORYOB.TJ</h1>
         </div>
 
-        <nav className="flex items-center gap-2 md:gap-4">
+        <nav className="flex items-center gap-2">
           {user ? (
-            <div className="flex items-center gap-2">
-              <div className="hidden lg:flex flex-col items-end mr-2">
-                <span className="text-sm font-bold text-foreground leading-tight">{currentUserProfile?.name}</span>
-                <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-                  {currentUserProfile?.role === 'korfarmo' ? 'Корфармо' : 'Корҷуй'}
-                </span>
+            <>
+              <div className="hidden md:flex items-center gap-4 mr-4">
+                <Button variant="ghost" onClick={() => setActiveView("jobs")} className={activeView === 'jobs' ? 'text-primary font-bold' : ''}>Асосӣ</Button>
+                <Button variant="ghost" onClick={() => setActiveView("chat")} className={activeView === 'chat' ? 'text-primary font-bold' : ''}>Чат</Button>
+                {currentUserProfile?.role === 'korfarmo' && (
+                  <Button variant="ghost" onClick={() => setActiveView("my-jobs")} className={activeView === 'my-jobs' ? 'text-primary font-bold' : ''}>Эълонҳои ман</Button>
+                )}
               </div>
-              <Button variant="ghost" size="icon" onClick={() => setActiveView("chat")} className={`rounded-xl ${activeView === 'chat' ? 'bg-primary/10 text-primary' : ''}`}>
-                <MessageCircle size={22} />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => setActiveView("profile")} className={`rounded-xl ${activeView === 'profile' ? 'bg-primary/10 text-primary' : ''}`}>
-                <UserIcon size={22} />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-xl text-destructive hover:bg-destructive/10">
-                <LogOut size={22} />
-              </Button>
-            </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="hidden lg:flex flex-col items-end mr-2 text-right">
+                  <span className="text-sm font-bold text-foreground leading-tight">{currentUserProfile?.name}</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                    {currentUserProfile?.role === 'korfarmo' ? 'Корфармо' : 'Корҷуй'}
+                  </span>
+                </div>
+                
+                {/* Desktop User Menu */}
+                <div className="hidden md:flex gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => setActiveView("profile")} className={`rounded-xl ${activeView === 'profile' ? 'bg-primary/10 text-primary' : ''}`}>
+                    <UserIcon size={22} />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-xl text-destructive hover:bg-destructive/10">
+                    <LogOut size={22} />
+                  </Button>
+                </div>
+
+                {/* Mobile Hamburger Menu */}
+                <div className="md:hidden">
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="ghost" size="icon" className="rounded-xl">
+                        <Menu size={24} />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="right" className="rounded-l-3xl">
+                      <SheetHeader>
+                        <SheetTitle className="text-left font-black text-primary text-xl">МЕНЮ</SheetTitle>
+                      </SheetHeader>
+                      <div className="flex flex-col gap-4 mt-8">
+                        <Button variant="ghost" className="justify-start gap-3 h-12 text-lg font-bold rounded-xl" onClick={() => setActiveView("jobs")}>
+                          <Home size={20} /> Асосӣ
+                        </Button>
+                        <Button variant="ghost" className="justify-start gap-3 h-12 text-lg font-bold rounded-xl" onClick={() => setActiveView("chat")}>
+                          <MessageCircle size={20} /> Чат
+                        </Button>
+                        {currentUserProfile?.role === 'korfarmo' && (
+                          <Button variant="ghost" className="justify-start gap-3 h-12 text-lg font-bold rounded-xl" onClick={() => setActiveView("my-jobs")}>
+                            <List size={20} /> Эълонҳои ман
+                          </Button>
+                        )}
+                        <Button variant="ghost" className="justify-start gap-3 h-12 text-lg font-bold rounded-xl" onClick={() => setActiveView("profile")}>
+                          <UserIcon size={20} /> Профил
+                        </Button>
+                        <div className="mt-auto pt-8 border-t">
+                          <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-lg font-bold rounded-xl text-destructive hover:bg-destructive/10" onClick={handleLogout}>
+                            <LogOut size={20} /> Баромад
+                          </Button>
+                        </div>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                </div>
+              </div>
+            </>
           ) : (
             <div className="flex gap-2">
               <Button onClick={() => setIsAuthModalOpen(true)} className="rounded-xl px-6 shadow-md shadow-primary/10">Воридшавӣ</Button>
@@ -128,7 +185,6 @@ export default function KoryobTJ() {
       <main className="flex-1 container max-w-6xl mx-auto p-4 md:p-8">
         {activeView === "jobs" && (
           <div className="space-y-10">
-            {/* Hero Section */}
             <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-white to-primary/5 p-8 md:p-16 rounded-[2.5rem] border border-primary/10 text-center space-y-8">
               <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
               <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -171,24 +227,8 @@ export default function KoryobTJ() {
                   </Select>
                 </div>
               </div>
-
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
-                <span className="text-sm font-bold text-muted-foreground mr-2">Категорияҳои маъмул:</span>
-                {CATEGORIES.map(cat => (
-                  <Button 
-                    key={cat} 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setSearchQuery(cat)}
-                    className="rounded-full bg-white/50 border-primary/10 hover:border-primary hover:text-primary transition-all text-xs font-bold"
-                  >
-                    {cat}
-                  </Button>
-                ))}
-              </div>
             </section>
 
-            {/* Content Area */}
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b pb-4">
                 <div className="flex items-center gap-3">
@@ -196,7 +236,7 @@ export default function KoryobTJ() {
                   <h3 className="text-2xl font-black text-foreground">Эълонҳои ҷорӣ</h3>
                 </div>
                 {currentUserProfile?.role === 'korfarmo' && (
-                  <Button onClick={() => setActiveView("create-job")} className="rounded-2xl gap-2 h-12 px-6 shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95">
+                  <Button onClick={() => setActiveView("create-job")} className="hidden md:flex rounded-2xl gap-2 h-12 px-6 shadow-lg shadow-primary/20 transition-transform hover:scale-105">
                     <Plus size={20} /> Иловаи эълон
                   </Button>
                 )}
@@ -208,16 +248,14 @@ export default function KoryobTJ() {
                     <JobCard 
                       key={job.id} 
                       job={job} 
-                      onClick={() => setSelectedJobId(job.id)} 
+                      onClick={() => handleViewDetails(job.id)} 
                       onChat={() => handleStartChat(job.postedEmail)}
-                      isOwner={user?.email === job.postedEmail}
+                      isOwner={user?.uid === job.postedUid}
                     />
                   ))
                 ) : (
                   <div className="lg:col-span-2 text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-muted/50 space-y-4">
-                    <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mx-auto opacity-50">
-                      <Filter size={32} className="text-muted-foreground" />
-                    </div>
+                    <Filter size={32} className="text-muted-foreground mx-auto opacity-50" />
                     <p className="text-muted-foreground text-lg font-medium">Мутаассифона, эълонҳо ёфт нашуданд.</p>
                     <Button variant="link" onClick={() => { setSearchQuery(""); setCityFilter("Ҳама шаҳрҳо"); }} className="text-primary font-bold">
                       Тоза кардани филтрҳо
@@ -228,10 +266,8 @@ export default function KoryobTJ() {
 
               {!user && filteredJobs.length >= 5 && (
                 <div className="relative overflow-hidden bg-primary/5 p-10 rounded-[2.5rem] text-center space-y-4 border border-primary/10 mt-12">
-                  <div className="space-y-2">
-                    <h4 className="text-2xl font-black">Дастрасии комил мехоҳед?</h4>
-                    <p className="font-medium text-muted-foreground max-w-lg mx-auto">Барои дидани ҳамаи эълонҳо ва тамос бо корфармоён лутфан ворид шавед.</p>
-                  </div>
+                  <h4 className="text-2xl font-black">Дастрасии комил мехоҳед?</h4>
+                  <p className="font-medium text-muted-foreground max-w-lg mx-auto">Барои дидани ҳамаи эълонҳо ва тамос бо корфармоён лутфан ворид шавед.</p>
                   <Button onClick={() => setIsAuthModalOpen(true)} className="rounded-xl h-12 px-10 text-lg font-bold shadow-lg shadow-primary/10">Қайд шудан</Button>
                 </div>
               )}
@@ -249,9 +285,7 @@ export default function KoryobTJ() {
                 <ChatWindow partnerEmail={activeChatEmail} onBack={() => setActiveChatEmail(null)} />
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-secondary/10">
-                  <div className="bg-white p-6 rounded-full shadow-inner mb-4">
-                    <MessageCircle size={48} className="opacity-20" />
-                  </div>
+                  <MessageCircle size={48} className="opacity-20 mb-4" />
                   <p className="font-bold">Яке аз чатҳоро интихоб кунед</p>
                 </div>
               )}
@@ -283,12 +317,43 @@ export default function KoryobTJ() {
         )}
       </main>
 
-      <footer className="py-12 border-t bg-white text-center">
+      {/* Mobile Bottom Navigation */}
+      {user && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-3 flex items-center justify-between z-50 rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+          <button onClick={() => setActiveView("jobs")} className={`flex flex-col items-center gap-1 ${activeView === 'jobs' ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Home size={24} />
+            <span className="text-[10px] font-bold">Асосӣ</span>
+          </button>
+          <button onClick={() => setActiveView("chat")} className={`flex flex-col items-center gap-1 ${activeView === 'chat' ? 'text-primary' : 'text-muted-foreground'}`}>
+            <MessageCircle size={24} />
+            <span className="text-[10px] font-bold">Чат</span>
+          </button>
+          
+          {currentUserProfile?.role === 'korfarmo' ? (
+            <button onClick={() => setActiveView("create-job")} className="bg-primary text-white p-3 rounded-2xl -mt-10 shadow-lg shadow-primary/30 border-4 border-white active:scale-90 transition-transform">
+              <Plus size={28} />
+            </button>
+          ) : (
+            <button className="flex flex-col items-center gap-1 text-muted-foreground opacity-50">
+              <Heart size={24} />
+              <span className="text-[10px] font-bold">Писанд</span>
+            </button>
+          )}
+
+          <button onClick={() => setActiveView("my-jobs")} className={`flex flex-col items-center gap-1 ${activeView === 'my-jobs' ? 'text-primary' : 'text-muted-foreground'} ${currentUserProfile?.role !== 'korfarmo' ? 'hidden' : ''}`}>
+            <List size={24} />
+            <span className="text-[10px] font-bold">Эълонҳо</span>
+          </button>
+          
+          <button onClick={() => setActiveView("profile")} className={`flex flex-col items-center gap-1 ${activeView === 'profile' ? 'text-primary' : 'text-muted-foreground'}`}>
+            <UserIcon size={24} />
+            <span className="text-[10px] font-bold">Профил</span>
+          </button>
+        </div>
+      )}
+
+      <footer className="py-12 border-t bg-white text-center hidden md:block">
         <div className="container max-w-6xl mx-auto px-4 space-y-4">
-          <div className="flex items-center justify-center gap-2 grayscale opacity-50">
-            <Briefcase size={20} />
-            <span className="font-black tracking-tighter">KORYOB.TJ</span>
-          </div>
           <p className="text-sm text-muted-foreground font-medium">© {new Date().getFullYear()} KORYOB.TJ — Платформаи муосири корёбӣ дар Тоҷикистон.</p>
         </div>
       </footer>
