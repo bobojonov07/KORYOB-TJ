@@ -22,9 +22,9 @@ import { useToast } from "@/hooks/use-toast";
 import { signOut } from "firebase/auth";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertTitle, AlertDescription } from "@/alert";
 
-const CITIES = ["Ҳама шаҳрҳо", "Душанбе", "Роғун", "Бохтар", "Истаравшан", "Исфара", "Конибодом", "Кӯлоб", "Турсунзода", "Ваҳдат", "Хуҷанд"];
+const CITIES = ["Ҳама шаҳрҳо", "Душанбе", "Хуҷанд", "Бохтар", "Кӯлоб", "Истаравшан", "Исфара", "Конибодом", "Турсунзода", "Ваҳдат", "Роғун", "Норак", "Панҷакент", "Ҳисор"];
 
 export default function KoryobTJ() {
   const auth = useAuth();
@@ -105,53 +105,58 @@ export default function KoryobTJ() {
   if (currentUserProfile?.isBlocked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Alert variant="destructive" className="max-w-md rounded-3xl p-8 border-none shadow-2xl bg-white">
-          <ShieldAlert className="h-12 w-12 mb-4 mx-auto" />
-          <AlertTitle className="text-2xl font-black text-center mb-2">Аккаунт Блок шуд</AlertTitle>
-          <AlertDescription className="text-center text-lg">
-            Мутаассифона, ҳисоби шумо барои риоя накардани қоидаҳои платформа (дашном ё гузоришҳои зиёд) блок карда шуд.
-            <Button onClick={handleLogout} className="w-full mt-6 rounded-2xl">Баромад</Button>
-          </AlertDescription>
-        </Alert>
+        <div className="max-w-md w-full bg-white rounded-[2.5rem] p-8 text-center shadow-2xl space-y-6 border border-destructive/20">
+          <div className="bg-destructive/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-destructive animate-pulse">
+            <ShieldAlert size={48} />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-3xl font-black text-foreground tracking-tight">Аккаунт Блок шуд</h2>
+            <p className="text-muted-foreground font-medium leading-relaxed">
+              Мутаассифона, ҳисоби шумо барои риоя накардани қоидаҳои платформа (дашном ё гузоришҳои зиёд) блок карда шуд.
+            </p>
+          </div>
+          <Button onClick={handleLogout} className="w-full h-14 rounded-2xl text-lg font-black" variant="destructive">
+            <LogOut size={20} className="mr-2" /> Баромад аз ҳисоб
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] flex flex-col pb-20 md:pb-0">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b px-4 md:px-8 py-4 flex items-center justify-between shadow-sm">
+    <div className="min-h-screen bg-[#FDFCFB] flex flex-col pb-24 md:pb-0">
+      <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b px-4 md:px-12 py-5 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2 cursor-pointer group" onClick={() => setActiveView("jobs")}>
-          <div className="bg-primary text-white p-2 rounded-xl shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-            <Briefcase size={24} />
+          <div className="bg-primary text-white p-2.5 rounded-2xl shadow-lg shadow-primary/30 group-hover:scale-105 transition-all">
+            <Briefcase size={26} />
           </div>
           <h1 className="text-2xl font-black text-primary tracking-tighter">KORYOB.TJ</h1>
         </div>
 
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-3">
           {user ? (
             <>
-              <div className="hidden md:flex items-center gap-4 mr-4">
-                <Button variant="ghost" onClick={() => setActiveView("jobs")} className={activeView === 'jobs' ? 'text-primary font-bold' : ''}>Асосӣ</Button>
-                <Button variant="ghost" onClick={() => setActiveView("chat")} className={activeView === 'chat' ? 'text-primary font-bold' : ''}>Чат</Button>
-                <Button variant="ghost" onClick={() => setActiveView("about")} className={activeView === 'about' ? 'text-primary font-bold' : ''}>Дар бораи мо</Button>
+              <div className="hidden md:flex items-center gap-2 mr-4 bg-secondary/30 p-1 rounded-2xl">
+                <Button variant={activeView === 'jobs' ? 'default' : 'ghost'} onClick={() => setActiveView("jobs")} className="rounded-xl font-bold">Асосӣ</Button>
+                <Button variant={activeView === 'chat' ? 'default' : 'ghost'} onClick={() => setActiveView("chat")} className="rounded-xl font-bold">Чат</Button>
                 {currentUserProfile?.role === 'korfarmo' && (
-                  <Button variant="ghost" onClick={() => setActiveView("my-jobs")} className={activeView === 'my-jobs' ? 'text-primary font-bold' : ''}>Эълонҳои ман</Button>
+                  <Button variant={activeView === 'my-jobs' ? 'default' : 'ghost'} onClick={() => setActiveView("my-jobs")} className="rounded-xl font-bold">Эълонҳо</Button>
                 )}
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <div className="hidden lg:flex flex-col items-end mr-2 text-right">
-                  <span className="text-sm font-bold text-foreground leading-tight">{currentUserProfile?.name}</span>
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                  <span className="text-sm font-black text-foreground leading-tight">{currentUserProfile?.name}</span>
+                  <span className="text-[10px] uppercase font-black text-primary tracking-widest">
                     {currentUserProfile?.role === 'korfarmo' ? 'Корфармо' : 'Корҷуй'}
                   </span>
                 </div>
                 
-                <div className="hidden md:flex gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => setActiveView("profile")} className={`rounded-xl ${activeView === 'profile' ? 'bg-primary/10 text-primary' : ''}`}>
+                <div className="hidden md:flex gap-2">
+                  <Button variant="outline" size="icon" onClick={() => setActiveView("profile")} className={`rounded-xl h-11 w-11 ${activeView === 'profile' ? 'border-primary text-primary bg-primary/5' : 'border-primary/10'}`}>
                     <UserIcon size={22} />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-xl text-destructive hover:bg-destructive/10">
+                  <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-xl h-11 w-11 text-destructive hover:bg-destructive/10">
                     <LogOut size={22} />
                   </Button>
                 </div>
@@ -159,35 +164,25 @@ export default function KoryobTJ() {
                 <div className="md:hidden">
                   <Sheet>
                     <SheetTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-xl">
-                        <Menu size={24} />
+                      <Button variant="outline" size="icon" className="rounded-xl h-11 w-11 border-primary/10">
+                        <Menu size={24} className="text-primary" />
                       </Button>
                     </SheetTrigger>
-                    <SheetContent side="right" className="rounded-l-3xl">
+                    <SheetContent side="right" className="rounded-l-[2.5rem] p-8">
                       <SheetHeader>
-                        <SheetTitle className="text-left font-black text-primary text-xl">МЕНЮ</SheetTitle>
+                        <SheetTitle className="text-left font-black text-primary text-2xl tracking-tighter">МЕНЮ</SheetTitle>
                       </SheetHeader>
-                      <div className="flex flex-col gap-4 mt-8">
-                        <Button variant="ghost" className="justify-start gap-3 h-12 text-lg font-bold rounded-xl" onClick={() => setActiveView("jobs")}>
-                          <Home size={20} /> Асосӣ
-                        </Button>
-                        <Button variant="ghost" className="justify-start gap-3 h-12 text-lg font-bold rounded-xl" onClick={() => setActiveView("chat")}>
-                          <MessageCircle size={20} /> Чат
-                        </Button>
-                        <Button variant="ghost" className="justify-start gap-3 h-12 text-lg font-bold rounded-xl" onClick={() => setActiveView("about")}>
-                          <Info size={20} /> Дар бораи мо
-                        </Button>
+                      <div className="flex flex-col gap-4 mt-10">
+                        <MobileNavItem icon={<Home />} label="Асосӣ" active={activeView === 'jobs'} onClick={() => setActiveView("jobs")} />
+                        <MobileNavItem icon={<MessageCircle />} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
+                        <MobileNavItem icon={<Info />} label="Оиди барнома" active={activeView === 'about'} onClick={() => setActiveView("about")} />
                         {currentUserProfile?.role === 'korfarmo' && (
-                          <Button variant="ghost" className="justify-start gap-3 h-12 text-lg font-bold rounded-xl" onClick={() => setActiveView("my-jobs")}>
-                            <List size={20} /> Эълонҳои ман
-                          </Button>
+                          <MobileNavItem icon={<List />} label="Эълонҳои ман" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} />
                         )}
-                        <Button variant="ghost" className="justify-start gap-3 h-12 text-lg font-bold rounded-xl" onClick={() => setActiveView("profile")}>
-                          <UserIcon size={20} /> Профил
-                        </Button>
-                        <div className="mt-auto pt-8 border-t">
-                          <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-lg font-bold rounded-xl text-destructive hover:bg-destructive/10" onClick={handleLogout}>
-                            <LogOut size={20} /> Баромад
+                        <MobileNavItem icon={<UserIcon />} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
+                        <div className="mt-auto pt-10 border-t">
+                          <Button variant="ghost" className="w-full justify-start gap-4 h-14 text-lg font-black rounded-2xl text-destructive hover:bg-destructive/10" onClick={handleLogout}>
+                            <LogOut size={22} /> Баромад
                           </Button>
                         </div>
                       </div>
@@ -198,53 +193,53 @@ export default function KoryobTJ() {
             </>
           ) : (
             <div className="flex gap-2">
-              <Button variant="ghost" className="hidden md:flex" onClick={() => setActiveView("about")}>Дар бораи мо</Button>
-              <Button onClick={() => setIsAuthModalOpen(true)} className="rounded-xl px-6 shadow-md shadow-primary/10">Воридшавӣ</Button>
+              <Button variant="ghost" className="hidden md:flex font-bold" onClick={() => setActiveView("about")}>Оиди мо</Button>
+              <Button onClick={() => setIsAuthModalOpen(true)} className="rounded-2xl px-8 h-11 font-black shadow-lg shadow-primary/20 transition-transform active:scale-95">Воридшавӣ</Button>
             </div>
           )}
         </nav>
       </header>
 
-      <main className="flex-1 container max-w-6xl mx-auto p-4 md:p-8">
+      <main className="flex-1 container max-w-7xl mx-auto p-4 md:p-12">
         {activeView === "jobs" && (
-          <div className="space-y-10">
-            <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-white to-primary/5 p-8 md:p-16 rounded-[2.5rem] border border-primary/10 text-center space-y-8">
-              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+          <div className="space-y-12">
+            <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-white to-primary/5 p-10 md:p-24 rounded-[3rem] border border-primary/10 text-center space-y-10 shadow-2xl shadow-primary/5">
+              <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-primary/5 rounded-full blur-[100px]" />
+              <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-primary/5 rounded-full blur-[100px]" />
               
-              <div className="space-y-4 relative">
-                <Badge variant="secondary" className="bg-white/80 text-primary border-primary/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm">
+              <div className="space-y-5 relative">
+                <Badge className="bg-white/90 text-primary border-primary/20 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-xl">
                   Платформаи №1 дар Тоҷикистон
                 </Badge>
-                <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight leading-[1.1]">
-                  Кори орзуи худро <br /> <span className="text-primary">дар як лаҳза ёбед</span>
+                <h2 className="text-4xl md:text-7xl font-black text-foreground tracking-tighter leading-[1] md:px-20">
+                  Кори орзуи худро <br /> <span className="text-primary underline decoration-primary/20 underline-offset-8">дар як лаҳза ёбед</span>
                 </h2>
-                <p className="text-muted-foreground text-lg max-w-2xl mx-auto font-medium">
-                  Пайваст кардани мутахассисон бо ширкатҳои пешсафи кишвар.
+                <p className="text-muted-foreground text-xl max-w-2xl mx-auto font-semibold leading-relaxed">
+                  Мо мутахассисонро бо ширкатҳои пешсафи Тоҷикистон мустақиман пайваст мекунем.
                 </p>
               </div>
 
-              <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto pt-6">
-                <div className="relative flex-[2]">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <div className="flex flex-col md:flex-row gap-4 max-w-5xl mx-auto pt-8 relative">
+                <div className="relative flex-[2] group">
+                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary w-6 h-6 group-focus-within:scale-110 transition-transform" />
                   <Input 
                     placeholder="Вазифа, ширкат ё калимаи калидӣ..." 
-                    className="pl-12 h-14 rounded-2xl bg-white shadow-xl shadow-primary/5 border-primary/10 transition-all text-base"
+                    className="pl-14 h-16 rounded-[1.5rem] bg-white shadow-2xl shadow-primary/5 border-primary/10 transition-all text-lg font-medium focus:ring-4 focus:ring-primary/10"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
                 <div className="flex-1">
                   <Select value={cityFilter} onValueChange={setCityFilter}>
-                    <SelectTrigger className="h-14 rounded-2xl bg-white shadow-xl shadow-primary/5 border-primary/10 font-semibold">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-5 h-5 text-primary" />
-                        <SelectValue placeholder="Шаҳр" />
+                    <SelectTrigger className="h-16 rounded-[1.5rem] bg-white shadow-2xl shadow-primary/5 border-primary/10 font-black text-lg px-6">
+                      <div className="flex items-center gap-3">
+                        <MapPin className="w-6 h-6 text-primary" />
+                        <SelectValue placeholder="Интихоби шаҳр" />
                       </div>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl">
+                    <SelectContent className="rounded-2xl p-2">
                       {CITIES.map(city => (
-                        <SelectItem key={city} value={city} className="font-medium">{city}</SelectItem>
+                        <SelectItem key={city} value={city} className="font-bold h-12 rounded-xl focus:bg-primary/5">{city}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -252,20 +247,25 @@ export default function KoryobTJ() {
               </div>
             </section>
 
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b pb-4">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="text-primary w-6 h-6" />
-                  <h3 className="text-2xl font-black text-foreground">Эълонҳои ҷорӣ</h3>
+            <div className="space-y-8">
+              <div className="flex items-center justify-between border-b border-primary/5 pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                    <TrendingUp size={28} />
+                  </div>
+                  <div>
+                    <h3 className="text-3xl font-black text-foreground tracking-tight">Эълонҳои ҷорӣ</h3>
+                    <p className="text-sm text-muted-foreground font-bold">{filteredJobs.length} эълон ёфт шуд</p>
+                  </div>
                 </div>
                 {currentUserProfile?.role === 'korfarmo' && (
-                  <Button onClick={() => setActiveView("create-job")} className="hidden md:flex rounded-2xl gap-2 h-12 px-6 shadow-lg shadow-primary/20 transition-transform hover:scale-105">
-                    <Plus size={20} /> Иловаи эълон
+                  <Button onClick={() => setActiveView("create-job")} className="hidden md:flex rounded-2xl gap-3 h-14 px-8 text-lg font-black shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                    <Plus size={24} /> Иловаи эълон
                   </Button>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
                 {filteredJobs.length > 0 ? (
                   filteredJobs.map(job => (
                     <JobCard 
@@ -277,18 +277,29 @@ export default function KoryobTJ() {
                     />
                   ))
                 ) : (
-                  <div className="lg:col-span-2 text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-muted/50 space-y-4">
-                    <Filter size={32} className="text-muted-foreground mx-auto opacity-50" />
-                    <p className="text-muted-foreground text-lg font-medium">Эълонҳо ёфт нашуданд.</p>
+                  <div className="lg:col-span-3 text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-primary/10 space-y-5 shadow-inner">
+                    <div className="bg-secondary/30 w-24 h-24 rounded-full flex items-center justify-center mx-auto text-muted-foreground/30">
+                      <Filter size={48} />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-muted-foreground text-xl font-black">Эълонҳо ёфт нашуданд.</p>
+                      <p className="text-sm text-muted-foreground/60 font-bold">Лутфан калимаҳои ҷустуҷӯиро иваз кунед ё шаҳри дигарро интихоб намоед.</p>
+                    </div>
                   </div>
                 )}
               </div>
 
               {!user && filteredJobs.length >= 5 && (
-                <div className="relative overflow-hidden bg-primary/5 p-10 rounded-[2.5rem] text-center space-y-4 border border-primary/10 mt-12">
-                  <h4 className="text-2xl font-black">Дастрасии комил мехоҳед?</h4>
-                  <p className="font-medium text-muted-foreground max-w-lg mx-auto">Барои дидани ҳамаи эълонҳо лутфан ворид шавед.</p>
-                  <Button onClick={() => setIsAuthModalOpen(true)} className="rounded-xl h-12 px-10 text-lg font-bold shadow-lg shadow-primary/10">Қайд шудан</Button>
+                <div className="relative overflow-hidden bg-primary/5 p-12 rounded-[3rem] text-center space-y-6 border border-primary/10 mt-16 shadow-xl">
+                  <div className="space-y-2">
+                    <h4 className="text-3xl font-black tracking-tight">Дастрасии комил мехоҳед?</h4>
+                    <p className="font-bold text-muted-foreground max-w-xl mx-auto leading-relaxed">
+                      Барои дидани ҳамаи эълонҳо, маълумоти тамос ва оғози чат бо корфармоён, лутфан ворид шавед ё сабти ном кунед.
+                    </p>
+                  </div>
+                  <Button onClick={() => setIsAuthModalOpen(true)} className="rounded-[1.25rem] h-14 px-12 text-xl font-black shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                    Ҳозир ҳамроҳ шавед
+                  </Button>
                 </div>
               )}
             </div>
@@ -296,17 +307,22 @@ export default function KoryobTJ() {
         )}
 
         {activeView === "chat" && (
-          <div className="grid md:grid-cols-3 gap-6 h-[75vh]">
-            <div className="md:col-span-1 bg-white rounded-3xl border shadow-xl shadow-black/5 overflow-hidden">
+          <div className="grid md:grid-cols-3 gap-8 h-[80vh] animate-in fade-in slide-in-from-bottom-5 duration-500">
+            <div className="md:col-span-1 bg-white rounded-[2.5rem] border shadow-2xl shadow-black/5 overflow-hidden border-primary/5">
               <ChatList activeChatEmail={activeChatEmail} onSelect={setActiveChatEmail} />
             </div>
-            <div className="md:col-span-2 bg-white rounded-3xl border shadow-xl shadow-black/5 overflow-hidden flex flex-col">
+            <div className="md:col-span-2 bg-white rounded-[2.5rem] border shadow-2xl shadow-black/5 overflow-hidden flex flex-col border-primary/5">
               {activeChatEmail ? (
                 <ChatWindow partnerEmail={activeChatEmail} onBack={() => setActiveChatEmail(null)} />
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-secondary/10">
-                  <MessageCircle size={48} className="opacity-20 mb-4" />
-                  <p className="font-bold">Яке аз чатҳоро интихоб кунед</p>
+                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-secondary/10 space-y-4">
+                  <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary/40">
+                    <MessageCircle size={56} />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-black text-2xl text-foreground/80">Мукотибаи худро оғоз кунед</p>
+                    <p className="font-bold text-muted-foreground">Яке аз чатҳоро аз рӯйхат интихоб намоед.</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -342,36 +358,21 @@ export default function KoryobTJ() {
       </main>
 
       {user && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-3 flex items-center justify-between z-50 rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-          <button onClick={() => setActiveView("jobs")} className={`flex flex-col items-center gap-1 ${activeView === 'jobs' ? 'text-primary' : 'text-muted-foreground'}`}>
-            <Home size={24} />
-            <span className="text-[10px] font-bold">Асосӣ</span>
-          </button>
-          <button onClick={() => setActiveView("chat")} className={`flex flex-col items-center gap-1 ${activeView === 'chat' ? 'text-primary' : 'text-muted-foreground'}`}>
-            <MessageCircle size={24} />
-            <span className="text-[10px] font-bold">Чат</span>
-          </button>
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-2xl border-t px-8 py-4 flex items-center justify-between z-50 rounded-t-[2.5rem] shadow-[0_-15px_40px_rgba(0,0,0,0.08)] border-primary/5">
+          <MobileNavTab icon={<Home size={26} />} label="Асосӣ" active={activeView === 'jobs'} onClick={() => setActiveView("jobs")} />
+          <MobileNavTab icon={<MessageCircle size={26} />} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
           
           {currentUserProfile?.role === 'korfarmo' ? (
-            <button onClick={() => setActiveView("create-job")} className="bg-primary text-white p-3 rounded-2xl -mt-10 shadow-lg shadow-primary/30 border-4 border-white active:scale-90 transition-transform">
-              <Plus size={28} />
+            <button onClick={() => setActiveView("create-job")} className="bg-primary text-white p-4 rounded-[1.5rem] -mt-14 shadow-2xl shadow-primary/40 border-[6px] border-[#FDFCFB] active:scale-90 transition-all hover:rotate-90">
+              <Plus size={32} />
             </button>
           ) : (
-            <button onClick={() => setActiveView("about")} className={`flex flex-col items-center gap-1 ${activeView === 'about' ? 'text-primary' : 'text-muted-foreground'}`}>
-              <Info size={24} />
-              <span className="text-[10px] font-bold">Дар бораи мо</span>
-            </button>
+            <MobileNavTab icon={<Info size={26} />} label="Оиди мо" active={activeView === 'about'} onClick={() => setActiveView("about")} />
           )}
 
-          <button onClick={() => setActiveView("my-jobs")} className={`flex flex-col items-center gap-1 ${activeView === 'my-jobs' ? 'text-primary' : 'text-muted-foreground'} ${currentUserProfile?.role !== 'korfarmo' ? 'hidden' : ''}`}>
-            <List size={24} />
-            <span className="text-[10px] font-bold">Эълонҳо</span>
-          </button>
+          <MobileNavTab icon={<List size={26} />} label="Эълонҳо" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} hidden={currentUserProfile?.role !== 'korfarmo'} />
           
-          <button onClick={() => setActiveView("profile")} className={`flex flex-col items-center gap-1 ${activeView === 'profile' ? 'text-primary' : 'text-muted-foreground'}`}>
-            <UserIcon size={24} />
-            <span className="text-[10px] font-bold">Профил</span>
-          </button>
+          <MobileNavTab icon={<UserIcon size={26} />} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
         </div>
       )}
 
@@ -385,5 +386,28 @@ export default function KoryobTJ() {
 
       <AuthModals isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
+  );
+}
+
+function MobileNavItem({ icon, label, active, onClick }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void }) {
+  return (
+    <Button 
+      variant="ghost" 
+      className={`justify-start gap-4 h-16 text-xl font-black rounded-2xl ${active ? 'bg-primary/10 text-primary' : ''}`} 
+      onClick={onClick}
+    >
+      <span className={active ? 'text-primary' : 'text-muted-foreground'}>{icon}</span>
+      {label}
+    </Button>
+  );
+}
+
+function MobileNavTab({ icon, label, active, onClick, hidden = false }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void, hidden?: boolean }) {
+  if (hidden) return null;
+  return (
+    <button onClick={onClick} className={`flex flex-col items-center gap-1.5 transition-all ${active ? 'text-primary scale-110' : 'text-muted-foreground/60'}`}>
+      <div className={`${active ? 'bg-primary/10 p-2 rounded-xl' : ''}`}>{icon}</div>
+      <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
+    </button>
   );
 }
