@@ -1,13 +1,11 @@
-
 "use client";
 
+import { useMemo } from "react";
 import { UserProfile, JobListing } from "@/app/lib/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useFirestore, useCollection } from "@/firebase";
-import { collection, query, where, orderBy } from "firebase/firestore";
+import { useRTDBData } from "@/firebase";
 import { User, Settings, Briefcase, ChevronRight, Mail, Calendar } from "lucide-react";
-import { useMemo } from "react";
 import { format } from "date-fns";
 
 interface ProfileViewProps {
@@ -17,15 +15,12 @@ interface ProfileViewProps {
 }
 
 export function ProfileView({ profile, onViewMyJobs, onEditJob }: ProfileViewProps) {
-  const { db } = useFirestore();
-
-  const jobsQuery = useMemo(() => {
-    if (!profile) return null;
-    return query(collection(db, "jobs"), where("postedUid", "==", profile.uid), orderBy("postedAt", "desc"));
-  }, [profile, db]);
-
-  const { data: myJobsData } = useCollection(jobsQuery);
-  const myJobs = (myJobsData as JobListing[]) || [];
+  const { data: jobsObj } = useRTDBData("jobs");
+  
+  const myJobsCount = useMemo(() => {
+    if (!jobsObj || !profile?.email) return 0;
+    return Object.values(jobsObj).filter((j: any) => j.postedEmail === profile.email).length;
+  }, [jobsObj, profile]);
 
   if (!profile) return null;
 
@@ -58,7 +53,7 @@ export function ProfileView({ profile, onViewMyJobs, onEditJob }: ProfileViewPro
           <Card className="rounded-2xl border-primary/5 cursor-pointer hover:bg-secondary/20 transition-colors" onClick={onViewMyJobs}>
             <CardHeader className="flex-row items-center justify-between space-y-0">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Briefcase size={20} className="text-primary" /> Эълонҳои ман ({myJobs.length})
+                <Briefcase size={20} className="text-primary" /> Эълонҳои ман ({myJobsCount})
               </CardTitle>
               <ChevronRight className="text-muted-foreground" />
             </CardHeader>

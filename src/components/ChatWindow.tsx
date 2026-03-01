@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useUser, useFirestore, useCollection } from "@/firebase";
-import { collection, query, orderBy, addDoc, doc, updateDoc, where } from "firebase/firestore";
+import { useUser, useRTDB, useRTDBData } from "@/firebase";
+import { ref, push, update, set } from "firebase/database";
 import { ChatMessage, UserProfile } from "@/app/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,29 +11,33 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface ChatWindowProps {
-  partnerUid: string;
+  partnerEmail: string;
   onBack: () => void;
 }
 
-export function ChatWindow({ partnerUid, onBack }: ChatWindowProps) {
-  const { db } = useFirestore();
+export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
+  const rtdb = useRTDB();
   const { user } = useUser();
   const [text, setText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const chatId = useMemo(() => {
-    if (!user) return "";
-    return [user.uid, partnerUid].sort().join("--");
-  }, [user, partnerUid]);
+    if (!user?.email) return "";
+    const e1 = encodeURIComponent(user.email).replace(/\./g, '%2E');
+    const e2 = encodeURIComponent(partnerEmail).replace(/\./g, '%2E');
+    return [e1, e2].sort().join("--");
+  }, [user, partnerEmail]);
 
-  const messagesRef = useMemo(() => collection(db, "chats", chatId, "messages"), [db, chatId]);
-  const messagesQuery = useMemo(() => query(messagesRef, orderBy("time", "asc")), [messagesRef]);
-  const { data: messagesData } = useCollection(messagesQuery);
-  const messages = (messagesData as ChatMessage[]) || [];
+  const { data: messagesObj } = useRTDBData(`chats/${chatId}`);
+  const messages = useMemo(() => {
+    if (!messagesObj) return [];
+    return Object.entries(messagesObj)
+      .map(([id, val]: [string, any]) => ({ id, ...val }))
+      .sort((a, b) => (a.time || 0) - (b.time || 0)) as any[];
+  }, [messagesObj]);
 
-  const partnerQuery = useMemo(() => query(collection(db, "users"), where("uid", "==", partnerUid)), [db, partnerUid]);
-  const { data: partnerData } = useCollection(partnerQuery);
-  const partner = (partnerData as UserProfile[])?.[0];
+  const partnerEncodedEmail = encodeURIComponent(partnerEmail).replace(/\./g, '%2E');
+  const { data: partner } = useRTDBData(`users/${partnerEncodedEmail}`) as { data: UserProfile | null };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -45,23 +48,29 @@ export function ChatWindow({ partnerUid, onBack }: ChatWindowProps) {
   useEffect(() => {
     if (!user || !messages.length) return;
     messages.forEach((msg) => {
-      if (msg.receiverUid === user.uid && !msg.read && msg.id) {
-        updateDoc(doc(db, "chats", chatId, "messages", msg.id), { read: true });
+      if (msg.sender !== user.email && !msg.read && msg.id) {
+        update(ref(rtdb, `chats/${chatId}/${msg.id}`), { read: true });
       }
     });
-  }, [messages, user, chatId, db]);
+    // Clear notifications for self
+    const myEncodedEmail = encodeURIComponent(user.email!).replace(/\./g, '%2E');
+    set(ref(rtdb, `userNotifications/${myEncodedEmail}`), false);
+  }, [messages, user, chatId, rtdb]);
 
-  const handleSend = () => {
-    if (!text.trim() || !user) return;
-    const msg: ChatMessage = {
-      senderUid: user.uid,
-      receiverUid: partnerUid,
+  const handleSend = async () => {
+    if (!text.trim() || !user?.email) return;
+    const msg = {
+      sender: user.email,
       text: text.trim(),
       time: Date.now(),
       read: false,
     };
     setText("");
-    addDoc(messagesRef, msg);
+    const newMsgRef = push(ref(rtdb, `chats/${chatId}`));
+    await set(newMsgRef, msg);
+    
+    // Set notification for partner
+    set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), true);
   };
 
   return (
@@ -82,13 +91,13 @@ export function ChatWindow({ partnerUid, onBack }: ChatWindowProps) {
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map((msg, i) => (
-          <div key={i} className={cn("flex flex-col max-w-[80%]", msg.senderUid === user?.uid ? "ml-auto items-end" : "mr-auto items-start")}>
-            <div className={cn("p-3 rounded-2xl text-sm break-words", msg.senderUid === user?.uid ? "bg-primary text-white rounded-tr-none" : "bg-white border rounded-tl-none")}>
+          <div key={i} className={cn("flex flex-col max-w-[80%]", msg.sender === user?.email ? "ml-auto items-end" : "mr-auto items-start")}>
+            <div className={cn("p-3 rounded-2xl text-sm break-words", msg.sender === user?.email ? "bg-primary text-white rounded-tr-none" : "bg-white border rounded-tl-none")}>
               {msg.text}
             </div>
             <div className="flex items-center gap-1 mt-1 px-1">
               <span className="text-[10px] text-muted-foreground">{format(msg.time, "HH:mm")}</span>
-              {msg.senderUid === user?.uid && (
+              {msg.sender === user?.email && (
                 <span className="text-primary">
                   {msg.read ? <CheckCheck size={12} /> : <Check size={12} />}
                 </span>

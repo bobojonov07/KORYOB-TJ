@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Plus, MessageCircle, User, LogOut, Briefcase, TrendingUp, Clock, Filter } from "lucide-react";
+import { Search, MapPin, Plus, MessageCircle, User, LogOut, Briefcase, TrendingUp, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAuth, useFirestore, useCollection, useUser } from "@/firebase";
-import { collection, query, where, orderBy, doc, updateDoc } from "firebase/firestore";
+import { useAuth, useRTDB, useRTDBData, useUser } from "@/firebase";
+import { ref, update } from "firebase/database";
 import { JobListing, UserProfile } from "@/app/lib/types";
 import { JobCard } from "@/components/JobCard";
 import { JobDetails } from "@/components/JobDetails";
@@ -25,7 +25,7 @@ const CATEGORIES = ["Муҳосиб", "Ронанда", "Муаллим", "Ош�
 
 export default function KoryobTJ() {
   const { auth } = useAuth();
-  const { db } = useFirestore();
+  const rtdb = useRTDB();
   const { user } = useUser();
   const { toast } = useToast();
 
@@ -33,35 +33,34 @@ export default function KoryobTJ() {
   const [cityFilter, setCityFilter] = useState("Ҳама шаҳрҳо");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<"jobs" | "chat" | "profile" | "my-jobs" | "create-job">("jobs");
-  const [activeChatUid, setActiveChatUid] = useState<string | null>(null);
+  const [activeChatEmail, setActiveChatEmail] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Firestore Queries
-  const jobsRef = useMemo(() => collection(db, "jobs"), [db]);
-  const activeJobsQuery = useMemo(() => query(jobsRef, where("active", "==", true), orderBy("postedAt", "desc")), [jobsRef]);
-  const { data: jobsData } = useCollection(activeJobsQuery) as { data: JobListing[] | null };
+  // RTDB Queries
+  const { data: jobsObj } = useRTDBData("jobs");
+  const jobsData = useMemo(() => {
+    if (!jobsObj) return [];
+    return Object.entries(jobsObj).map(([id, val]: [string, any]) => ({ id, ...val })) as JobListing[];
+  }, [jobsObj]);
 
-  const usersRef = useMemo(() => collection(db, "users"), [db]);
-  const userProfileDoc = useMemo(() => (user ? doc(usersRef, user.uid) : null), [usersRef, user]);
-  const { data: profile } = useCollection(userProfileDoc ? query(usersRef, where("uid", "==", user!.uid)) : null) as { data: UserProfile[] | null };
-  const currentUserProfile = profile?.[0];
+  const userEncodedEmail = user?.email ? encodeURIComponent(user.email).replace(/\./g, '%2E') : null;
+  const { data: currentUserProfile } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
 
   useEffect(() => {
-    if (user && userProfileDoc) {
-      updateDoc(userProfileDoc, { lastSeen: Date.now() });
+    if (user && userEncodedEmail) {
+      update(ref(rtdb, `users/${userEncodedEmail}`), { lastSeen: Date.now() });
     }
-  }, [user, userProfileDoc]);
+  }, [user, userEncodedEmail, rtdb]);
 
   const filteredJobs = useMemo(() => {
-    const baseList = jobsData || [];
-    let list = [...baseList];
+    let list = jobsData.filter(j => j.active);
     
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       list = list.filter(j => 
         j.title.toLowerCase().includes(q) || 
         j.company.toLowerCase().includes(q) || 
-        j.desc.toLowerCase().includes(q)
+        (j.desc && j.desc.toLowerCase().includes(q))
       );
     }
     if (cityFilter !== "Ҳама шаҳрҳо") {
@@ -70,7 +69,7 @@ export default function KoryobTJ() {
     return user ? list : list.slice(0, 5);
   }, [jobsData, searchQuery, cityFilter, user]);
 
-  const selectedJob = (jobsData || []).find(j => j.id === selectedJobId);
+  const selectedJob = jobsData.find(j => j.id === selectedJobId);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -78,12 +77,12 @@ export default function KoryobTJ() {
     toast({ title: "Шумо баромадед", description: "То дидор!" });
   };
 
-  const handleStartChat = (partnerUid: string) => {
+  const handleStartChat = (partnerEmail: string) => {
     if (!user) {
       setIsAuthModalOpen(true);
       return;
     }
-    setActiveChatUid(partnerUid);
+    setActiveChatEmail(partnerEmail);
     setActiveView("chat");
   };
 
@@ -208,8 +207,8 @@ export default function KoryobTJ() {
                       key={job.id} 
                       job={job} 
                       onClick={() => setSelectedJobId(job.id)} 
-                      onChat={() => handleStartChat(job.postedUid)}
-                      isOwner={user?.uid === job.postedUid}
+                      onChat={() => handleStartChat(job.postedEmail)}
+                      isOwner={user?.email === job.postedEmail}
                     />
                   ))
                 ) : (
@@ -225,7 +224,7 @@ export default function KoryobTJ() {
                 )}
               </div>
 
-              {!user && (jobsData?.length || 0) > 5 && (
+              {!user && filteredJobs.length >= 5 && (
                 <div className="relative overflow-hidden bg-primary/5 p-10 rounded-[2.5rem] text-center space-y-4 border border-primary/10 mt-12">
                   <div className="space-y-2">
                     <h4 className="text-2xl font-black">Дастрасии комил мехоҳед?</h4>
@@ -241,11 +240,11 @@ export default function KoryobTJ() {
         {activeView === "chat" && (
           <div className="grid md:grid-cols-3 gap-6 h-[75vh]">
             <div className="md:col-span-1 bg-white rounded-3xl border shadow-xl shadow-black/5 overflow-hidden">
-              <ChatList activeChatUid={activeChatUid} onSelect={setActiveChatUid} />
+              <ChatList activeChatEmail={activeChatEmail} onSelect={setActiveChatEmail} />
             </div>
             <div className="md:col-span-2 bg-white rounded-3xl border shadow-xl shadow-black/5 overflow-hidden flex flex-col">
-              {activeChatUid ? (
-                <ChatWindow partnerUid={activeChatUid} onBack={() => setActiveChatUid(null)} />
+              {activeChatEmail ? (
+                <ChatWindow partnerEmail={activeChatEmail} onBack={() => setActiveChatEmail(null)} />
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-secondary/10">
                   <div className="bg-white p-6 rounded-full shadow-inner mb-4">
@@ -296,7 +295,7 @@ export default function KoryobTJ() {
         <JobDetails 
           job={selectedJob} 
           onClose={() => setSelectedJobId(null)} 
-          onChat={() => handleStartChat(selectedJob.postedUid)}
+          onChat={() => handleStartChat(selectedJob.postedEmail)}
         />
       )}
 

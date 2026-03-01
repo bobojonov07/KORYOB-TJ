@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useMemo } from "react";
-import { useUser, useFirestore, useCollection } from "@/firebase";
-import { collection, query, where, orderBy, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { useUser, useRTDB, useRTDBData } from "@/firebase";
+import { ref, remove, update } from "firebase/database";
 import { JobListing } from "@/app/lib/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,27 +17,28 @@ interface MyJobsViewProps {
 }
 
 export function MyJobsView({ onEditJob, onBack }: MyJobsViewProps) {
-  const { db } = useFirestore();
+  const rtdb = useRTDB();
   const { user } = useUser();
   const { toast } = useToast();
 
-  const jobsQuery = useMemo(() => {
-    if (!user) return null;
-    return query(collection(db, "jobs"), where("postedUid", "==", user.uid), orderBy("postedAt", "desc"));
-  }, [user, db]);
-
-  const { data: myJobsData } = useCollection(jobsQuery);
-  const myJobs = (myJobsData as JobListing[]) || [];
+  const { data: jobsObj } = useRTDBData("jobs");
+  const myJobs = useMemo(() => {
+    if (!jobsObj || !user?.email) return [];
+    return Object.entries(jobsObj)
+      .map(([id, val]: [string, any]) => ({ id, ...val }))
+      .filter((j: any) => j.postedEmail === user.email)
+      .sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime()) as JobListing[];
+  }, [jobsObj, user]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Шумо мехоҳед ин эълонро ҳазф кунед?")) {
-      deleteDoc(doc(db, "jobs", id));
+      await remove(ref(rtdb, `jobs/${id}`));
       toast({ title: "Ҳазф шуд" });
     }
   };
 
   const toggleActive = async (job: JobListing) => {
-    updateDoc(doc(db, "jobs", job.id), { active: !job.active });
+    await update(ref(rtdb, `jobs/${job.id}`), { active: !job.active });
     toast({ title: job.active ? "Эълон ғайрифаъол шуд" : "Эълон фаъол шуд" });
   };
 

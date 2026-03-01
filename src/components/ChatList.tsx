@@ -1,30 +1,26 @@
-
 "use client";
 
 import { useMemo } from "react";
-import { useUser, useFirestore, useCollection } from "@/firebase";
-import { collection, query, where, orderBy, doc } from "firebase/firestore";
-import { ChatMessage, UserProfile } from "@/app/lib/types";
+import { useUser, useRTDBData } from "@/firebase";
+import { UserProfile } from "@/app/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 interface ChatListProps {
-  activeChatUid: string | null;
-  onSelect: (uid: string) => void;
+  activeChatEmail: string | null;
+  onSelect: (email: string) => void;
 }
 
-export function ChatList({ activeChatUid, onSelect }: ChatListProps) {
-  const { db } = useFirestore();
+export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
   const { user } = useUser();
+  const { data: usersObj } = useRTDBData("users");
 
-  const usersRef = useMemo(() => collection(db, "users"), [db]);
-  const usersQuery = useMemo(() => {
-    if (!user) return null;
-    return query(usersRef, where("uid", "!=", user.uid));
-  }, [usersRef, user]);
-  
-  const { data: usersData } = useCollection(usersQuery);
-  const users = (usersData as UserProfile[]) || [];
+  const users = useMemo(() => {
+    if (!usersObj) return [];
+    return Object.entries(usersObj)
+      .map(([id, val]: [string, any]) => ({ id, ...val }))
+      .filter((u: any) => u.email !== user?.email) as UserProfile[];
+  }, [usersObj, user]);
 
   return (
     <div className="flex flex-col h-full">
@@ -33,11 +29,11 @@ export function ChatList({ activeChatUid, onSelect }: ChatListProps) {
         <div className="divide-y">
           {users.map(u => (
             <div 
-              key={u.uid} 
-              onClick={() => onSelect(u.uid)}
+              key={u.email} 
+              onClick={() => onSelect(u.email)}
               className={cn(
                 "p-4 cursor-pointer hover:bg-secondary/30 transition-colors flex items-center gap-3",
-                activeChatUid === u.uid && "bg-primary/10 border-r-4 border-primary"
+                activeChatEmail === u.email && "bg-primary/10 border-r-4 border-primary"
               )}
             >
               <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">

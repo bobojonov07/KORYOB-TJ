@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -7,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useAuth, useFirestore } from "@/firebase";
+import { useAuth, useRTDB } from "@/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { ref, set } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
 
 interface AuthModalsProps {
@@ -19,7 +18,7 @@ interface AuthModalsProps {
 
 export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
   const { auth } = useAuth();
-  const { db } = useFirestore();
+  const rtdb = useRTDB();
   const { toast } = useToast();
 
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
@@ -38,7 +37,8 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
         onClose();
       } else if (mode === "signup") {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
-        await setDoc(doc(db, "users", cred.user.uid), {
+        const encodedEmail = encodeURIComponent(email).replace(/\./g, '%2E');
+        await set(ref(rtdb, `users/${encodedEmail}`), {
           uid: cred.user.uid,
           name,
           email,

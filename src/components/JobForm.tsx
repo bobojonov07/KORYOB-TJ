@@ -1,15 +1,14 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { JobListing, UserProfile } from "@/app/lib/types";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { UserProfile } from "@/app/lib/types";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useFirestore, useUser, useCollection } from "@/firebase";
-import { collection, doc, setDoc, updateDoc, query, where, getDoc } from "firebase/firestore";
+import { useRTDB, useUser, useRTDBData } from "@/firebase";
+import { ref, push, set, update, get } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send } from "lucide-react";
 
@@ -20,7 +19,7 @@ interface JobFormProps {
 }
 
 export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
-  const { db } = useFirestore();
+  const rtdb = useRTDB();
   const { user } = useUser();
   const { toast } = useToast();
 
@@ -37,17 +36,15 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
     desc: "",
   });
 
-  const usersRef = useMemo(() => collection(db, "users"), [db]);
-  const { data: profileData } = useCollection(user ? query(usersRef, where("uid", "==", user.uid)) : null) as { data: UserProfile[] };
-  const profile = profileData?.[0];
+  const encodedEmail = user?.email ? encodeURIComponent(user.email).replace(/\./g, '%2E') : null;
+  const { data: profile } = useRTDBData(encodedEmail ? `users/${encodedEmail}` : null) as { data: UserProfile | null };
 
   useEffect(() => {
     if (jobId) {
       const loadJob = async () => {
-        const docRef = doc(db, "jobs", jobId);
-        const snap = await getDoc(docRef);
+        const snap = await get(ref(rtdb, `jobs/${jobId}`));
         if (snap.exists()) {
-          const data = snap.data();
+          const data = snap.val();
           setFormData({
             title: data.title,
             company: data.company,
@@ -63,7 +60,7 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
       };
       loadJob();
     }
-  }, [jobId, db]);
+  }, [jobId, rtdb]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,22 +73,19 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
 
     setLoading(true);
     try {
-      const jobRef = jobId ? doc(db, "jobs", jobId) : doc(collection(db, "jobs"));
-      const finalData = {
-        ...formData,
-        id: jobRef.id,
-        postedBy: profile.name,
-        postedEmail: profile.email,
-        postedUid: user.uid,
-        postedAt: jobId ? undefined : new Date().toISOString(),
-        active: true,
-        views: jobId ? undefined : 0,
-      };
-
       if (jobId) {
-        await updateDoc(jobRef, { ...formData });
+        await update(ref(rtdb, `jobs/${jobId}`), { ...formData });
       } else {
-        await setDoc(jobRef, finalData);
+        const jobsRef = ref(rtdb, "jobs");
+        const newJobRef = push(jobsRef);
+        await set(newJobRef, {
+          ...formData,
+          postedBy: profile.name,
+          postedEmail: profile.email,
+          postedAt: new Date().toISOString(),
+          active: true,
+          views: 0,
+        });
       }
 
       toast({ title: jobId ? "Эълон навсозӣ шуд" : "Эълон нашр шуд" });
