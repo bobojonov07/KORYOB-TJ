@@ -1,12 +1,13 @@
-
 "use client";
 
+import { useEffect } from "react";
 import { JobListing } from "@/app/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Building, Phone, Calendar, User, MessageCircle, DollarSign, Clock, Users } from "lucide-react";
-import { useUser } from "@/firebase";
+import { useUser, useRTDB } from "@/firebase";
+import { ref, runTransaction } from "firebase/database";
 
 interface JobDetailsProps {
   job: JobListing;
@@ -16,7 +17,17 @@ interface JobDetailsProps {
 
 export function JobDetails({ job, onClose, onChat }: JobDetailsProps) {
   const { user } = useUser();
+  const rtdb = useRTDB();
   const isOwner = user?.uid === job.postedUid;
+
+  useEffect(() => {
+    if (rtdb && job.id && user && !isOwner) {
+      const viewRef = ref(rtdb, `jobs/${job.id}/views`);
+      runTransaction(viewRef, (currentValue) => {
+        return (currentValue || 0) + 1;
+      });
+    }
+  }, [rtdb, job.id, user, isOwner]);
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
