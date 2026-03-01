@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth, useFirestore, useCollection, useUser } from "@/firebase";
-import { collection, query, where, orderBy, doc, updateDoc, increment } from "firebase/firestore";
+import { collection, query, where, orderBy, doc, updateDoc } from "firebase/firestore";
 import { JobListing, UserProfile } from "@/app/lib/types";
 import { JobCard } from "@/components/JobCard";
 import { JobDetails } from "@/components/JobDetails";
@@ -38,11 +38,11 @@ export default function KoryobTJ() {
   // Firestore Queries
   const jobsRef = useMemo(() => collection(db, "jobs"), [db]);
   const activeJobsQuery = useMemo(() => query(jobsRef, where("active", "==", true), orderBy("postedAt", "desc")), [jobsRef]);
-  const { data: jobsData = [] } = useCollection(activeJobsQuery) as { data: JobListing[] };
+  const { data: jobsData } = useCollection(activeJobsQuery) as { data: JobListing[] | null };
 
   const usersRef = useMemo(() => collection(db, "users"), [db]);
   const userProfileDoc = useMemo(() => (user ? doc(usersRef, user.uid) : null), [usersRef, user]);
-  const { data: profile } = useCollection(userProfileDoc ? query(usersRef, where("uid", "==", user!.uid)) : null) as { data: UserProfile[] };
+  const { data: profile } = useCollection(userProfileDoc ? query(usersRef, where("uid", "==", user!.uid)) : null) as { data: UserProfile[] | null };
   const currentUserProfile = profile?.[0];
 
   useEffect(() => {
@@ -52,7 +52,9 @@ export default function KoryobTJ() {
   }, [user, userProfileDoc]);
 
   const filteredJobs = useMemo(() => {
-    let list = jobsData;
+    const baseList = jobsData || [];
+    let list = [...baseList];
+    
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       list = list.filter(j => 
@@ -67,7 +69,7 @@ export default function KoryobTJ() {
     return user ? list : list.slice(0, 5);
   }, [jobsData, searchQuery, cityFilter, user]);
 
-  const selectedJob = jobsData.find(j => j.id === selectedJobId);
+  const selectedJob = (jobsData || []).find(j => j.id === selectedJobId);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -179,7 +181,7 @@ export default function KoryobTJ() {
                   </div>
                 )}
 
-                {!user && jobsData.length > 5 && (
+                {!user && (jobsData?.length || 0) > 5 && (
                   <div className="bg-primary/10 p-6 rounded-2xl text-center space-y-3 border border-primary/20">
                     <p className="font-semibold text-primary">Барои дидани ҳамаи эълонҳо лутфан ворид шавед.</p>
                     <Button onClick={() => setIsAuthModalOpen(true)}>Қайд шудан</Button>
@@ -237,11 +239,11 @@ export default function KoryobTJ() {
       </footer>
 
       {/* Modals */}
-      {selectedJobId && activeView === "jobs" && (
+      {selectedJobId && activeView === "jobs" && selectedJob && (
         <JobDetails 
-          job={selectedJob!} 
+          job={selectedJob} 
           onClose={() => setSelectedJobId(null)} 
-          onChat={() => handleStartChat(selectedJob!.postedUid)}
+          onChat={() => handleStartChat(selectedJob.postedUid)}
         />
       )}
 
