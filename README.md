@@ -1,5 +1,36 @@
-# Firebase Studio
+# KORYOB.TJ — Платформаи №1 барои дарёфти ҷойҳои корӣ дар Тоҷикистон
 
-This is a NextJS starter in Firebase Studio.
+Ин лоиҳа бо истифода аз Next.js ва Firebase сохта шудааст.
 
-To get started, take a look at src/app/page.tsx.
+## Чӣ тавр ба GitHub бор кардан (Инструкция):
+
+1. **Терминалро кушоед** дар IDE-и худ.
+2. **Инициализатсияи Git**:
+   ```bash
+   git init
+   ```
+3. **Пайваст кардан ба репозиторияи GitHub**:
+   ```bash
+   git remote add origin https://github.com/bobojonov07/KORYOB-TJ.git
+   ```
+4. **Илова кардани файлҳо**:
+   ```bash
+   git add .
+   ```
+5. **Коммит (захира):**
+   ```bash
+   git commit -m "Initial commit - Koryob.tj version 1.0"
+   ```
+6. **Бор кардан (Push):**
+   ```bash
+   git push -u origin main
+   ```
+
+*Эзоҳ: Агар хатогии "remote origin already exists" барояд, аввал иҷро кунед: `git remote remove origin` ва баъд қадами 3-ро такрор кунед.*
+
+## Имкониятҳои барнома:
+- Ҷустуҷӯи кор дар тамоми шаҳрҳои Тоҷикистон.
+- Чат дар вақти воқеӣ байни корҷӯ ва корфармо.
+- Системаи автоматии модераторӣ ва филтри дашномҳо.
+- Системаи блоккунии худкори вайронкунандагон.
+- Профили шахсӣ бо имкони ивази ном ва парол.
