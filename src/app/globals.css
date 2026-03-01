@@ -1,50 +1,37 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 36 17% 95%;
+    --background: 36 33% 98%;
     --foreground: 20 10% 15%;
     --card: 0 0% 100%;
     --card-foreground: 20 10% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 10% 15%;
-    --primary: 40 70% 60%;
-    --primary-foreground: 40 70% 10%;
-    --secondary: 40 30% 90%;
-    --secondary-foreground: 40 70% 20%;
-    --muted: 36 10% 88%;
-    --muted-foreground: 20 10% 45%;
-    --accent: 10 60% 45%;
+    --primary: 28 100% 50%; /* #ff7b00 - Koryob Orange */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 220 10% 15%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 28 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 36 10% 85%;
-    --input: 36 10% 85%;
-    --ring: 40 70% 60%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 28 100% 50%;
     --radius: 0.75rem;
   }
   .dark {
-    --background: 20 10% 10%;
-    --foreground: 36 17% 95%;
-    --card: 20 10% 12%;
-    --card-foreground: 36 17% 95%;
-    --popover: 20 10% 12%;
-    --popover-foreground: 36 17% 95%;
-    --primary: 40 70% 60%;
-    --primary-foreground: 20 10% 10%;
-    --secondary: 20 10% 18%;
-    --secondary-foreground: 40 70% 60%;
-    --muted: 20 10% 18%;
-    --muted-foreground: 36 10% 65%;
-    --accent: 10 60% 45%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 36 17% 95%;
-    --border: 20 10% 20%;
-    --input: 20 10% 20%;
-    --ring: 40 70% 60%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --primary: 28 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    /* ... dark mode details ... */
   }
 }
 
@@ -53,6 +40,6 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply bg-background text-foreground antialiased;
   }
 }

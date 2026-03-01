@@ -1,0 +1,72 @@
+
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["korjob", "korfarmo"] },
+        "lastSeen": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "JobListing": {
+      "title": "Job Listing",
+      "description": "Details of a job posting",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "company": { "type": "string" },
+        "city": { "type": "string" },
+        "salary": { "type": "string" },
+        "hours": { "type": "string" },
+        "age": { "type": "string" },
+        "phone": { "type": "string" },
+        "gender": { "type": "string" },
+        "desc": { "type": "string" },
+        "postedBy": { "type": "string" },
+        "postedEmail": { "type": "string" },
+        "postedUid": { "type": "string" },
+        "postedAt": { "type": "string" },
+        "views": { "type": "number" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["title", "company", "city", "postedUid", "active"]
+    },
+    "ChatMessage": {
+      "title": "Chat Message",
+      "description": "A single message in a conversation",
+      "type": "object",
+      "properties": {
+        "senderUid": { "type": "string" },
+        "receiverUid": { "type": "string" },
+        "text": { "type": "string" },
+        "time": { "type": "number" },
+        "read": { "type": "boolean" }
+      },
+      "required": ["senderUid", "receiverUid", "text", "time"]
+    }
+  },
+  "auth": {
+    "providers": ["password"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles"
+    },
+    "/jobs/{jobId}": {
+      "schema": "JobListing",
+      "description": "All job postings"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Direct messages between users"
+    }
+  }
+}

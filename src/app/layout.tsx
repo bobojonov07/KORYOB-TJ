@@ -1,9 +1,11 @@
 import type {Metadata} from 'next';
 import './globals.css';
+import { FirebaseClientProvider } from '@/firebase';
+import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Salom Notes - Warm & Simple Note Taking',
-  description: 'Compose, save, and browse your notes with a friendly AI assistant.',
+  title: 'KORYOB.TJ — Платформаи №1 барои дарёфти ҷойҳои корӣ дар Тоҷикистон',
+  description: 'Кори орзуи худро ёбед. Платформаи муосир барои пайваст кардани корҷӯён ва корфармоён.',
 };
 
 export default function RootLayout({
@@ -12,13 +14,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="tg">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased selection:bg-primary/30">{children}</body>
+      <body className="font-body antialiased selection:bg-primary/30">
+        <FirebaseClientProvider>
+          {children}
+          <Toaster />
+        </FirebaseClientProvider>
+      </body>
     </html>
   );
 }
