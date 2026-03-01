@@ -1,14 +1,18 @@
+
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useUser, useRTDB, useRTDBData } from "@/firebase";
-import { ref, push, update, set } from "firebase/database";
+import { ref, push, update, set, runTransaction } from "firebase/database";
 import { ChatMessage, UserProfile } from "@/app/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ArrowLeft, Check, CheckCheck } from "lucide-react";
+import { Send, ArrowLeft, Check, CheckCheck, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { containsForbiddenWords, MODERATION_RULES } from "@/app/lib/moderation";
+import { useToast } from "@/hooks/use-toast";
+import { ReportDialog } from "./ReportDialog";
 
 interface ChatWindowProps {
   partnerEmail: string;
@@ -18,7 +22,9 @@ interface ChatWindowProps {
 export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   const rtdb = useRTDB();
   const { user } = useUser();
+  const { toast } = useToast();
   const [text, setText] = useState("");
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const chatId = useMemo(() => {
@@ -38,6 +44,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
   const partnerEncodedEmail = encodeURIComponent(partnerEmail).replace(/\./g, '%2E');
   const { data: partner } = useRTDBData(`users/${partnerEncodedEmail}`) as { data: UserProfile | null };
+  const { data: currentUserProfile } = useRTDBData(user?.email ? `users/${encodeURIComponent(user.email).replace(/\./g, '%2E')}` : null) as { data: UserProfile | null };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -52,13 +59,41 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         update(ref(rtdb, `chats/${chatId}/${msg.id}`), { read: true });
       }
     });
-    // Clear notifications for self
     const myEncodedEmail = encodeURIComponent(user.email!).replace(/\./g, '%2E');
     set(ref(rtdb, `userNotifications/${myEncodedEmail}`), false);
   }, [messages, user, chatId, rtdb]);
 
   const handleSend = async () => {
-    if (!text.trim() || !user?.email) return;
+    if (!text.trim() || !user?.email || !currentUserProfile) return;
+
+    if (currentUserProfile.isBlocked) {
+      toast({ variant: "destructive", title: "Ҳисоб блок шудааст", description: "Шумо паём фиристода наметавонед." });
+      return;
+    }
+
+    if (containsForbiddenWords(text)) {
+      const myEncodedEmail = encodeURIComponent(user.email).replace(/\./g, '%2E');
+      const userRef = ref(rtdb, `users/${myEncodedEmail}`);
+      
+      await runTransaction(userRef, (userData) => {
+        if (userData) {
+          userData.warningCount = (userData.warningCount || 0) + 1;
+          if (userData.warningCount >= MODERATION_RULES.MAX_WARNINGS) {
+            userData.isBlocked = true;
+          }
+        }
+        return userData;
+      });
+
+      toast({ 
+        variant: "destructive", 
+        title: "Огоҳӣ!", 
+        description: "Дар паёми шумо калимаҳои ноҷо ҳастанд. Баъди 3 огоҳӣ аккаунт блок мешавад." 
+      });
+      setText("");
+      return;
+    }
+
     const msg = {
       sender: user.email,
       text: text.trim(),
@@ -68,8 +103,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     setText("");
     const newMsgRef = push(ref(rtdb, `chats/${chatId}`));
     await set(newMsgRef, msg);
-    
-    // Set notification for partner
     set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), true);
   };
 
@@ -86,18 +119,23 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
   return (
     <div className="flex flex-col h-full bg-secondary/5">
-      <div className="p-4 border-b bg-white flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden">
-          <ArrowLeft />
-        </Button>
-        <div className="flex flex-col">
-          <h3 className="font-bold text-lg leading-none">{partner?.name || "Чат"}</h3>
-          {partner?.lastSeen && (
-            <span className={cn("text-[10px] mt-1", Date.now() - partner.lastSeen < 300000 ? "text-green-500 font-bold" : "text-muted-foreground")}>
-              {Date.now() - partner.lastSeen < 300000 ? "Онлайн" : `Охирин дидан: ${safeFormatTime(partner.lastSeen)}`}
-            </span>
-          )}
+      <div className="p-4 border-b bg-white flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden">
+            <ArrowLeft />
+          </Button>
+          <div className="flex flex-col">
+            <h3 className="font-bold text-lg leading-none">{partner?.name || "Чат"}</h3>
+            {partner?.lastSeen && (
+              <span className={cn("text-[10px] mt-1", Date.now() - partner.lastSeen < 300000 ? "text-green-500 font-bold" : "text-muted-foreground")}>
+                {Date.now() - partner.lastSeen < 300000 ? "Онлайн" : `Охирин дидан: ${safeFormatTime(partner.lastSeen)}`}
+              </span>
+            )}
+          </div>
         </div>
+        <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-muted-foreground hover:text-destructive">
+          <AlertTriangle size={20} />
+        </Button>
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -125,11 +163,19 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
           value={text} 
           onChange={e => setText(e.target.value)} 
           onKeyDown={e => e.key === 'Enter' && handleSend()}
+          disabled={currentUserProfile?.isBlocked}
         />
-        <Button onClick={handleSend} size="icon" className="rounded-full shrink-0">
+        <Button onClick={handleSend} size="icon" className="rounded-full shrink-0" disabled={currentUserProfile?.isBlocked}>
           <Send size={18} />
         </Button>
       </div>
+
+      <ReportDialog 
+        isOpen={isReportOpen} 
+        onClose={() => setIsReportOpen(false)} 
+        reportedUid={partner?.uid || ""}
+        reportedEmail={partnerEmail}
+      />
     </div>
   );
 }

@@ -1,13 +1,15 @@
+
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { JobListing } from "@/app/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Building, Phone, Calendar, User, MessageCircle, Banknote, Clock, Users } from "lucide-react";
+import { MapPin, Building, Phone, Calendar, User, MessageCircle, Banknote, Clock, Users, AlertTriangle } from "lucide-react";
 import { useUser, useRTDB } from "@/firebase";
 import { ref, runTransaction } from "firebase/database";
+import { ReportDialog } from "./ReportDialog";
 
 interface JobDetailsProps {
   job: JobListing;
@@ -19,6 +21,7 @@ export function JobDetails({ job, onClose, onChat }: JobDetailsProps) {
   const { user } = useUser();
   const rtdb = useRTDB();
   const isOwner = user?.uid === job.postedUid;
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   useEffect(() => {
     if (rtdb && job.id && user && !isOwner) {
@@ -34,10 +37,19 @@ export function JobDetails({ job, onClose, onChat }: JobDetailsProps) {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-0 border-none shadow-2xl">
         <div className="bg-primary p-6 md:p-8 text-white">
           <DialogHeader>
-            <DialogTitle className="text-2xl md:text-3xl font-black">{job.title}</DialogTitle>
-            <DialogDescription className="text-white/80 text-lg font-medium flex items-center gap-2 mt-2">
-              <Building className="w-5 h-5" /> {job.company} — <MapPin className="w-5 h-5" /> {job.city}
-            </DialogDescription>
+            <div className="flex justify-between items-start">
+              <div>
+                <DialogTitle className="text-2xl md:text-3xl font-black">{job.title}</DialogTitle>
+                <DialogDescription className="text-white/80 text-lg font-medium flex items-center gap-2 mt-2">
+                  <Building className="w-5 h-5" /> {job.company} — <MapPin className="w-5 h-5" /> {job.city}
+                </DialogDescription>
+              </div>
+              {!isOwner && user && (
+                <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-white/50 hover:text-white hover:bg-white/10">
+                  <AlertTriangle size={24} />
+                </Button>
+              )}
+            </div>
           </DialogHeader>
         </div>
 
@@ -73,6 +85,13 @@ export function JobDetails({ job, onClose, onChat }: JobDetailsProps) {
           </div>
         </div>
       </DialogContent>
+
+      <ReportDialog 
+        isOpen={isReportOpen} 
+        onClose={() => setIsReportOpen(false)} 
+        reportedUid={job.postedUid}
+        reportedEmail={job.postedEmail}
+      />
     </Dialog>
   );
 }

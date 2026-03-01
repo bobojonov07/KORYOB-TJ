@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth, useRTDB } from "@/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { ref, set } from "firebase/database";
+import { ref, set, get } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -59,6 +59,15 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
     setLoading(true);
     try {
       if (mode === "login") {
+        const encodedEmail = encodeURIComponent(email).replace(/\./g, '%2E');
+        const userSnap = await get(ref(rtdb, `users/${encodedEmail}`));
+        
+        if (userSnap.exists() && userSnap.val().isBlocked) {
+          toast({ variant: "destructive", title: "Ҳисоб блок шудааст", description: "Аккаунти шумо барои риоя накардани қоидаҳо блок карда шудааст." });
+          setLoading(false);
+          return;
+        }
+
         await signInWithEmailAndPassword(auth, email, password);
         toast({ title: "Хуш омадед!", description: "Шумо ворид шудед." });
         onClose();
@@ -72,7 +81,10 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
           phone,
           role,
           createdAt: new Date().toISOString(),
-          lastSeen: Date.now()
+          lastSeen: Date.now(),
+          warningCount: 0,
+          reportsCount: 0,
+          isBlocked: false
         });
         toast({ title: "Сабти ном шуд", description: "Хуш омадед ба KORYOB.TJ!" });
         onClose();
@@ -82,7 +94,7 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
         setMode("login");
       }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Хатогӣ", description: "Почта ё парол нодуруст аст." });
+      toast({ variant: "destructive", title: "Хатогӣ", description: "Почта ё парол нодуруст аст ё хатогии техникӣ рух дод." });
     } finally {
       setLoading(false);
     }
@@ -147,12 +159,13 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
               </div>
 
               <div className="bg-muted/30 p-4 rounded-2xl space-y-2 border">
-                <Label className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Сиёсати махфият</Label>
-                <ScrollArea className="h-20 text-[11px] text-muted-foreground leading-relaxed pr-3">
+                <Label className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Сиёсати махфият ва Модераторӣ</Label>
+                <ScrollArea className="h-28 text-[11px] text-muted-foreground leading-relaxed pr-3">
                   <p>1. Ҷамъоварии маълумот: Мо танҳо ном, почта, телефон ва нақши шуморо ҷамъ меорем.</p>
-                  <p>2. Паролҳо: Ҳамаи паролҳо рамзгузорӣ шудаанд ва ба касе дастрас нестанд.</p>
-                  <p>3. Масъулият: Платформа танҳо барои пайваст кардани корбар ва корфармо мебошад.</p>
-                  <p>4. Эълонҳо: Маълумоти дар эълонҳо буда оммавӣ мебошанд.</p>
+                  <p>2. Паролҳо: Ҳамаи паролҳо рамзгузорӣ шудаанд.</p>
+                  <p>3. **Модераторӣ**: Истифодаи дашном ва калимаҳои қабеҳ қатъиян манъ аст. Система ба таври худкор паёмҳои ноҷоро мебандад.</p>
+                  <p>4. **Блоккунӣ**: Баъди 3 огоҳӣ барои дашном ё 5 гузориш (report) аз ҷониби корбарони дигар, аккаунт ҳамешагӣ блок карда мешавад.</p>
+                  <p>5. **Гузоришҳо**: Сабаби гузориш бояд аз 50 то 100 аломат бошад.</p>
                 </ScrollArea>
                 <div className="flex items-start space-x-2 pt-1">
                   <Checkbox 
@@ -161,7 +174,7 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
                     onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} 
                   />
                   <label htmlFor="terms" className="text-xs text-muted-foreground leading-none cursor-pointer font-medium">
-                    Ман ба <span className="text-primary font-bold">Сиёсати махфият</span> ва шартҳо розӣ ҳастам.
+                    Ман ба <span className="text-primary font-bold">Шартҳои истифода</span> розӣ ҳастам.
                   </label>
                 </div>
               </div>

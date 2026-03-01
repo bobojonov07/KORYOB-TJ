@@ -9,6 +9,9 @@ export interface UserProfile {
   role: UserRole;
   lastSeen?: number;
   createdAt?: string;
+  warningCount?: number;
+  reportsCount?: number;
+  isBlocked?: boolean;
 }
 
 export interface JobListing {
@@ -32,14 +35,16 @@ export interface JobListing {
 
 export interface ChatMessage {
   id?: string;
-  senderUid: string;
-  receiverUid: string;
+  sender: string;
   text: string;
   time: number;
   read: boolean;
 }
 
-export interface Conversation {
-  partnerUid: string;
-  lastMessage?: ChatMessage;
+export interface UserReport {
+  id: string;
+  reportedUid: string;
+  reporterUid: string;
+  reason: string;
+  timestamp: number;
 }

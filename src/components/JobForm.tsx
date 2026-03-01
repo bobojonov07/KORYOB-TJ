@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRTDB, useUser, useRTDBData } from "@/firebase";
-import { ref, push, set, update, get } from "firebase/database";
+import { ref, push, set, update, get, runTransaction } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send } from "lucide-react";
+import { containsForbiddenWords, MODERATION_RULES } from "@/app/lib/moderation";
 
 interface JobFormProps {
   jobId: string | null;
@@ -66,8 +68,34 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
     e.preventDefault();
     if (!user || !profile || !rtdb) return;
 
-    if (!formData.title || !formData.company || !formData.city) {
+    if (profile.isBlocked) {
+      toast({ variant: "destructive", title: "Ҳисоб блок шудааст", description: "Шумо эълон нашр карда наметавонед." });
+      return;
+    }
+
+    if (!formData.title || !formData.company || !formData.city || !formData.desc) {
       toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан майдонҳои асосиро пур кунед." });
+      return;
+    }
+
+    if (containsForbiddenWords(formData.title) || containsForbiddenWords(formData.desc)) {
+      const userRef = ref(rtdb, `users/${encodedEmail}`);
+      
+      await runTransaction(userRef, (userData) => {
+        if (userData) {
+          userData.warningCount = (userData.warningCount || 0) + 1;
+          if (userData.warningCount >= MODERATION_RULES.MAX_WARNINGS) {
+            userData.isBlocked = true;
+          }
+        }
+        return userData;
+      });
+
+      toast({ 
+        variant: "destructive", 
+        title: "Огоҳӣ!", 
+        description: "Дар эълони шумо калимаҳои ноҷо ҳастанд. Аккаунт метавонад блок шавад." 
+      });
       return;
     }
 
@@ -92,7 +120,6 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
       toast({ title: jobId ? "Эълон навсозӣ шуд" : "Эълон нашр шуд" });
       onSuccess();
     } catch (error) {
-      console.error(error);
       toast({ variant: "destructive", title: "Хатогӣ", description: "Натавонистам эълонро сабт кунам." });
     } finally {
       setLoading(false);

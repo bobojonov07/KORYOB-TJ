@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, TrendingUp, Filter, Menu, Home, Heart, List, Info } from "lucide-react";
+import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, TrendingUp, Filter, Menu, Home, List, Info, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { signOut } from "firebase/auth";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const CITIES = ["Ҳама шаҳрҳо", "Душанбе", "Роғун", "Бохтар", "Истаравшан", "Исфара", "Конибодом", "Кӯлоб", "Турсунзода", "Ваҳдат", "Хуҷанд"];
 
@@ -45,7 +46,7 @@ export default function KoryobTJ() {
   }, [jobsObj]);
 
   const userEncodedEmail = user?.email ? encodeURIComponent(user.email).replace(/\./g, '%2E') : null;
-  const { data: currentUserProfile } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
+  const { data: currentUserProfile } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null) as { data: UserProfile | null };
 
   useEffect(() => {
     if (user && userEncodedEmail && rtdb) {
@@ -100,6 +101,21 @@ export default function KoryobTJ() {
     }
     setSelectedJobId(jobId);
   };
+
+  if (currentUserProfile?.isBlocked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Alert variant="destructive" className="max-w-md rounded-3xl p-8 border-none shadow-2xl bg-white">
+          <ShieldAlert className="h-12 w-12 mb-4 mx-auto" />
+          <AlertTitle className="text-2xl font-black text-center mb-2">Аккаунт Блок шуд</AlertTitle>
+          <AlertDescription className="text-center text-lg">
+            Мутаассифона, ҳисоби шумо барои риоя накардани қоидаҳои платформа (дашном ё гузоришҳои зиёд) блок карда шуд.
+            <Button onClick={handleLogout} className="w-full mt-6 rounded-2xl">Баромад</Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FDFCFB] flex flex-col pb-20 md:pb-0">
@@ -299,7 +315,7 @@ export default function KoryobTJ() {
 
         {activeView === "profile" && (
           <ProfileView 
-            profile={currentUserProfile} 
+            profile={currentUserProfile || undefined} 
             onViewMyJobs={() => setActiveView("my-jobs")}
             onAbout={() => setActiveView("about")}
           />
