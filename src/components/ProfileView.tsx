@@ -24,7 +24,8 @@ export function ProfileView({ profile, onViewMyJobs, onEditJob }: ProfileViewPro
     return query(collection(db, "jobs"), where("postedUid", "==", profile.uid), orderBy("postedAt", "desc"));
   }, [profile, db]);
 
-  const { data: myJobs = [] } = useCollection(jobsQuery) as { data: JobListing[] };
+  const { data: myJobsData } = useCollection(jobsQuery);
+  const myJobs = (myJobsData as JobListing[]) || [];
 
   if (!profile) return null;
 
@@ -32,7 +33,7 @@ export function ProfileView({ profile, onViewMyJobs, onEditJob }: ProfileViewPro
     <div className="max-w-3xl mx-auto py-6 space-y-6">
       <div className="flex flex-col items-center text-center space-y-4 bg-white p-8 rounded-3xl border shadow-sm">
         <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-bold border-4 border-white shadow-lg">
-          {profile.name[0].toUpperCase()}
+          {profile.name[0]?.toUpperCase() || '?'}
         </div>
         <div>
           <h2 className="text-2xl font-bold">{profile.name}</h2>

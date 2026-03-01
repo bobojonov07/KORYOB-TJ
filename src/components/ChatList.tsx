@@ -17,11 +17,14 @@ export function ChatList({ activeChatUid, onSelect }: ChatListProps) {
   const { db } = useFirestore();
   const { user } = useUser();
 
-  // In a real app, we'd have a separate "conversations" collection for efficiency.
-  // Here we'll just show users who are not ourselves for the demo chat list.
   const usersRef = useMemo(() => collection(db, "users"), [db]);
-  const usersQuery = useMemo(() => query(usersRef, where("uid", "!=", user?.uid || "")), [usersRef, user]);
-  const { data: users = [] } = useCollection(usersQuery) as { data: UserProfile[] };
+  const usersQuery = useMemo(() => {
+    if (!user) return null;
+    return query(usersRef, where("uid", "!=", user.uid));
+  }, [usersRef, user]);
+  
+  const { data: usersData } = useCollection(usersQuery);
+  const users = (usersData as UserProfile[]) || [];
 
   return (
     <div className="flex flex-col h-full">
@@ -38,7 +41,7 @@ export function ChatList({ activeChatUid, onSelect }: ChatListProps) {
               )}
             >
               <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                {u.name[0].toUpperCase()}
+                {u.name[0]?.toUpperCase() || '?'}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-center">

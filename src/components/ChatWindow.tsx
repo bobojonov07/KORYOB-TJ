@@ -29,11 +29,12 @@ export function ChatWindow({ partnerUid, onBack }: ChatWindowProps) {
 
   const messagesRef = useMemo(() => collection(db, "chats", chatId, "messages"), [db, chatId]);
   const messagesQuery = useMemo(() => query(messagesRef, orderBy("time", "asc")), [messagesRef]);
-  const { data: messages = [] } = useCollection(messagesQuery) as { data: ChatMessage[] };
+  const { data: messagesData } = useCollection(messagesQuery);
+  const messages = (messagesData as ChatMessage[]) || [];
 
-  const partnerDoc = useMemo(() => doc(db, "users", partnerUid), [db, partnerUid]);
-  const { data: partnerProfile } = useCollection(query(collection(db, "users"), where("uid", "==", partnerUid))) as { data: UserProfile[] };
-  const partner = partnerProfile?.[0];
+  const partnerQuery = useMemo(() => query(collection(db, "users"), where("uid", "==", partnerUid)), [db, partnerUid]);
+  const { data: partnerData } = useCollection(partnerQuery);
+  const partner = (partnerData as UserProfile[])?.[0];
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -41,17 +42,16 @@ export function ChatWindow({ partnerUid, onBack }: ChatWindowProps) {
     }
   }, [messages]);
 
-  // Mark as read
   useEffect(() => {
     if (!user || !messages.length) return;
-    messages.forEach(async (msg) => {
+    messages.forEach((msg) => {
       if (msg.receiverUid === user.uid && !msg.read && msg.id) {
-        await updateDoc(doc(db, "chats", chatId, "messages", msg.id), { read: true });
+        updateDoc(doc(db, "chats", chatId, "messages", msg.id), { read: true });
       }
     });
   }, [messages, user, chatId, db]);
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!text.trim() || !user) return;
     const msg: ChatMessage = {
       senderUid: user.uid,
@@ -61,7 +61,7 @@ export function ChatWindow({ partnerUid, onBack }: ChatWindowProps) {
       read: false,
     };
     setText("");
-    await addDoc(messagesRef, msg);
+    addDoc(messagesRef, msg);
   };
 
   return (

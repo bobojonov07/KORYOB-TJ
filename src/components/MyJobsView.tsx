@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Trash2, Edit, CheckCircle, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface MyJobsViewProps {
   onEditJob: (job: JobListing) => void;
@@ -26,17 +27,18 @@ export function MyJobsView({ onEditJob, onBack }: MyJobsViewProps) {
     return query(collection(db, "jobs"), where("postedUid", "==", user.uid), orderBy("postedAt", "desc"));
   }, [user, db]);
 
-  const { data: myJobs = [] } = useCollection(jobsQuery) as { data: JobListing[] };
+  const { data: myJobsData } = useCollection(jobsQuery);
+  const myJobs = (myJobsData as JobListing[]) || [];
 
   const handleDelete = async (id: string) => {
     if (confirm("Шумо мехоҳед ин эълонро ҳазф кунед?")) {
-      await deleteDoc(doc(db, "jobs", id));
+      deleteDoc(doc(db, "jobs", id));
       toast({ title: "Ҳазф шуд" });
     }
   };
 
   const toggleActive = async (job: JobListing) => {
-    await updateDoc(doc(db, "jobs", job.id), { active: !job.active });
+    updateDoc(doc(db, "jobs", job.id), { active: !job.active });
     toast({ title: job.active ? "Эълон ғайрифаъол шуд" : "Эълон фаъол шуд" });
   };
 
@@ -58,7 +60,7 @@ export function MyJobsView({ onEditJob, onBack }: MyJobsViewProps) {
                   {job.active ? "Фаъол" : "Ғайрифаъол"}
                 </Badge>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Eye size={14} /> {job.views}
+                  <Eye size={14} /> {job.views || 0}
                 </div>
               </div>
               <CardTitle className="text-xl font-bold mt-2">{job.title}</CardTitle>
@@ -87,8 +89,4 @@ export function MyJobsView({ onEditJob, onBack }: MyJobsViewProps) {
       </div>
     </div>
   );
-}
-
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
 }
