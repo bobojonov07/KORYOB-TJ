@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, MapPin, MessageCircle, Clock, DollarSign, Building2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { tg } from "date-fns/locale";
 
 interface JobCardProps {
   job: JobListing;
@@ -16,6 +15,11 @@ interface JobCardProps {
 }
 
 export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
+  const safeDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? new Date() : d;
+  };
+
   return (
     <Card className="hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 group overflow-hidden border-primary/10 rounded-[2rem] bg-white flex flex-col h-full border hover:-translate-y-1">
       <CardHeader className="pb-4 space-y-4">
@@ -25,7 +29,7 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
           </Badge>
           <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase font-black tracking-widest bg-muted/50 px-2 py-1 rounded-md">
             <Clock className="w-3 h-3" />
-            {formatDistanceToNow(new Date(job.postedAt), { addSuffix: true })}
+            {formatDistanceToNow(safeDate(job.postedAt), { addSuffix: true })}
           </div>
         </div>
         <div className="space-y-1.5">
@@ -47,7 +51,7 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
           </div>
           <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-xl">
             <Eye className="w-4 h-4 text-muted-foreground" />
-            <span className="text-xs font-bold text-muted-foreground">{job.views} дида шуд</span>
+            <span className="text-xs font-bold text-muted-foreground">{job.views || 0} дида шуд</span>
           </div>
         </div>
         <p className="text-sm text-muted-foreground/80 line-clamp-3 leading-relaxed font-medium italic">

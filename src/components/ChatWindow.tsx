@@ -73,6 +73,17 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), true);
   };
 
+  const safeFormatTime = (time: any) => {
+    if (!time) return "";
+    try {
+      const date = new Date(time);
+      if (isNaN(date.getTime())) return "";
+      return format(date, "HH:mm");
+    } catch (e) {
+      return "";
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-secondary/5">
       <div className="p-4 border-b bg-white flex items-center gap-3">
@@ -83,7 +94,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
           <h3 className="font-bold text-lg leading-none">{partner?.name || "Чат"}</h3>
           {partner?.lastSeen && (
             <span className={cn("text-[10px] mt-1", Date.now() - partner.lastSeen < 300000 ? "text-green-500 font-bold" : "text-muted-foreground")}>
-              {Date.now() - partner.lastSeen < 300000 ? "Онлайн" : `Охирин дидан: ${format(partner.lastSeen, "HH:mm")}`}
+              {Date.now() - partner.lastSeen < 300000 ? "Онлайн" : `Охирин дидан: ${safeFormatTime(partner.lastSeen)}`}
             </span>
           )}
         </div>
@@ -96,7 +107,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
               {msg.text}
             </div>
             <div className="flex items-center gap-1 mt-1 px-1">
-              <span className="text-[10px] text-muted-foreground">{format(msg.time, "HH:mm")}</span>
+              <span className="text-[10px] text-muted-foreground">{safeFormatTime(msg.time)}</span>
               {msg.sender === user?.email && (
                 <span className="text-primary">
                   {msg.read ? <CheckCheck size={12} /> : <Check size={12} />}
