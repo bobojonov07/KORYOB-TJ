@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -8,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useRTDBData, useRTDB, useAuth } from "@/firebase";
-import { User, Briefcase, ChevronRight, Mail, Calendar, KeyRound, Pencil } from "lucide-react";
+import { User, Briefcase, ChevronRight, Mail, Calendar, KeyRound, Pencil, Info } from "lucide-react";
 import { format } from "date-fns";
 import { ref, update } from "firebase/database";
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
@@ -17,10 +18,10 @@ import { useToast } from "@/hooks/use-toast";
 interface ProfileViewProps {
   profile?: UserProfile;
   onViewMyJobs: () => void;
-  onEditJob: (id: string) => void;
+  onAbout: () => void;
 }
 
-export function ProfileView({ profile, onViewMyJobs, onEditJob }: ProfileViewProps) {
+export function ProfileView({ profile, onViewMyJobs, onAbout }: ProfileViewProps) {
   const rtdb = useRTDB();
   const auth = useAuth();
   const { toast } = useToast();
@@ -65,7 +66,7 @@ export function ProfileView({ profile, onViewMyJobs, onEditJob }: ProfileViewPro
       setIsPassModalOpen(false);
       setPassData({ current: "", new: "" });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Хатогӣ", description: "Пароли ҷорӣ нодуруст аст ё хатои техникӣ" });
+      toast({ variant: "destructive", title: "Хатогӣ", description: "Пароли ҷорӣ нодуруст аст" });
     } finally {
       setLoading(false);
     }
@@ -109,6 +110,15 @@ export function ProfileView({ profile, onViewMyJobs, onEditJob }: ProfileViewPro
           </Card>
         )}
 
+        <Card className="rounded-[2rem] border-primary/5 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={onAbout}>
+          <CardHeader className="flex-row items-center justify-between space-y-0 p-6">
+            <CardTitle className="text-xl font-black flex items-center gap-3">
+              <Info size={22} className="text-primary" /> Дар бораи барнома
+            </CardTitle>
+            <ChevronRight className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
+          </CardHeader>
+        </Card>
+
         <Card className="rounded-[2rem] border-primary/5 shadow-sm overflow-hidden">
           <CardHeader>
             <CardTitle className="text-xl font-black flex items-center gap-3">
@@ -140,7 +150,6 @@ export function ProfileView({ profile, onViewMyJobs, onEditJob }: ProfileViewPro
         </Card>
       </div>
 
-      {/* Name Modal */}
       <Dialog open={isNameModalOpen} onOpenChange={setIsNameModalOpen}>
         <DialogContent className="rounded-3xl max-w-sm">
           <DialogHeader>
@@ -158,7 +167,6 @@ export function ProfileView({ profile, onViewMyJobs, onEditJob }: ProfileViewPro
         </DialogContent>
       </Dialog>
 
-      {/* Password Modal */}
       <Dialog open={isPassModalOpen} onOpenChange={setIsPassModalOpen}>
         <DialogContent className="rounded-3xl max-w-sm">
           <DialogHeader>

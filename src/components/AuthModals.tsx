@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth, useRTDB } from "@/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { ref, set } from "firebase/database";
@@ -27,9 +29,16 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("korjob");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleAction = async () => {
     if (!auth || !rtdb) return;
+    
+    if (mode === "signup" && !agreedToTerms) {
+      toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан ба шартҳои истифода розӣ шавед." });
+      return;
+    }
+
     setLoading(true);
     try {
       if (mode === "login") {
@@ -55,7 +64,7 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
         setMode("login");
       }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Хатогӣ", description: error.message });
+      toast({ variant: "destructive", title: "Хатогӣ", description: "Почта ё парол нодуруст аст." });
     } finally {
       setLoading(false);
     }
@@ -91,19 +100,31 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
           )}
 
           {mode === "signup" && (
-            <div className="space-y-3 pt-2">
-              <Label>Шумо кистед?</Label>
-              <RadioGroup value={role} onValueChange={setRole} className="flex gap-4">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="korjob" id="korjob" />
-                  <Label htmlFor="korjob" className="cursor-pointer">Корҷӯй</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="korfarmo" id="korfarmo" />
-                  <Label htmlFor="korfarmo" className="cursor-pointer">Корфармо</Label>
-                </div>
-              </RadioGroup>
-            </div>
+            <>
+              <div className="space-y-3 pt-2">
+                <Label>Шумо кистед?</Label>
+                <RadioGroup value={role} onValueChange={setRole} className="flex gap-4">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="korjob" id="korjob" />
+                    <Label htmlFor="korjob" className="cursor-pointer">Корҷӯй</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="korfarmo" id="korfarmo" />
+                    <Label htmlFor="korfarmo" className="cursor-pointer">Корфармо</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              <div className="flex items-start space-x-2 pt-2">
+                <Checkbox 
+                  id="terms" 
+                  checked={agreedToTerms} 
+                  onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} 
+                />
+                <label htmlFor="terms" className="text-xs text-muted-foreground leading-none cursor-pointer">
+                  Ман ба <span className="text-primary font-bold">Сиёсати махфият</span> ва шартҳои истифода розӣ ҳастам.
+                </label>
+              </div>
+            </>
           )}
 
           <Button onClick={handleAction} disabled={loading} className="w-full h-11 rounded-full text-lg shadow-md">
