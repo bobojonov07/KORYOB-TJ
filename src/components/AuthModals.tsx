@@ -12,6 +12,7 @@ import { useAuth, useRTDB } from "@/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { ref, set } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AuthModalsProps {
   isOpen: boolean;
@@ -27,16 +28,32 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [role, setRole] = useState("korjob");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleAction = async () => {
     if (!auth || !rtdb) return;
     
-    if (mode === "signup" && !agreedToTerms) {
-      toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан ба шартҳои истифода розӣ шавед." });
-      return;
+    if (mode === "signup") {
+      if (!name || name.length < 3) {
+        toast({ variant: "destructive", title: "Хатогӣ", description: "Ном бояд на камтар аз 3 аломат бошад." });
+        return;
+      }
+      if (!phone) {
+        toast({ variant: "destructive", title: "Хатогӣ", description: "Рақами телефонро ворид кунед." });
+        return;
+      }
+      if (password !== confirmPassword) {
+        toast({ variant: "destructive", title: "Хатогӣ", description: "Паролҳо мувофиқат намекунанд." });
+        return;
+      }
+      if (!agreedToTerms) {
+        toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан ба шартҳои истифода розӣ шавед." });
+        return;
+      }
     }
 
     setLoading(true);
@@ -52,6 +69,7 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
           uid: cred.user.uid,
           name,
           email,
+          phone,
           role,
           createdAt: new Date().toISOString(),
           lastSeen: Date.now()
@@ -72,75 +90,98 @@ export function AuthModals({ isOpen, onClose }: AuthModalsProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md rounded-2xl">
+      <DialogContent className="sm:max-w-md rounded-[2rem] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-primary">
+          <DialogTitle className="text-2xl font-black text-center text-primary">
             {mode === "login" ? "Воридшавӣ" : mode === "signup" ? "Қайд шудан" : "Барқароркунии парол"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-2">
           {mode === "signup" && (
-            <div className="space-y-2">
-              <Label>Ном ва насаб</Label>
-              <Input placeholder="Ном" value={name} onChange={e => setName(e.target.value)} />
-            </div>
+            <>
+              <div className="space-y-1">
+                <Label className="font-bold">Ном ва насаб</Label>
+                <Input placeholder="Ном" value={name} onChange={e => setName(e.target.value)} className="rounded-xl h-11" />
+              </div>
+              <div className="space-y-1">
+                <Label className="font-bold">Рақами телефон</Label>
+                <Input placeholder="+992 000 00 00 00" value={phone} onChange={e => setPhone(e.target.value)} className="rounded-xl h-11" />
+              </div>
+            </>
           )}
 
-          <div className="space-y-2">
-            <Label>Почтаи электронӣ (Email)</Label>
-            <Input type="email" placeholder="example@mail.tj" value={email} onChange={e => setEmail(e.target.value)} />
+          <div className="space-y-1">
+            <Label className="font-bold">Почтаи электронӣ (Email)</Label>
+            <Input type="email" placeholder="example@mail.tj" value={email} onChange={e => setEmail(e.target.value)} className="rounded-xl h-11" />
           </div>
 
           {mode !== "forgot" && (
-            <div className="space-y-2">
-              <Label>Парол</Label>
-              <Input type="password" placeholder="******" value={password} onChange={e => setPassword(e.target.value)} />
+            <div className="space-y-1">
+              <Label className="font-bold">Парол</Label>
+              <Input type="password" placeholder="******" value={password} onChange={e => setPassword(e.target.value)} className="rounded-xl h-11" />
+            </div>
+          )}
+
+          {mode === "signup" && (
+            <div className="space-y-1">
+              <Label className="font-bold">Такрори парол</Label>
+              <Input type="password" placeholder="******" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="rounded-xl h-11" />
             </div>
           )}
 
           {mode === "signup" && (
             <>
               <div className="space-y-3 pt-2">
-                <Label>Шумо кистед?</Label>
+                <Label className="font-bold">Шумо кистед?</Label>
                 <RadioGroup value={role} onValueChange={setRole} className="flex gap-4">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="korjob" id="korjob" />
-                    <Label htmlFor="korjob" className="cursor-pointer">Корҷӯй</Label>
+                    <Label htmlFor="korjob" className="cursor-pointer font-medium">Корҷӯй</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="korfarmo" id="korfarmo" />
-                    <Label htmlFor="korfarmo" className="cursor-pointer">Корфармо</Label>
+                    <Label htmlFor="korfarmo" className="cursor-pointer font-medium">Корфармо</Label>
                   </div>
                 </RadioGroup>
               </div>
-              <div className="flex items-start space-x-2 pt-2">
-                <Checkbox 
-                  id="terms" 
-                  checked={agreedToTerms} 
-                  onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} 
-                />
-                <label htmlFor="terms" className="text-xs text-muted-foreground leading-none cursor-pointer">
-                  Ман ба <span className="text-primary font-bold">Сиёсати махфият</span> ва шартҳои истифода розӣ ҳастам.
-                </label>
+
+              <div className="bg-muted/30 p-4 rounded-2xl space-y-2 border">
+                <Label className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Сиёсати махфият</Label>
+                <ScrollArea className="h-20 text-[11px] text-muted-foreground leading-relaxed pr-3">
+                  <p>1. Ҷамъоварии маълумот: Мо танҳо ном, почта, телефон ва нақши шуморо ҷамъ меорем.</p>
+                  <p>2. Паролҳо: Ҳамаи паролҳо рамзгузорӣ шудаанд ва ба касе дастрас нестанд.</p>
+                  <p>3. Масъулият: Платформа танҳо барои пайваст кардани корбар ва корфармо мебошад.</p>
+                  <p>4. Эълонҳо: Маълумоти дар эълонҳо буда оммавӣ мебошанд.</p>
+                </ScrollArea>
+                <div className="flex items-start space-x-2 pt-1">
+                  <Checkbox 
+                    id="terms" 
+                    checked={agreedToTerms} 
+                    onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} 
+                  />
+                  <label htmlFor="terms" className="text-xs text-muted-foreground leading-none cursor-pointer font-medium">
+                    Ман ба <span className="text-primary font-bold">Сиёсати махфият</span> ва шартҳо розӣ ҳастам.
+                  </label>
+                </div>
               </div>
             </>
           )}
 
-          <Button onClick={handleAction} disabled={loading} className="w-full h-11 rounded-full text-lg shadow-md">
+          <Button onClick={handleAction} disabled={loading} className="w-full h-12 rounded-2xl text-lg font-black shadow-lg shadow-primary/20 transition-transform active:scale-95">
             {loading ? "Интизор шавед..." : mode === "login" ? "Ворид шудан" : mode === "signup" ? "Сабти ном" : "Ирсол"}
           </Button>
 
-          <div className="text-center text-sm space-y-2">
+          <div className="text-center text-sm space-y-2 pt-2">
             {mode === "login" ? (
               <>
-                <p>Ҳисоб надоред? <button onClick={() => setMode("signup")} className="text-primary font-bold hover:underline">Қайд шудан</button></p>
-                <button onClick={() => setMode("forgot")} className="text-muted-foreground hover:text-primary transition-colors">Паролро фаромӯш кардед?</button>
+                <p className="font-medium text-muted-foreground">Ҳисоб надоред? <button onClick={() => setMode("signup")} className="text-primary font-bold hover:underline">Қайд шудан</button></p>
+                <button onClick={() => setMode("forgot")} className="text-muted-foreground hover:text-primary transition-colors font-bold text-xs">Паролро фаромӯш кардед?</button>
               </>
             ) : mode === "signup" ? (
-              <p>Аллакай ҳисоб доред? <button onClick={() => setMode("login")} className="text-primary font-bold hover:underline">Ворид шудан</button></p>
+              <p className="font-medium text-muted-foreground">Аллакай ҳисоб доред? <button onClick={() => setMode("login")} className="text-primary font-bold hover:underline">Ворид шудан</button></p>
             ) : (
-              <button onClick={() => setMode("login")} className="text-primary font-bold hover:underline">Бозгашт ба воридшавӣ</button>
+              <button onClick={() => setMode("login")} className="text-primary font-bold hover:underline font-bold">Бозгашт ба воридшавӣ</button>
             )}
           </div>
         </div>

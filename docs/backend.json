@@ -9,6 +9,7 @@
         "uid": { "type": "string" },
         "name": { "type": "string" },
         "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
         "role": { "type": "string", "enum": ["korjob", "korfarmo"] },
         "lastSeen": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
@@ -43,13 +44,12 @@
       "description": "A single message in a conversation",
       "type": "object",
       "properties": {
-        "senderUid": { "type": "string" },
-        "receiverUid": { "type": "string" },
+        "sender": { "type": "string" },
         "text": { "type": "string" },
         "time": { "type": "number" },
         "read": { "type": "boolean" }
       },
-      "required": ["senderUid", "receiverUid", "text", "time"]
+      "required": ["sender", "text", "time"]
     }
   },
   "auth": {
@@ -64,7 +64,7 @@
       "schema": "JobListing",
       "description": "All job postings"
     },
-    "/chats/{chatId}/messages/{messageId}": {
+    "/chats/{chatId}": {
       "schema": "ChatMessage",
       "description": "Direct messages between users"
     }
