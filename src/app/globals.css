@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -24,14 +23,7 @@
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 28 100% 50%;
-    --radius: 0.75rem;
-  }
-  .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --primary: 28 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    /* ... dark mode details ... */
+    --radius: 1rem;
   }
 }
 
@@ -40,6 +32,20 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased font-body;
   }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-headline;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30 transition-colors;
 }
