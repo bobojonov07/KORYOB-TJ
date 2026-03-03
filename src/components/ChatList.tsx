@@ -23,7 +23,6 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
     
     const myEncodedEmail = encodeURIComponent(user.email).replace(/\./g, '%2E');
     
-    // Map chat metadata to find last interaction time
     const chatStats = new Map<string, { lastTime: number, hasUnread: boolean }>();
     
     Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {
@@ -51,13 +50,14 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
         lastInteraction: chatStats.get(u.email)?.lastTime || 0,
         hasUnread: chatStats.get(u.email)?.hasUnread || false
       }))
-      .sort((a, b) => b.lastInteraction - a.lastInteraction) as any[];
+      .sort((a, b) => b.lastInteraction - a.lastInteraction);
   }, [usersObj, chatsObj, user]);
 
   return (
     <div className="flex flex-col h-full bg-white">
-      <div className="p-6 border-b font-black text-xl tracking-tighter bg-white sticky top-0 z-10">
+      <div className="p-6 border-b font-black text-xl tracking-tighter bg-white sticky top-0 z-10 flex items-center justify-between">
         Чатҳо
+        <MessageCircle size={20} className="text-primary opacity-50" />
       </div>
       <ScrollArea className="flex-1">
         <div className="divide-y divide-primary/5">

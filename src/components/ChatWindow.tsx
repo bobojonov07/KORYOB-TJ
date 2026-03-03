@@ -57,9 +57,9 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   }, [messages]);
 
   useEffect(() => {
-    if (!user || !messages.length || !rtdb) return;
+    if (!user || !messages.length || !rtdb || !myEncodedEmail) return;
     
-    // Mark messages as read
+    // Паёмҳоро ҳамчун хондашуда қайд мекунем
     let updated = false;
     messages.forEach((msg) => {
       if (msg.sender !== user.email && !msg.read && msg.id) {
@@ -68,14 +68,14 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
       }
     });
 
-    // If we read some messages, check if there are any more unread messages in other chats
-    if (updated && myEncodedEmail) {
+    if (updated) {
+      // Огоҳиномаро дар базаи додаҳо нест мекунем
       set(ref(rtdb, `userNotifications/${myEncodedEmail}`), false);
     }
   }, [messages, user, chatId, rtdb, myEncodedEmail]);
 
   const handleSend = async () => {
-    if (!text.trim() || !user?.email || !currentUserProfile) return;
+    if (!text.trim() || !user?.email || !currentUserProfile || !rtdb) return;
 
     if (currentUserProfile.isBlocked) {
       toast({ variant: "destructive", title: "Ҳисоб блок шудааст", description: "Шумо паём фиристода наметавонед." });
@@ -115,7 +115,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     const newMsgRef = push(ref(rtdb, `chats/${chatId}`));
     await set(newMsgRef, msg);
     
-    // Set notification for partner
+    // Ба ҳамсуҳбат огоҳинома мефиристем
     set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), true);
   };
 

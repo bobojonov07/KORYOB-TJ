@@ -9,7 +9,7 @@
 
 ```bash
 git add .
-git commit -m "Версияи нав: Дизайни касбӣ, экранҳои алоҳида ва ислоҳи хатогиҳо"
+git commit -m "Версияи нав: Экранҳои пурра, огоҳиномаҳо ва ислоҳи чат"
 git push origin main
 ```
 
@@ -18,7 +18,7 @@ git push origin main
 1. Ба [vercel.com](https://vercel.com/) ворид шавед ва бо GitHub пайваст шавед.
 2. Тугмаи **"Add New"** ва баъд **"Project"**-ро пахш кунед.
 3. Репозиторияи `KORYOB-TJ`-ро интихоб кунед.
-4. Дар бахши **Environment Variables**, ҳамаи калидҳои Firebase-ро аз файли `src/firebase/config.ts` илова кунед (масалан `NEXT_PUBLIC_FIREBASE_API_KEY` ва ғайра, агар лозим бошад). Одатан Vercel худаш файлҳоро мехонад.
+4. Дар бахши **Environment Variables**, ҳамаи калидҳои Firebase-ро аз файли `src/firebase/config.ts` илова кунед.
 5. Тугмаи **"Deploy"**-ро пахш кунед.
 
 ### 🔗 Пайваст кардани домени шахсӣ:
