@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, TrendingUp, Filter, Menu, Home, List, Info, ShieldAlert, Heart } from "lucide-react";
+import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, TrendingUp, Filter, Menu, Home, List, Info, ShieldAlert, Heart, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +12,7 @@ import { JobListing, UserProfile } from "@/app/lib/types";
 import { JobCard } from "@/components/JobCard";
 import { JobDetails } from "@/components/JobDetails";
 import { JobForm } from "@/components/JobForm";
-import { AuthModals } from "@/components/AuthModals";
+import { AuthView } from "@/components/AuthView";
 import { ChatList } from "@/components/ChatList";
 import { ChatWindow } from "@/components/ChatWindow";
 import { ProfileView } from "@/components/ProfileView";
@@ -35,9 +35,8 @@ export default function KoryobTJ() {
   const [searchQuery, setSearchQuery] = useState("");
   const [cityFilter, setCityFilter] = useState("Ҳама шаҳрҳо");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<"jobs" | "chat" | "profile" | "my-jobs" | "create-job" | "about" | "favorites">("jobs");
+  const [activeView, setActiveView] = useState<"jobs" | "chat" | "profile" | "my-jobs" | "create-job" | "about" | "favorites" | "auth" | "job-details">("jobs");
   const [activeChatEmail, setActiveChatEmail] = useState<string | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const { data: jobsObj } = useRTDBData("jobs");
   const jobsData = useMemo(() => {
@@ -83,7 +82,7 @@ export default function KoryobTJ() {
 
   const handleStartChat = (partnerEmail: string) => {
     if (!user) {
-      setIsAuthModalOpen(true);
+      setActiveView("auth");
       return;
     }
     if (user.email === partnerEmail) {
@@ -92,6 +91,15 @@ export default function KoryobTJ() {
     }
     setActiveChatEmail(partnerEmail);
     setActiveView("chat");
+  };
+
+  const handleJobClick = (jobId: string) => {
+    if (!user) {
+      setActiveView("auth");
+      return;
+    }
+    setSelectedJobId(jobId);
+    setActiveView("job-details");
   };
 
   if (currentUserProfile?.isBlocked) {
@@ -112,6 +120,22 @@ export default function KoryobTJ() {
           </Button>
         </div>
       </div>
+    );
+  }
+
+  // Auth Screen
+  if (activeView === "auth") {
+    return <AuthView onBack={() => setActiveView("jobs")} onAuthSuccess={() => setActiveView("jobs")} />;
+  }
+
+  // Job Details Screen
+  if (activeView === "job-details" && selectedJob) {
+    return (
+      <JobDetails 
+        job={selectedJob} 
+        onBack={() => setActiveView("jobs")} 
+        onChat={() => handleStartChat(selectedJob.postedEmail)} 
+      />
     );
   }
 
@@ -188,7 +212,7 @@ export default function KoryobTJ() {
           ) : (
             <div className="flex gap-2">
               <Button variant="ghost" className="hidden md:flex font-bold" onClick={() => setActiveView("about")}>Оиди мо</Button>
-              <Button onClick={() => setIsAuthModalOpen(true)} className="rounded-2xl px-8 h-11 font-black shadow-lg shadow-primary/20 transition-transform active:scale-95">Воридшавӣ</Button>
+              <Button onClick={() => setActiveView("auth")} className="rounded-2xl px-8 h-11 font-black shadow-lg shadow-primary/20 transition-transform active:scale-95">Воридшавӣ</Button>
             </div>
           )}
         </nav>
@@ -265,10 +289,7 @@ export default function KoryobTJ() {
                     <JobCard 
                       key={job.id} 
                       job={job} 
-                      onClick={() => {
-                        if (!user) { setIsAuthModalOpen(true); return; }
-                        setSelectedJobId(job.id);
-                      }} 
+                      onClick={() => handleJobClick(job.id)} 
                       onChat={() => handleStartChat(job.postedEmail)}
                       isOwner={user?.uid === job.postedUid}
                     />
@@ -294,7 +315,7 @@ export default function KoryobTJ() {
                       Барои дидани ҳамаи эълонҳо, маълумоти тамос ва оғози чат бо корфармоён, лутфан ворид шавед ё сабти ном кунед.
                     </p>
                   </div>
-                  <Button onClick={() => setIsAuthModalOpen(true)} className="rounded-[1.25rem] h-14 px-12 text-xl font-black shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                  <Button onClick={() => setActiveView("auth")} className="rounded-[1.25rem] h-14 px-12 text-xl font-black shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
                     Ҳозир ҳамроҳ шавед
                   </Button>
                 </div>
@@ -336,7 +357,7 @@ export default function KoryobTJ() {
 
         {activeView === "favorites" && (
           <FavoritesView 
-            onSelectJob={(id) => { setSelectedJobId(id); setActiveView("jobs"); }}
+            onSelectJob={(id) => handleJobClick(id)}
             onBack={() => setActiveView("jobs")}
           />
         )}
@@ -349,9 +370,9 @@ export default function KoryobTJ() {
 
         {activeView === "create-job" && (
           <JobForm 
-            jobId={selectedJobId} 
-            onSuccess={() => { setActiveView("jobs"); setSelectedJobId(null); }}
-            onCancel={() => { setActiveView("jobs"); setSelectedJobId(null); }}
+            jobId={null} 
+            onSuccess={() => setActiveView("jobs")}
+            onCancel={() => setActiveView("jobs")}
           />
         )}
 
@@ -378,16 +399,6 @@ export default function KoryobTJ() {
           <MobileNavTab icon={<UserIcon size={26} />} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
         </div>
       )}
-
-      {selectedJobId && activeView === "jobs" && selectedJob && (
-        <JobDetails 
-          job={selectedJob} 
-          onClose={() => setSelectedJobId(null)} 
-          onChat={() => handleStartChat(selectedJob.postedEmail)}
-        />
-      )}
-
-      <AuthModals isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { JobListing, UserProfile } from "@/app/lib/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Clock, Banknote, Building2, MapPin, Heart } from "lucide-react";
+import { Eye, Clock, Banknote, Building2, MapPin, Heart, ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useUser, useRTDB, useRTDBData } from "@/firebase";
 import { ref, update, runTransaction } from "firebase/database";
@@ -51,7 +51,7 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-[0_20px_50px_rgba(255,123,0,0.1)] transition-all duration-500 group overflow-hidden border-primary/10 rounded-[2.5rem] bg-white flex flex-col h-full border hover:-translate-y-2 active:scale-[0.98]">
+    <Card className="hover:shadow-[0_30px_60px_rgba(255,123,0,0.15)] transition-all duration-500 group overflow-hidden border-primary/10 rounded-[2.5rem] bg-white flex flex-col h-full border hover:-translate-y-2 active:scale-[0.98]">
       <CardHeader className="pb-4 space-y-5">
         <div className="flex justify-between items-start">
           <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-4 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-1.5">
@@ -67,7 +67,7 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
                 variant="ghost" 
                 size="icon" 
                 onClick={toggleFavorite}
-                className={cn("rounded-xl h-8 w-8", isFavorite ? "text-red-500 bg-red-50" : "text-muted-foreground")}
+                className={cn("rounded-xl h-8 w-8 transition-transform active:scale-125", isFavorite ? "text-red-500 bg-red-50" : "text-muted-foreground")}
               >
                 <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
               </Button>
@@ -105,9 +105,14 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
         </p>
       </CardContent>
 
-      <CardFooter className="pt-0 p-8 flex gap-4 border-t border-primary/5 bg-secondary/10 mt-auto">
-        <Button variant="outline" size="lg" className="flex-1 rounded-2xl border-primary/10 font-black h-14 hover:bg-white hover:text-primary hover:border-primary transition-all shadow-md active:scale-95" onClick={onClick}>
-          ТАФСИЛОТ
+      <CardFooter className="pt-0 p-8 flex gap-4 border-t border-primary/5 bg-secondary/5 mt-auto">
+        <Button 
+          variant="default" 
+          size="lg" 
+          className="flex-1 rounded-[1.25rem] font-black h-14 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all gap-3" 
+          onClick={onClick}
+        >
+          ТАФСИЛОТ <ArrowRight size={18} />
         </Button>
       </CardFooter>
     </Card>
