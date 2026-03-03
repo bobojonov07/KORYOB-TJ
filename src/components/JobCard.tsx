@@ -1,4 +1,3 @@
-
 "use client";
 
 import { JobListing, UserProfile } from "@/app/lib/types";
@@ -23,7 +22,8 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
   const rtdb = useRTDB();
   
   const userEncodedEmail = user?.email ? encodeURIComponent(user.email).replace(/\./g, '%2E') : null;
-  const { data: profile } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null) as { data: UserProfile | null };
+  const { data: profileObj } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
+  const profile = profileObj as UserProfile | null;
 
   const isFavorite = profile?.favorites?.includes(job.id);
 

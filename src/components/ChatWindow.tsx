@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -43,8 +42,12 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   }, [messagesObj]);
 
   const partnerEncodedEmail = encodeURIComponent(partnerEmail).replace(/\./g, '%2E');
-  const { data: partner } = useRTDBData(`users/${partnerEncodedEmail}`) as { data: UserProfile | null };
-  const { data: currentUserProfile } = useRTDBData(user?.email ? `users/${encodeURIComponent(user.email).replace(/\./g, '%2E')}` : null) as { data: UserProfile | null };
+  const { data: partnerObj } = useRTDBData(`users/${partnerEncodedEmail}`);
+  const partner = partnerObj as UserProfile | null;
+
+  const myEncodedEmail = user?.email ? encodeURIComponent(user.email).replace(/\./g, '%2E') : null;
+  const { data: currentUserProfileObj } = useRTDBData(myEncodedEmail ? `users/${myEncodedEmail}` : null);
+  const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -59,9 +62,10 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         update(ref(rtdb, `chats/${chatId}/${msg.id}`), { read: true });
       }
     });
-    const myEncodedEmail = encodeURIComponent(user.email!).replace(/\./g, '%2E');
-    set(ref(rtdb, `userNotifications/${myEncodedEmail}`), false);
-  }, [messages, user, chatId, rtdb]);
+    if (myEncodedEmail) {
+      set(ref(rtdb, `userNotifications/${myEncodedEmail}`), false);
+    }
+  }, [messages, user, chatId, rtdb, myEncodedEmail]);
 
   const handleSend = async () => {
     if (!text.trim() || !user?.email || !currentUserProfile) return;
@@ -72,18 +76,18 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     }
 
     if (containsForbiddenWords(text)) {
-      const myEncodedEmail = encodeURIComponent(user.email).replace(/\./g, '%2E');
-      const userRef = ref(rtdb, `users/${myEncodedEmail}`);
-      
-      await runTransaction(userRef, (userData) => {
-        if (userData) {
-          userData.warningCount = (userData.warningCount || 0) + 1;
-          if (userData.warningCount >= MODERATION_RULES.MAX_WARNINGS) {
-            userData.isBlocked = true;
+      if (myEncodedEmail) {
+        const userRef = ref(rtdb, `users/${myEncodedEmail}`);
+        await runTransaction(userRef, (userData) => {
+          if (userData) {
+            userData.warningCount = (userData.warningCount || 0) + 1;
+            if (userData.warningCount >= MODERATION_RULES.MAX_WARNINGS) {
+              userData.isBlocked = true;
+            }
           }
-        }
-        return userData;
-      });
+          return userData;
+        });
+      }
 
       toast({ 
         variant: "destructive", 

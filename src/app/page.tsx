@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -47,7 +46,8 @@ export default function KoryobTJ() {
   }, [jobsObj]);
 
   const userEncodedEmail = user?.email ? encodeURIComponent(user.email).replace(/\./g, '%2E') : null;
-  const { data: currentUserProfile } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null) as { data: UserProfile | null };
+  const { data: currentUserProfileObj } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
+  const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
   useEffect(() => {
     if (user && userEncodedEmail && rtdb) {
