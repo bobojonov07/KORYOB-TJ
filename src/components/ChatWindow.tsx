@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -6,7 +7,7 @@ import { ref, push, update, set, runTransaction } from "firebase/database";
 import { ChatMessage, UserProfile } from "@/app/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ArrowLeft, Check, CheckCheck, AlertTriangle } from "lucide-react";
+import { Send, ArrowLeft, Check, CheckCheck, AlertTriangle, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { containsForbiddenWords, MODERATION_RULES } from "@/app/lib/moderation";
@@ -68,7 +69,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     });
 
     // If we read some messages, check if there are any more unread messages in other chats
-    // For simplicity, we just clear the main notification if we are in an active chat
     if (updated && myEncodedEmail) {
       set(ref(rtdb, `userNotifications/${myEncodedEmail}`), false);
     }

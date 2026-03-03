@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -5,6 +6,7 @@ import { useUser, useRTDBData } from "@/firebase";
 import { UserProfile } from "@/app/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { MessageCircle } from "lucide-react";
 
 interface ChatListProps {
   activeChatEmail: string | null;

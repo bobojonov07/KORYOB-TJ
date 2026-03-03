@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, Menu, Home, List, Info, ShieldAlert, Heart, ChevronLeft, LayoutDashboard, Bell } from "lucide-react";
+import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, Menu, Home, List, Info, ShieldAlert, Heart, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,7 +21,6 @@ import { AboutView } from "@/components/AboutView";
 import { FavoritesView } from "@/components/FavoritesView";
 import { useToast } from "@/hooks/use-toast";
 import { signOut } from "firebase/auth";
-import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
