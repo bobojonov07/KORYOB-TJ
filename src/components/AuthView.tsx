@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -10,7 +11,8 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswor
 import { ref, set, get } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronLeft, Briefcase, Lock, Mail, User as UserIcon, Phone, Sparkles } from "lucide-react";
+import { ChevronLeft, Briefcase, Lock, Mail, User as UserIcon, Phone, Sparkles, UserCheck, Building2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AuthViewProps {
   onBack: () => void;
@@ -29,6 +31,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [role, setRole] = useState<"korjob" | "korfarmo">("korjob");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleAction = async () => {
@@ -76,7 +79,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
           name,
           email,
           phone,
-          role: 'korjob', 
+          role: role, 
           createdAt: new Date().toISOString(),
           lastSeen: Date.now(),
           warningCount: 0,
@@ -115,18 +118,41 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
           </div>
           <div className="space-y-1">
             <h1 className="text-3xl font-black tracking-tighter">KORYOB.TJ</h1>
-            {mode === "signup" && (
-              <p className="text-muted-foreground text-xs font-bold px-4 leading-relaxed">
-                Ба платформаи №1 дар Тоҷикистон ҳамроҳ шавед. <br /> 
-                <span className="text-primary flex items-center justify-center gap-1 mt-1">
-                  <Sparkles size={12} /> Бо мо дарёфти кор осонтар ва тезтар аст
-                </span>
-              </p>
-            )}
+            <p className="text-muted-foreground text-xs font-bold px-4 leading-relaxed">
+              {mode === "signup" ? "Интихоб кунед ва ҳамроҳ шавед" : "Ба ҳисоби худ ворид шавед"}
+            </p>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-[2.5rem] shadow-xl space-y-4 border border-primary/5">
+          {mode === "signup" && (
+            <div className="space-y-3">
+              <Label className="text-[11px] font-black text-muted-foreground uppercase tracking-widest ml-1">Ман кистам?</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={() => setRole("korjob")}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all",
+                    role === "korjob" ? "border-primary bg-primary/5 text-primary" : "border-secondary bg-secondary/20 text-muted-foreground"
+                  )}
+                >
+                  <UserCheck size={24} />
+                  <span className="text-xs font-black">Корҷӯ</span>
+                </button>
+                <button 
+                  onClick={() => setRole("korfarmo")}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all",
+                    role === "korfarmo" ? "border-primary bg-primary/5 text-primary" : "border-secondary bg-secondary/20 text-muted-foreground"
+                  )}
+                >
+                  <Building2 size={24} />
+                  <span className="text-xs font-black">Корфармо</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {mode === "signup" && (
             <>
               <div className="space-y-1">
@@ -181,7 +207,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
                 <p>1. Модераторӣ: Истифодаи дашном ва калимаҳои ноҷо қатъиян манъ аст.</p>
                 <p>2. Блоккунӣ: Барои риоя накардани қоидаҳо (3 огоҳӣ ё 5 гузориш) аккаунт ба таври худкор блок мешавад.</p>
                 <p>3. Махфият: Маълумоти шумо танҳо барои коркард дар дохили платформа истифода мешавад.</p>
-                <p>4. Ҷавобгарӣ: Барномасоз барои саҳеҳии маълумот дар эълонҳо ҷавобгар нест.</p>
+                <p>4. Ҷавобгарӣ: Барномасоз Бобоҷонзода Аминҷон барои саҳеҳии маълумот дар эълонҳо ҷавобгар нест.</p>
               </ScrollArea>
               <div className="flex items-center space-x-2">
                 <Checkbox id="terms" checked={agreedToTerms} onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} />
