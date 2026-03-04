@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Clock, Banknote, Building2, MapPin, Heart, ArrowRight } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import { useUser, useRTDB, useRTDBData } from "@/firebase";
 import { ref, update, runTransaction } from "firebase/database";
 import { cn } from "@/lib/utils";
@@ -15,6 +14,26 @@ interface JobCardProps {
   onClick: () => void;
   onChat: () => void;
   isOwner: boolean;
+}
+
+/**
+ * Функсияи махсус барои нишон додани вақт ба забони тоҷикӣ
+ */
+function formatTajikTime(dateStr: string) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+  if (diffInMinutes < 1) return "Ҳозир";
+  if (diffInMinutes < 60) return `${diffInMinutes} дақиқа пеш`;
+  if (diffInHours < 24) return `${diffInHours} соат пеш`;
+  if (diffInDays === 1) return "Дирӯз";
+  if (diffInDays < 30) return `${diffInDays} рӯз пеш`;
+  
+  return date.toLocaleDateString('tg-TJ', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
@@ -45,11 +64,6 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
     });
   };
 
-  const safeDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? new Date() : d;
-  };
-
   return (
     <Card className="hover:shadow-[0_30px_60px_rgba(255,123,0,0.15)] transition-all duration-500 group overflow-hidden border-primary/10 rounded-[2.5rem] bg-white flex flex-col h-full border hover:-translate-y-2 active:scale-[0.98]">
       <CardHeader className="pb-4 space-y-5">
@@ -60,7 +74,7 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase font-black tracking-widest bg-secondary/50 px-3 py-1.5 rounded-xl border border-primary/5">
               <Clock className="w-3.5 h-3.5" />
-              {formatDistanceToNow(safeDate(job.postedAt), { addSuffix: true })}
+              {formatTajikTime(job.postedAt)}
             </div>
             {user && (
               <Button 
