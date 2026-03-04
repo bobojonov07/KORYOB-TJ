@@ -38,6 +38,8 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     if (!messagesObj) return [];
     return Object.entries(messagesObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
+      // Филтр кардани паёмҳои холӣ ё харобшуда
+      .filter((msg: any) => msg.text && msg.sender)
       .sort((a, b) => (a.time || 0) - (b.time || 0)) as any[];
   }, [messagesObj]);
 
@@ -139,7 +141,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
   return (
     <div className="flex flex-col h-full bg-[#FDFCFB] animate-in slide-in-from-right duration-300">
-      {/* Header - Compact UI for Mobile */}
+      {/* Header - Compact UI */}
       <div className="p-2 md:p-4 border-b bg-white flex items-center justify-between sticky top-0 z-20 shadow-sm backdrop-blur-xl bg-white/90">
         <div className="flex items-center gap-2 md:gap-3">
           <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50 h-8 w-8 md:h-10 md:w-10">
@@ -161,49 +163,55 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         </Button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 md:p-8 space-y-3 md:space-y-4 bg-[#F5F5F5]/30">
-        {messages.map((msg, i) => (
-          <div key={i} className={cn("flex flex-col max-w-[90%] md:max-w-[85%] group", msg.sender === user?.email ? "ml-auto items-end" : "mr-auto items-start")}>
-            <div className="flex items-center gap-1.5 max-w-full">
-              {msg.sender === user?.email && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-destructive hover:bg-destructive/10 rounded-full shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleDeleteMessage(msg.id)}
-                >
-                  <Trash2 size={14} />
-                </Button>
-              )}
-              <div className={cn(
-                "p-3.5 rounded-2xl md:rounded-3xl text-sm font-bold shadow-sm break-words", 
-                msg.sender === user?.email 
-                  ? "bg-primary text-white rounded-tr-none" 
-                  : "bg-white border border-primary/5 rounded-tl-none text-foreground"
-              )}>
-                {msg.text}
+      {/* Message Area */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 md:p-8 space-y-4 bg-[#F5F5F5]/30">
+        {messages.map((msg, i) => {
+          const isMine = msg.sender === user?.email;
+          return (
+            <div key={msg.id || i} className={cn("flex flex-col max-w-[85%] group", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
+              <div className="flex items-end gap-1.5 max-w-full">
+                {isMine && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1"
+                    onClick={() => handleDeleteMessage(msg.id)}
+                  >
+                    <Trash2 size={12} />
+                  </Button>
+                )}
+                
+                <div className={cn(
+                  "p-3 rounded-2xl text-sm font-bold shadow-sm break-words relative", 
+                  isMine 
+                    ? "bg-primary text-white rounded-tr-none" 
+                    : "bg-white border border-primary/5 rounded-tl-none text-foreground"
+                )}>
+                  {msg.text}
+                </div>
+
+                {!isMine && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1"
+                    onClick={() => handleDeleteMessage(msg.id)}
+                  >
+                    <Trash2 size={12} />
+                  </Button>
+                )}
               </div>
-              {msg.sender !== user?.email && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-destructive hover:bg-destructive/10 rounded-full shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleDeleteMessage(msg.id)}
-                >
-                  <Trash2 size={14} />
-                </Button>
-              )}
+              <div className="flex items-center gap-1.5 mt-1 px-1">
+                <span className="text-[9px] text-muted-foreground/60 font-black tracking-tighter">{safeFormatTime(msg.time)}</span>
+                {isMine && (
+                  <span className="text-primary">
+                    {msg.read ? <CheckCheck size={12} /> : <Check size={12} />}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 mt-1 px-2">
-              <span className="text-[9px] md:text-[10px] text-muted-foreground/60 font-black tracking-tighter">{safeFormatTime(msg.time)}</span>
-              {msg.sender === user?.email && (
-                <span className="text-primary">
-                  {msg.read ? <CheckCheck size={14} /> : <Check size={14} />}
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center py-20 opacity-20 text-center space-y-4">
             <MessageCircle size={56} className="text-primary" />
