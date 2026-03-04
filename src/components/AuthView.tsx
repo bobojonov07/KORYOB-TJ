@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -36,6 +37,8 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
   const handleAction = async () => {
     if (!auth || !rtdb) return;
     
+    const cleanEmail = email.trim().toLowerCase();
+
     if (mode === "signup") {
       if (!name || name.length < 3) {
         toast({ variant: "destructive", title: "Хатогӣ", description: "Ном бояд на камтар аз 3 аломат бошад." });
@@ -58,7 +61,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
     setLoading(true);
     try {
       if (mode === "login") {
-        const encodedEmail = encodeURIComponent(email).replace(/\./g, '%2E');
+        const encodedEmail = encodeURIComponent(cleanEmail).replace(/\./g, '%2E');
         const userSnap = await get(ref(rtdb, `users/${encodedEmail}`));
         
         if (userSnap.exists() && userSnap.val().isBlocked) {
@@ -67,16 +70,16 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
           return;
         }
 
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, cleanEmail, password);
         toast({ title: "Хуш омадед!", description: "Шумо ворид шудед." });
         onAuthSuccess();
       } else if (mode === "signup") {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        const encodedEmail = encodeURIComponent(email).replace(/\./g, '%2E');
+        const cred = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+        const encodedEmail = encodeURIComponent(cleanEmail).replace(/\./g, '%2E');
         await set(ref(rtdb, `users/${encodedEmail}`), {
           uid: cred.user.uid,
           name,
-          email,
+          email: cleanEmail,
           phone,
           role: role, 
           createdAt: new Date().toISOString(),
@@ -88,7 +91,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
         toast({ title: "Хуш омадед!", description: "Сабти ном бомуваффақият гузашт." });
         onAuthSuccess();
       } else {
-        await sendPasswordResetEmail(auth, email);
+        await sendPasswordResetEmail(auth, cleanEmail);
         toast({ title: "Ирсол шуд", description: "Пайванд ба почтаи шумо фиристода шуд." });
         setMode("login");
       }

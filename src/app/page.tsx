@@ -44,8 +44,8 @@ export default function KoryobTJ() {
     return Object.entries(jobsObj).map(([id, val]: [string, any]) => ({ id, ...val })) as JobListing[];
   }, [jobsObj]);
 
-  const userEncodedEmail = user?.email ? encodeURIComponent(user.email).replace(/\./g, '%2E') : null;
-  const { data: currentUserProfileObj } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
+  const userEncodedEmail = user?.email ? encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E') : null;
+  const { data: currentUserProfileObj, loading: profileLoading } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
   // Огоҳинома барои паёмҳои нав
@@ -91,7 +91,7 @@ export default function KoryobTJ() {
       setActiveView("auth");
       return;
     }
-    if (user.email === partnerEmail) {
+    if (user.email?.toLowerCase() === partnerEmail.toLowerCase()) {
       toast({ variant: "destructive", title: "Хатогӣ", description: "Шумо ба худатон навишта наметавонед." });
       return;
     }
@@ -108,11 +108,10 @@ export default function KoryobTJ() {
     setActiveView("job-details");
   };
 
-  // Санҷиши экрани пурра барои мобилӣ
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const isFullScreenView = isMobile && (
     activeView === "job-details" || 
-    activeView === "chat" || // Акнун рӯйхати чатҳо ҳам дар мобилӣ пурра аст
+    activeView === "chat" || 
     activeView === "auth" ||
     activeView === "create-job" ||
     activeView === "profile" ||
@@ -157,7 +156,6 @@ export default function KoryobTJ() {
 
   return (
     <div className="min-h-screen bg-[#FDFCFB] flex flex-col pb-24 md:pb-0 overflow-x-hidden">
-      {/* Header танҳо вақте нишон дода мешавад, ки экрани пурра набошад */}
       {!isFullScreenView && (
         <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b px-4 md:px-12 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveView("jobs"); setActiveChatEmail(null); }}>
@@ -167,7 +165,6 @@ export default function KoryobTJ() {
             <h1 className="text-xl md:text-2xl font-black text-primary tracking-tighter">KORYOB.TJ</h1>
           </div>
 
-          {/* Меню барои Компютер */}
           <nav className="hidden md:flex items-center gap-6">
             <NavButton icon={<Home size={20}/>} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />
             {user && (
@@ -194,7 +191,6 @@ export default function KoryobTJ() {
             )}
           </nav>
 
-          {/* Меню барои Мобилӣ (Sheet) */}
           <div className="md:hidden flex items-center gap-3">
             {!user ? (
               <Button onClick={() => setActiveView("auth")} size="sm" className="rounded-xl font-black">Воридшавӣ</Button>
@@ -328,14 +324,13 @@ export default function KoryobTJ() {
           </div>
         )}
 
-        {activeView === "profile" && <ProfileView profile={currentUserProfile || undefined} onViewMyJobs={() => setActiveView("my-jobs")} onAbout={() => setActiveView("about")} onBack={() => setActiveView("jobs")} />}
+        {activeView === "profile" && <ProfileView profile={currentUserProfile} loading={profileLoading} onViewMyJobs={() => setActiveView("my-jobs")} onAbout={() => setActiveView("about")} onBack={() => setActiveView("jobs")} />}
         {activeView === "favorites" && <FavoritesView onSelectJob={(id) => handleJobClick(id)} onBack={() => setActiveView("jobs")} />}
         {activeView === "my-jobs" && <MyJobsView onBack={() => setActiveView("profile")} />}
         {activeView === "create-job" && <JobForm jobId={null} onSuccess={() => setActiveView("jobs")} onCancel={() => setActiveView("jobs")} />}
         {activeView === "about" && <AboutView onBack={() => setActiveView("jobs")} />}
       </main>
 
-      {/* Менюи поёнӣ барои Мобилӣ (Floating Tabs) */}
       {user && !isFullScreenView && (
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t px-6 py-3 flex items-center justify-between z-50 rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
           <MobileNavTab icon={<Home size={22} />} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />

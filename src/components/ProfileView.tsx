@@ -9,20 +9,21 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useRTDBData, useRTDB, useAuth } from "@/firebase";
-import { User, Briefcase, ChevronRight, Mail, Calendar, KeyRound, Pencil, Info, ChevronLeft } from "lucide-react";
+import { User, Briefcase, ChevronRight, Mail, Calendar, KeyRound, Pencil, Info, ChevronLeft, Loader2, Phone } from "lucide-react";
 import { format } from "date-fns";
 import { ref, update } from "firebase/database";
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProfileViewProps {
-  profile?: UserProfile;
+  profile?: UserProfile | null;
+  loading?: boolean;
   onViewMyJobs: () => void;
   onAbout: () => void;
   onBack: () => void;
 }
 
-export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileViewProps) {
+export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack }: ProfileViewProps) {
   const rtdb = useRTDB();
   const auth = useAuth();
   const { toast } = useToast();
@@ -32,33 +33,55 @@ export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileV
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [newName, setNewName] = useState(profile?.name || "");
   const [passData, setPassData] = useState({ current: "", new: "" });
-  const [loading, setLoading] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
   
   const myJobsCount = useMemo(() => {
     if (!jobsObj || !profile?.email) return 0;
-    return Object.values(jobsObj).filter((j: any) => j.postedEmail === profile.email).length;
+    return Object.values(jobsObj).filter((j: any) => j.postedEmail?.toLowerCase() === profile.email?.toLowerCase()).length;
   }, [jobsObj, profile]);
 
-  if (!profile) return null;
+  if (loading) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+        <p className="font-black text-muted-foreground uppercase tracking-widest text-xs">Боршавӣ...</p>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-6">
+        <div className="bg-secondary/20 p-8 rounded-full">
+          <User size={64} className="text-muted-foreground/30" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-black">Профил ёфт нашуд</h2>
+          <p className="text-muted-foreground font-medium">Мутаассифона, маълумоти профили шуморо пайдо карда натавонистем.</p>
+        </div>
+        <Button onClick={onBack} variant="outline" className="rounded-2xl px-8 h-14 font-black">Бозгашт</Button>
+      </div>
+    );
+  }
 
   const handleUpdateName = async () => {
     if (!newName.trim() || !rtdb) return;
-    setLoading(true);
+    setUpdateLoading(true);
     try {
-      const encodedEmail = encodeURIComponent(profile.email).replace(/\./g, '%2E');
+      const encodedEmail = encodeURIComponent(profile.email.toLowerCase()).replace(/\./g, '%2E');
       await update(ref(rtdb, `users/${encodedEmail}`), { name: newName });
       toast({ title: "Ном иваз шуд" });
       setIsNameModalOpen(false);
     } catch (e) {
       toast({ variant: "destructive", title: "Хатогӣ", description: "Натавонистам номро иваз кунам" });
     } finally {
-      setLoading(false);
+      setUpdateLoading(false);
     }
   };
 
   const handleChangePassword = async () => {
     if (!passData.current || !passData.new || !auth.currentUser) return;
-    setLoading(true);
+    setUpdateLoading(true);
     try {
       const credential = EmailAuthProvider.credential(profile.email, passData.current);
       await reauthenticateWithCredential(auth.currentUser, credential);
@@ -69,7 +92,7 @@ export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileV
     } catch (e: any) {
       toast({ variant: "destructive", title: "Хатогӣ", description: "Пароли ҷорӣ нодуруст аст" });
     } finally {
-      setLoading(false);
+      setUpdateLoading(false);
     }
   };
 
@@ -85,7 +108,7 @@ export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileV
       <div className="flex-1 overflow-y-auto p-4 md:p-0 space-y-6 pb-24">
         <div className="flex flex-col items-center text-center space-y-4 bg-white p-10 rounded-[2.5rem] border shadow-sm">
           <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-black border-4 border-white shadow-xl">
-            {profile.name[0]?.toUpperCase() || '?'}
+            {profile.name?.[0]?.toUpperCase() || '?'}
           </div>
           <div>
             <h2 className="text-3xl font-black tracking-tight">{profile.name}</h2>
@@ -99,11 +122,13 @@ export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileV
           <Card className="rounded-[2rem] border-primary/5 shadow-sm">
             <CardHeader>
               <CardTitle className="text-xl font-black flex items-center gap-3">
-                <User size={22} className="text-primary" /> Маълумоти умумӣ
+                <div className="bg-primary/10 p-2 rounded-xl text-primary"><User size={20} /></div>
+                Маълумоти умумӣ
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <InfoItem icon={<Mail size={18} />} label="Почта" value={profile.email} />
+              <InfoItem icon={<Phone size={18} />} label="Телефон" value={profile.phone || "—"} />
               <InfoItem icon={<Calendar size={18} />} label="Санаи сабт" value={profile.createdAt ? format(new Date(profile.createdAt), "dd.MM.yyyy") : "—"} />
             </CardContent>
           </Card>
@@ -112,7 +137,8 @@ export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileV
             <Card className="rounded-[2rem] border-primary/5 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={onViewMyJobs}>
               <CardHeader className="flex-row items-center justify-between space-y-0 p-6">
                 <CardTitle className="text-xl font-black flex items-center gap-3">
-                  <Briefcase size={22} className="text-primary" /> Эълонҳои ман ({myJobsCount})
+                  <div className="bg-primary/10 p-2 rounded-xl text-primary"><Briefcase size={20} /></div>
+                  Эълонҳои ман ({myJobsCount})
                 </CardTitle>
                 <ChevronRight className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
               </CardHeader>
@@ -122,7 +148,8 @@ export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileV
           <Card className="rounded-[2rem] border-primary/5 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={onAbout}>
             <CardHeader className="flex-row items-center justify-between space-y-0 p-6">
               <CardTitle className="text-xl font-black flex items-center gap-3">
-                <Info size={22} className="text-primary" /> Дар бораи барнома
+                <div className="bg-primary/10 p-2 rounded-xl text-primary"><Info size={20} /></div>
+                Дар бораи барнома
               </CardTitle>
               <ChevronRight className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
             </CardHeader>
@@ -131,7 +158,8 @@ export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileV
           <Card className="rounded-[2rem] border-primary/5 shadow-sm overflow-hidden">
             <CardHeader>
               <CardTitle className="text-xl font-black flex items-center gap-3">
-                <KeyRound size={22} className="text-primary" /> Танзимот ва амният
+                <div className="bg-primary/10 p-2 rounded-xl text-primary"><KeyRound size={20} /></div>
+                Танзимот ва амният
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 border-t">
@@ -170,8 +198,8 @@ export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileV
               <Label className="font-bold">Номи нав</Label>
               <Input value={newName} onChange={e => setNewName(e.target.value)} className="rounded-xl h-12" />
             </div>
-            <Button onClick={handleUpdateName} disabled={loading} className="w-full h-12 rounded-xl font-bold">
-              {loading ? "Сабт..." : "Сабт кардан"}
+            <Button onClick={handleUpdateName} disabled={updateLoading} className="w-full h-12 rounded-xl font-bold">
+              {updateLoading ? "Сабт..." : "Сабт кардан"}
             </Button>
           </div>
         </DialogContent>
@@ -191,8 +219,8 @@ export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileV
               <Label className="font-bold">Пароли нав</Label>
               <Input type="password" value={passData.new} onChange={e => setPassData({...passData, new: e.target.value})} className="rounded-xl h-12" />
             </div>
-            <Button onClick={handleChangePassword} disabled={loading} className="w-full h-12 rounded-xl font-bold">
-              {loading ? "Иваз..." : "Иваз кардан"}
+            <Button onClick={handleChangePassword} disabled={updateLoading} className="w-full h-12 rounded-xl font-bold">
+              {updateLoading ? "Иваз..." : "Иваз кардан"}
             </Button>
           </div>
         </DialogContent>
