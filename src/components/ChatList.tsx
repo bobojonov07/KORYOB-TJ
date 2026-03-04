@@ -22,7 +22,6 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
     if (!usersObj || !chatsObj || !user?.email) return [];
     
     const myEncodedEmail = encodeURIComponent(user.email).replace(/\./g, '%2E');
-    
     const chatStats = new Map<string, { lastTime: number, hasUnread: boolean }>();
     
     Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {

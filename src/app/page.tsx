@@ -82,6 +82,7 @@ export default function KoryobTJ() {
     if (!auth) return;
     await signOut(auth);
     setActiveView("jobs");
+    setActiveChatEmail(null);
     toast({ title: "Шумо баромадед", description: "То дидор!" });
   };
 
