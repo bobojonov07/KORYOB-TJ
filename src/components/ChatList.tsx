@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { useUser, useRTDBData } from "@/firebase";
-import { UserProfile } from "@/app/lib/types";
+import { useUser, useRTDB, useRTDBData } from "@/firebase";
+import { ref, remove } from "firebase/database";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatListProps {
   activeChatEmail: string | null;
@@ -14,20 +16,19 @@ interface ChatListProps {
 
 export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
   const { user } = useUser();
+  const rtdb = useRTDB();
+  const { toast } = useToast();
   const { data: usersObj } = useRTDBData("users");
   const { data: chatsObj } = useRTDBData("chats");
 
   const sortedUsers = useMemo(() => {
     if (!usersObj || !chatsObj || !user?.email) {
-      if (!usersObj) return [];
-      // Агар чатҳо набошанд, ақаллан рӯйхати корбаронро (бидуни тартиб) бармегардонем, вале танҳо онҳоеро, ки бо мо чат доранд.
       return [];
     }
     
     const myEncodedEmail = encodeURIComponent(user.email).replace(/\./g, '%2E');
-    const chatStats = new Map<string, { lastTime: number, hasUnread: boolean }>();
+    const chatStats = new Map<string, { lastTime: number, hasUnread: boolean, chatId: string }>();
     
-    // Дарёфти маълумот дар бораи охирин паёмҳо аз ҳамаи чатҳо
     Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {
       if (chatKey.includes(myEncodedEmail)) {
         const parts = chatKey.split('--');
@@ -40,22 +41,37 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
         
         chatStats.set(partnerEmail, { 
           lastTime: lastMsg?.time || 0,
-          hasUnread 
+          hasUnread,
+          chatId: chatKey
         });
       }
     });
 
-    // Тартиб додани рӯйхати корбарон аз рӯи вақти охирин паём
     return Object.entries(usersObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
       .filter((u: any) => chatStats.has(u.email))
       .map((u: any) => ({
         ...u,
         lastInteraction: chatStats.get(u.email)?.lastTime || 0,
-        hasUnread: chatStats.get(u.email)?.hasUnread || false
+        hasUnread: chatStats.get(u.email)?.hasUnread || false,
+        chatId: chatStats.get(u.email)?.chatId || ""
       }))
       .sort((a, b) => b.lastInteraction - a.lastInteraction);
   }, [usersObj, chatsObj, user]);
+
+  const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
+    e.stopPropagation();
+    if (!rtdb || !chatId) return;
+    
+    if (confirm("Шумо мехоҳед тамоми таърихи ин чатро ҳазф кунед?")) {
+      try {
+        await remove(ref(rtdb, `chats/${chatId}`));
+        toast({ title: "Чат ҳазф шуд" });
+      } catch (err) {
+        toast({ variant: "destructive", title: "Хатогӣ", description: "Натавонистам чатро ҳазф кунам" });
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -70,7 +86,7 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
               key={u.email} 
               onClick={() => onSelect(u.email)}
               className={cn(
-                "p-5 cursor-pointer hover:bg-primary/5 transition-all flex items-center gap-4 relative",
+                "p-5 cursor-pointer hover:bg-primary/5 transition-all flex items-center gap-4 relative group",
                 activeChatEmail === u.email && "bg-primary/5"
               )}
             >
@@ -88,9 +104,19 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-black text-md truncate tracking-tight">{u.name}</span>
-                  {u.hasUnread && (
-                    <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {u.hasUnread && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
+                      onClick={(e) => handleDeleteChat(e, u.chatId)}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="text-[10px] text-muted-foreground truncate uppercase font-black tracking-widest bg-secondary/50 px-2 py-0.5 rounded-md">

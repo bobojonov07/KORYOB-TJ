@@ -1,13 +1,12 @@
-
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useUser, useRTDB, useRTDBData } from "@/firebase";
-import { ref, push, update, set, runTransaction } from "firebase/database";
+import { ref, push, update, set, runTransaction, remove } from "firebase/database";
 import { ChatMessage, UserProfile } from "@/app/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ArrowLeft, Check, CheckCheck, AlertTriangle, MessageCircle } from "lucide-react";
+import { Send, ArrowLeft, Check, CheckCheck, AlertTriangle, MessageCircle, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { containsForbiddenWords, MODERATION_RULES } from "@/app/lib/moderation";
@@ -59,7 +58,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   useEffect(() => {
     if (!user || !messages.length || !rtdb || !myEncodedEmail) return;
     
-    // Паёмҳоро ҳамчун хондашуда қайд мекунем
     let updated = false;
     messages.forEach((msg) => {
       if (msg.sender !== user.email && !msg.read && msg.id) {
@@ -69,7 +67,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     });
 
     if (updated) {
-      // Огоҳиномаро дар базаи додаҳо нест мекунем
       set(ref(rtdb, `userNotifications/${myEncodedEmail}`), false);
     }
   }, [messages, user, chatId, rtdb, myEncodedEmail]);
@@ -115,8 +112,18 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     const newMsgRef = push(ref(rtdb, `chats/${chatId}`));
     await set(newMsgRef, msg);
     
-    // Ба ҳамсуҳбат огоҳинома мефиристем
     set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), true);
+  };
+
+  const handleDeleteMessage = async (msgId: string) => {
+    if (!rtdb || !msgId || !chatId) return;
+    if (confirm("Шумо мехоҳед ин паёмро ҳазф кунед?")) {
+      try {
+        await remove(ref(rtdb, `chats/${chatId}/${msgId}`));
+      } catch (err) {
+        toast({ variant: "destructive", title: "Хатогӣ", description: "Натавонистам паёмро ҳазф кунам" });
+      }
+    }
   };
 
   const safeFormatTime = (time: any) => {
@@ -153,14 +160,36 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 space-y-4">
         {messages.map((msg, i) => (
-          <div key={i} className={cn("flex flex-col max-w-[85%]", msg.sender === user?.email ? "ml-auto items-end" : "mr-auto items-start")}>
-            <div className={cn(
-              "p-4 rounded-3xl text-sm font-bold shadow-sm", 
-              msg.sender === user?.email 
-                ? "bg-primary text-white rounded-tr-none" 
-                : "bg-white border border-primary/5 rounded-tl-none text-foreground"
-            )}>
-              {msg.text}
+          <div key={i} className={cn("flex flex-col max-w-[85%] group", msg.sender === user?.email ? "ml-auto items-end" : "mr-auto items-start")}>
+            <div className="flex items-center gap-2 max-w-full">
+              {msg.sender === user?.email && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground/30 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity rounded-full shrink-0"
+                  onClick={() => handleDeleteMessage(msg.id)}
+                >
+                  <Trash2 size={14} />
+                </Button>
+              )}
+              <div className={cn(
+                "p-4 rounded-3xl text-sm font-bold shadow-sm break-words", 
+                msg.sender === user?.email 
+                  ? "bg-primary text-white rounded-tr-none" 
+                  : "bg-white border border-primary/5 rounded-tl-none text-foreground"
+              )}>
+                {msg.text}
+              </div>
+              {msg.sender !== user?.email && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground/30 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity rounded-full shrink-0"
+                  onClick={() => handleDeleteMessage(msg.id)}
+                >
+                  <Trash2 size={14} />
+                </Button>
+              )}
             </div>
             <div className="flex items-center gap-1.5 mt-1 px-2">
               <span className="text-[10px] text-muted-foreground/60 font-black tracking-tighter">{safeFormatTime(msg.time)}</span>
