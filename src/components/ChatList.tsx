@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -15,6 +16,13 @@ interface ChatListProps {
   onBack?: () => void;
 }
 
+/**
+ * Utility to encode email consistently for RTDB paths
+ */
+const encodeEmail = (email: string) => {
+  return encodeURIComponent(email.toLowerCase()).replace(/\./g, '%2E').toLowerCase();
+};
+
 export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
   const { user } = useUser();
   const rtdb = useRTDB();
@@ -27,14 +35,15 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       return [];
     }
     
-    const myEncodedEmail = encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E');
+    const myEncodedEmail = encodeEmail(user.email);
     const chatStats = new Map<string, { lastTime: number, hasUnread: boolean, chatId: string }>();
     
     Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {
       const parts = chatKey.split('--');
       if (parts.includes(myEncodedEmail)) {
         const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
-        const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.');
+        // For matching with user objects, we need a clean email
+        const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.').toLowerCase();
         
         const messageList = Object.values(messages).sort((a: any, b: any) => (a.time || 0) - (b.time || 0));
         const lastMsg: any = messageList[messageList.length - 1];
@@ -44,7 +53,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           !m.read
         );
         
-        chatStats.set(partnerEmail.toLowerCase(), { 
+        chatStats.set(partnerEmail, { 
           lastTime: lastMsg?.time || 0,
           hasUnread,
           chatId: chatKey
@@ -55,12 +64,15 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     return Object.entries(usersObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
       .filter((u: any) => u.email && chatStats.has(u.email.toLowerCase()))
-      .map((u: any) => ({
-        ...u,
-        lastInteraction: chatStats.get(u.email.toLowerCase())?.lastTime || 0,
-        hasUnread: chatStats.get(u.email.toLowerCase())?.hasUnread || false,
-        chatId: chatStats.get(u.email.toLowerCase())?.chatId || ""
-      }))
+      .map((u: any) => {
+        const emailLower = u.email.toLowerCase();
+        return {
+          ...u,
+          lastInteraction: chatStats.get(emailLower)?.lastTime || 0,
+          hasUnread: chatStats.get(emailLower)?.hasUnread || false,
+          chatId: chatStats.get(emailLower)?.chatId || ""
+        };
+      })
       .sort((a, b) => b.lastInteraction - a.lastInteraction);
   }, [usersObj, chatsObj, user]);
 

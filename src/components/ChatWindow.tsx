@@ -19,6 +19,13 @@ interface ChatWindowProps {
   onBack: () => void;
 }
 
+/**
+ * Utility to encode email consistently for RTDB paths
+ */
+const encodeEmail = (email: string) => {
+  return encodeURIComponent(email.toLowerCase()).replace(/\./g, '%2E').toLowerCase();
+};
+
 export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   const rtdb = useRTDB();
   const { user } = useUser();
@@ -29,8 +36,8 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
   const chatId = useMemo(() => {
     if (!user?.email || !partnerEmail) return null;
-    const e1 = encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E');
-    const e2 = encodeURIComponent(partnerEmail.toLowerCase()).replace(/\./g, '%2E');
+    const e1 = encodeEmail(user.email);
+    const e2 = encodeEmail(partnerEmail);
     return [e1, e2].sort().join("--");
   }, [user, partnerEmail]);
 
@@ -39,15 +46,15 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     if (!messagesObj) return [];
     return Object.entries(messagesObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
-      .filter((msg: any) => msg.text && msg.text.trim() !== "" && msg.sender)
+      .filter((msg: any) => msg.text && msg.sender)
       .sort((a, b) => (a.time || 0) - (b.time || 0)) as any[];
   }, [messagesObj]);
 
-  const partnerEncodedEmail = partnerEmail ? encodeURIComponent(partnerEmail.toLowerCase()).replace(/\./g, '%2E') : null;
+  const partnerEncodedEmail = useMemo(() => partnerEmail ? encodeEmail(partnerEmail) : null, [partnerEmail]);
   const { data: partnerObj } = useRTDBData(partnerEncodedEmail ? `users/${partnerEncodedEmail}` : null);
   const partner = partnerObj as UserProfile | null;
 
-  const myEncodedEmail = user?.email ? encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E') : null;
+  const myEncodedEmail = useMemo(() => user?.email ? encodeEmail(user.email) : null, [user]);
   const { data: currentUserProfileObj } = useRTDBData(myEncodedEmail ? `users/${myEncodedEmail}` : null);
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
