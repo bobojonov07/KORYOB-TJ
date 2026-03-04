@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -23,6 +22,7 @@ interface ChatWindowProps {
  * Utility to encode email consistently for RTDB paths
  */
 const encodeEmail = (email: string) => {
+  if (!email) return "";
   return encodeURIComponent(email.toLowerCase()).replace(/\./g, '%2E').toLowerCase();
 };
 
@@ -46,7 +46,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     if (!messagesObj) return [];
     return Object.entries(messagesObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
-      .filter((msg: any) => msg.text && msg.sender)
+      .filter((msg: any) => msg && msg.text && msg.sender)
       .sort((a, b) => (a.time || 0) - (b.time || 0)) as any[];
   }, [messagesObj]);
 
@@ -64,6 +64,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     }
   }, [messages]);
 
+  // Mark messages as read
   useEffect(() => {
     if (!user || !messages.length || !rtdb || !myEncodedEmail || !chatId) return;
     
@@ -81,14 +82,15 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   }, [messages, user, chatId, rtdb, myEncodedEmail]);
 
   const handleSend = async () => {
-    if (!text.trim() || !user?.email || !currentUserProfile || !rtdb || !chatId) return;
+    const trimmedText = text.trim();
+    if (!trimmedText || !user?.email || !currentUserProfile || !rtdb || !chatId) return;
 
     if (currentUserProfile.isBlocked) {
       toast({ variant: "destructive", title: "Ҳисоб блок шудааст", description: "Шумо паём фиристода наметавонед." });
       return;
     }
 
-    if (containsForbiddenWords(text)) {
+    if (containsForbiddenWords(trimmedText)) {
       if (myEncodedEmail) {
         const userRef = ref(rtdb, `users/${myEncodedEmail}`);
         await runTransaction(userRef, (userData) => {
@@ -113,10 +115,11 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
     const msg = {
       sender: user.email.toLowerCase(),
-      text: text.trim(),
+      text: trimmedText,
       time: Date.now(),
       read: false,
     };
+    
     setText("");
     const newMsgRef = push(ref(rtdb, `chats/${chatId}`));
     await set(newMsgRef, msg);
@@ -181,7 +184,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1"
+                    className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={() => handleDeleteMessage(msg.id)}
                   >
                     <Trash2 size={14} />
@@ -201,7 +204,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1"
+                    className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={() => handleDeleteMessage(msg.id)}
                   >
                     <Trash2 size={14} />

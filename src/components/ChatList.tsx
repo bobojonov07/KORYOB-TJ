@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo } from "react";
@@ -20,6 +19,7 @@ interface ChatListProps {
  * Utility to encode email consistently for RTDB paths
  */
 const encodeEmail = (email: string) => {
+  if (!email) return "";
   return encodeURIComponent(email.toLowerCase()).replace(/\./g, '%2E').toLowerCase();
 };
 
@@ -43,8 +43,12 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
         const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
         const partnerEmail = decodeURIComponent(partnerEncoded).toLowerCase();
         
+        // Safety check for messages
+        if (!messages || typeof messages !== 'object') return;
+
         const messageList = Object.values(messages).sort((a: any, b: any) => (a.time || 0) - (b.time || 0));
         const lastMsg: any = messageList[messageList.length - 1];
+        
         const hasUnread = messageList.some((m: any) => 
           m.sender && 
           m.sender.toLowerCase() !== user.email?.toLowerCase() && 
@@ -59,13 +63,13 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       }
     });
 
-    // 2. Map chat stats to user info (if available) or use plain email
     if (chatStats.size === 0) return [];
 
+    // 2. Map chat stats to user info
     const result = Array.from(chatStats.entries()).map(([email, stats]) => {
-      // Find user data by email with safety check
-      let userData = null;
+      let userData: any = null;
       if (usersObj) {
+        // Find user by email safely
         userData = Object.values(usersObj).find((u: any) => 
           u && u.email && u.email.toLowerCase() === email.toLowerCase()
         );
@@ -73,9 +77,9 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
 
       return {
         email,
-        name: (userData as any)?.name || email.split('@')[0],
-        role: (userData as any)?.role || 'korjob',
-        lastSeen: (userData as any)?.lastSeen || null,
+        name: userData?.name || email.split('@')[0],
+        role: userData?.role || 'korjob',
+        lastSeen: userData?.lastSeen || null,
         ...stats
       };
     });
