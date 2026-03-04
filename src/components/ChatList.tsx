@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo } from "react";
@@ -6,16 +5,17 @@ import { useUser, useRTDB, useRTDBData } from "@/firebase";
 import { ref, remove } from "firebase/database";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { MessageCircle, Trash2 } from "lucide-react";
+import { MessageCircle, Trash2, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChatListProps {
   activeChatEmail: string | null;
   onSelect: (email: string) => void;
+  onBack?: () => void;
 }
 
-export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
+export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
   const { user } = useUser();
   const rtdb = useRTDB();
   const { toast } = useToast();
@@ -81,7 +81,14 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
   return (
     <div className="flex flex-col h-full bg-white">
       <div className="p-4 md:p-5 border-b font-black text-xl tracking-tighter bg-white sticky top-0 z-10 flex items-center justify-between">
-        Чатҳо
+        <div className="flex items-center gap-2">
+          {onBack && (
+            <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden rounded-full h-10 w-10 bg-secondary/50">
+              <ChevronLeft size={20} />
+            </Button>
+          )}
+          Чатҳо
+        </div>
         <MessageCircle size={20} className="text-primary opacity-50" />
       </div>
       <ScrollArea className="flex-1">

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -308,7 +307,7 @@ export default function KoryobTJ() {
           <div className="h-full md:h-[calc(100vh-200px)] lg:h-[80vh]">
             <div className="flex h-full bg-white md:rounded-[2rem] md:shadow-xl overflow-hidden md:border border-primary/5">
               <div className={cn("flex flex-col border-r w-full md:w-1/3", activeChatEmail && "hidden md:flex")}>
-                <ChatList activeChatEmail={activeChatEmail} onSelect={setActiveChatEmail} />
+                <ChatList activeChatEmail={activeChatEmail} onSelect={setActiveChatEmail} onBack={() => setActiveView("jobs")} />
               </div>
               <div className={cn("flex flex-col w-full md:w-2/3", !activeChatEmail && "hidden md:flex")}>
                 {activeChatEmail ? (
