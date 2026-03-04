@@ -18,7 +18,12 @@ git commit -m "Update: Full-screen UI and delete functionality"
 git push origin main
 ```
 
-*Эзоҳ: Агар номи "main" кор накунад, "master"-ро санҷед.*
+### ⚠️ Агар хатогии "Rejected" ё "error: failed to push" барояд:
+Ин фармонро иҷро кунед, то тағйиротҳоро ҳамоҳанг созед:
+```bash
+git pull origin main
+```
+Ва баъд аз он дубора фармони `git push origin main`-ро пахш кунед.
 
 ## ✨ Имкониятҳои нави ин версия:
 - **Full-screen UI**: Экрани чат ва тафсилот дар мобилӣ пурра мебошанд.
