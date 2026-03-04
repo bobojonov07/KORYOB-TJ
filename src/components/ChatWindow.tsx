@@ -157,7 +157,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
           </Button>
           <div className="flex flex-col">
             <h3 className="font-black text-sm md:text-lg leading-tight tracking-tight truncate max-w-[140px] md:max-w-md">
-              {partner?.name || "Чат"}
+              {partner?.name || partnerEmail.split('@')[0]}
             </h3>
             {partner?.lastSeen && (
               <span className={cn("text-[8px] md:text-[10px] uppercase font-black tracking-widest mt-0.5", Date.now() - partner.lastSeen < 300000 ? "text-green-500" : "text-muted-foreground/60")}>

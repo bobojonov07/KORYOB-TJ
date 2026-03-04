@@ -6,7 +6,7 @@ import { useUser, useRTDB, useRTDBData } from "@/firebase";
 import { ref, remove } from "firebase/database";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { MessageCircle, Trash2, ChevronLeft } from "lucide-react";
+import { MessageCircle, Trash2, ChevronLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,22 +27,22 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
   const { user } = useUser();
   const rtdb = useRTDB();
   const { toast } = useToast();
-  const { data: usersObj } = useRTDBData("users");
-  const { data: chatsObj } = useRTDBData("chats");
+  const { data: usersObj, loading: usersLoading } = useRTDBData("users");
+  const { data: chatsObj, loading: chatsLoading } = useRTDBData("chats");
 
   const sortedUsers = useMemo(() => {
-    if (!usersObj || !user?.email) {
-      return [];
-    }
+    if (!user?.email) return [];
     
     const myEncodedEmail = encodeEmail(user.email);
-    const chatStats = new Map<string, { lastTime: number, hasUnread: boolean, chatId: string }>();
+    const partnersMap = new Map<string, { lastTime: number, hasUnread: boolean, chatId: string }>();
     
+    // 1. Find all chats I'm involved in
     if (chatsObj) {
       Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {
         const parts = chatKey.split('--');
         if (parts.includes(myEncodedEmail)) {
           const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
+          // Simple way to get the plain email back for display/matching
           const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.').toLowerCase();
           
           const messageList = Object.values(messages).sort((a: any, b: any) => (a.time || 0) - (b.time || 0));
@@ -53,7 +53,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
             !m.read
           );
           
-          chatStats.set(partnerEmail, { 
+          partnersMap.set(partnerEmail, { 
             lastTime: lastMsg?.time || 0,
             hasUnread,
             chatId: chatKey
@@ -62,26 +62,24 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       });
     }
 
-    // Convert users object to array and filter
-    return Object.entries(usersObj)
-      .map(([id, val]: [string, any]) => ({ id, ...val }))
-      .filter((u: any) => {
-        // Санҷиши бехатарӣ барои email
-        if (!u.email) return false;
-        // Нишон додани танҳо онҳое, ки бо мо чат доранд
-        return chatStats.has(u.email.toLowerCase());
-      })
-      .map((u: any) => {
-        const emailLower = u.email.toLowerCase();
-        const stats = chatStats.get(emailLower);
-        return {
-          ...u,
-          lastInteraction: stats?.lastTime || 0,
-          hasUnread: stats?.hasUnread || false,
-          chatId: stats?.chatId || ""
-        };
-      })
-      .sort((a, b) => b.lastInteraction - a.lastInteraction);
+    // 2. Map partners to user data if available
+    const result = Array.from(partnersMap.entries()).map(([email, stats]) => {
+      // Find user data by email
+      let userData = null;
+      if (usersObj) {
+        userData = Object.values(usersObj).find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
+      }
+
+      return {
+        email,
+        name: (userData as any)?.name || email.split('@')[0],
+        role: (userData as any)?.role || 'korjob',
+        lastSeen: (userData as any)?.lastSeen || null,
+        ...stats
+      };
+    });
+
+    return result.sort((a, b) => b.lastTime - a.lastTime);
   }, [usersObj, chatsObj, user]);
 
   const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
@@ -97,6 +95,15 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       }
     }
   };
+
+  if (usersLoading || chatsLoading) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-10 space-y-4">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">Боршавӣ...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -154,9 +161,9 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
                   <div className="text-[9px] text-muted-foreground truncate uppercase font-black tracking-widest bg-secondary/50 px-2 py-0.5 rounded-md">
                     {u.role === 'korfarmo' ? 'Корфармо' : 'Корҷӯ'}
                   </div>
-                  {u.lastInteraction > 0 && (
+                  {u.lastTime > 0 && (
                     <span className="text-[10px] text-muted-foreground/60 font-bold">
-                      {new Date(u.lastInteraction).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(u.lastTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   )}
                 </div>
