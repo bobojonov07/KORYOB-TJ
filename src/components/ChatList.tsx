@@ -31,46 +31,54 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
   const { data: chatsObj } = useRTDBData("chats");
 
   const sortedUsers = useMemo(() => {
-    if (!usersObj || !chatsObj || !user?.email) {
+    if (!usersObj || !user?.email) {
       return [];
     }
     
     const myEncodedEmail = encodeEmail(user.email);
     const chatStats = new Map<string, { lastTime: number, hasUnread: boolean, chatId: string }>();
     
-    Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {
-      const parts = chatKey.split('--');
-      if (parts.includes(myEncodedEmail)) {
-        const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
-        // For matching with user objects, we need a clean email
-        const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.').toLowerCase();
-        
-        const messageList = Object.values(messages).sort((a: any, b: any) => (a.time || 0) - (b.time || 0));
-        const lastMsg: any = messageList[messageList.length - 1];
-        const hasUnread = messageList.some((m: any) => 
-          m.sender && 
-          m.sender.toLowerCase() !== user.email?.toLowerCase() && 
-          !m.read
-        );
-        
-        chatStats.set(partnerEmail, { 
-          lastTime: lastMsg?.time || 0,
-          hasUnread,
-          chatId: chatKey
-        });
-      }
-    });
+    if (chatsObj) {
+      Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {
+        const parts = chatKey.split('--');
+        if (parts.includes(myEncodedEmail)) {
+          const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
+          const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.').toLowerCase();
+          
+          const messageList = Object.values(messages).sort((a: any, b: any) => (a.time || 0) - (b.time || 0));
+          const lastMsg: any = messageList[messageList.length - 1];
+          const hasUnread = messageList.some((m: any) => 
+            m.sender && 
+            m.sender.toLowerCase() !== user.email?.toLowerCase() && 
+            !m.read
+          );
+          
+          chatStats.set(partnerEmail, { 
+            lastTime: lastMsg?.time || 0,
+            hasUnread,
+            chatId: chatKey
+          });
+        }
+      });
+    }
 
+    // Convert users object to array and filter
     return Object.entries(usersObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
-      .filter((u: any) => u.email && chatStats.has(u.email.toLowerCase()))
+      .filter((u: any) => {
+        // Санҷиши бехатарӣ барои email
+        if (!u.email) return false;
+        // Нишон додани танҳо онҳое, ки бо мо чат доранд
+        return chatStats.has(u.email.toLowerCase());
+      })
       .map((u: any) => {
         const emailLower = u.email.toLowerCase();
+        const stats = chatStats.get(emailLower);
         return {
           ...u,
-          lastInteraction: chatStats.get(emailLower)?.lastTime || 0,
-          hasUnread: chatStats.get(emailLower)?.hasUnread || false,
-          chatId: chatStats.get(emailLower)?.chatId || ""
+          lastInteraction: stats?.lastTime || 0,
+          hasUnread: stats?.hasUnread || false,
+          chatId: stats?.chatId || ""
         };
       })
       .sort((a, b) => b.lastInteraction - a.lastInteraction);
