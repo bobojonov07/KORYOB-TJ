@@ -139,41 +139,42 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
   return (
     <div className="flex flex-col h-full bg-[#FDFCFB] animate-in slide-in-from-right duration-300">
-      <div className="p-4 md:p-6 border-b bg-white flex items-center justify-between sticky top-0 z-20 shadow-sm backdrop-blur-xl bg-white/90">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50 h-10 w-10">
-            <ArrowLeft size={20} />
+      {/* Header - Optimized for Mobile */}
+      <div className="p-3 md:p-6 border-b bg-white flex items-center justify-between sticky top-0 z-20 shadow-sm backdrop-blur-xl bg-white/90">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50 h-9 w-9 md:h-10 md:w-10">
+            <ArrowLeft size={18} className="md:size-5" />
           </Button>
           <div className="flex flex-col">
-            <h3 className="font-black text-lg leading-tight tracking-tight">{partner?.name || "Чат"}</h3>
+            <h3 className="font-black text-md md:text-lg leading-tight tracking-tight truncate max-w-[150px] md:max-w-md">{partner?.name || "Чат"}</h3>
             {partner?.lastSeen && (
-              <span className={cn("text-[10px] uppercase font-black tracking-widest mt-0.5", Date.now() - partner.lastSeen < 300000 ? "text-green-500" : "text-muted-foreground/60")}>
-                {Date.now() - partner.lastSeen < 300000 ? "Онлайн" : `Охирин дидан: ${safeFormatTime(partner.lastSeen)}`}
+              <span className={cn("text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-0.5", Date.now() - partner.lastSeen < 300000 ? "text-green-500" : "text-muted-foreground/60")}>
+                {Date.now() - partner.lastSeen < 300000 ? "Онлайн" : `Дида шуд: ${safeFormatTime(partner.lastSeen)}`}
               </span>
             )}
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-muted-foreground hover:text-destructive h-10 w-10 rounded-full">
-          <AlertTriangle size={20} />
+        <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-muted-foreground hover:text-destructive h-9 w-9 md:h-10 md:w-10 rounded-full">
+          <AlertTriangle size={18} className="md:size-5" />
         </Button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 space-y-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 md:p-8 space-y-3 md:space-y-4 bg-[#F5F5F5]/30">
         {messages.map((msg, i) => (
-          <div key={i} className={cn("flex flex-col max-w-[85%] group", msg.sender === user?.email ? "ml-auto items-end" : "mr-auto items-start")}>
-            <div className="flex items-center gap-2 max-w-full">
+          <div key={i} className={cn("flex flex-col max-w-[90%] md:max-w-[85%] group", msg.sender === user?.email ? "ml-auto items-end" : "mr-auto items-start")}>
+            <div className="flex items-center gap-1.5 max-w-full">
               {msg.sender === user?.email && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground/30 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity rounded-full shrink-0"
+                  className="h-7 w-7 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                   onClick={() => handleDeleteMessage(msg.id)}
                 >
                   <Trash2 size={14} />
                 </Button>
               )}
               <div className={cn(
-                "p-4 rounded-3xl text-sm font-bold shadow-sm break-words", 
+                "p-3.5 rounded-2xl md:rounded-3xl text-sm font-bold shadow-sm break-words", 
                 msg.sender === user?.email 
                   ? "bg-primary text-white rounded-tr-none" 
                   : "bg-white border border-primary/5 rounded-tl-none text-foreground"
@@ -184,7 +185,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground/30 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity rounded-full shrink-0"
+                  className="h-7 w-7 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                   onClick={() => handleDeleteMessage(msg.id)}
                 >
                   <Trash2 size={14} />
@@ -192,7 +193,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
               )}
             </div>
             <div className="flex items-center gap-1.5 mt-1 px-2">
-              <span className="text-[10px] text-muted-foreground/60 font-black tracking-tighter">{safeFormatTime(msg.time)}</span>
+              <span className="text-[9px] md:text-[10px] text-muted-foreground/60 font-black tracking-tighter">{safeFormatTime(msg.time)}</span>
               {msg.sender === user?.email && (
                 <span className="text-primary">
                   {msg.read ? <CheckCheck size={14} /> : <Check size={14} />}
@@ -202,17 +203,18 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
           </div>
         ))}
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center py-20 opacity-30 text-center space-y-4">
-            <MessageCircle size={64} className="text-primary" />
-            <p className="font-black text-lg">Паём фиристед</p>
+          <div className="h-full flex flex-col items-center justify-center py-20 opacity-20 text-center space-y-4">
+            <MessageCircle size={56} className="text-primary" />
+            <p className="font-black text-md">Паём нависед</p>
           </div>
         )}
       </div>
 
-      <div className="p-4 md:p-6 bg-white border-t sticky bottom-0 z-20 flex gap-3 items-center">
+      {/* Input Area */}
+      <div className="p-3 md:p-6 bg-white border-t sticky bottom-0 z-20 flex gap-2 md:gap-3 items-center">
         <Input 
-          placeholder="Паём нависед..." 
-          className="rounded-2xl h-14 bg-secondary/20 border-none font-bold px-6 focus-visible:ring-primary" 
+          placeholder="Паём..." 
+          className="rounded-xl md:rounded-2xl h-12 md:h-14 bg-secondary/20 border-none font-bold px-4 md:px-6 focus-visible:ring-primary" 
           value={text} 
           onChange={e => setText(e.target.value)} 
           onKeyDown={e => e.key === 'Enter' && handleSend()}
@@ -221,10 +223,10 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         <Button 
           onClick={handleSend} 
           size="icon" 
-          className="rounded-2xl h-14 w-14 shrink-0 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all" 
+          className="rounded-xl md:rounded-2xl h-12 w-12 md:h-14 md:w-14 shrink-0 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all" 
           disabled={currentUserProfile?.isBlocked || !text.trim()}
         >
-          <Send size={22} />
+          <Send size={20} className="md:size-5" />
         </Button>
       </div>
 
