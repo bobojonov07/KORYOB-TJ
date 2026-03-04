@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useRTDBData, useRTDB, useAuth } from "@/firebase";
-import { User, Briefcase, ChevronRight, Mail, Calendar, KeyRound, Pencil, Info } from "lucide-react";
+import { User, Briefcase, ChevronRight, Mail, Calendar, KeyRound, Pencil, Info, ChevronLeft } from "lucide-react";
 import { format } from "date-fns";
 import { ref, update } from "firebase/database";
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
@@ -19,9 +19,10 @@ interface ProfileViewProps {
   profile?: UserProfile;
   onViewMyJobs: () => void;
   onAbout: () => void;
+  onBack: () => void;
 }
 
-export function ProfileView({ profile, onViewMyJobs, onAbout }: ProfileViewProps) {
+export function ProfileView({ profile, onViewMyJobs, onAbout, onBack }: ProfileViewProps) {
   const rtdb = useRTDB();
   const auth = useAuth();
   const { toast } = useToast();
@@ -73,81 +74,90 @@ export function ProfileView({ profile, onViewMyJobs, onAbout }: ProfileViewProps
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-6 space-y-6">
-      <div className="flex flex-col items-center text-center space-y-4 bg-white p-10 rounded-[2.5rem] border shadow-sm">
-        <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-black border-4 border-white shadow-xl">
-          {profile.name[0]?.toUpperCase() || '?'}
-        </div>
-        <div>
-          <h2 className="text-3xl font-black tracking-tight">{profile.name}</h2>
-          <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs mt-1">
-            {profile.role === 'korfarmo' ? 'Корфармо' : 'Корҷуй'}
-          </p>
-        </div>
-      </div>
+    <div className="max-w-3xl mx-auto md:py-6 space-y-6 h-full flex flex-col bg-[#FDFCFB]">
+      <header className="md:hidden flex items-center gap-4 p-4 border-b bg-white sticky top-0 z-20">
+        <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50">
+          <ChevronLeft size={20} />
+        </Button>
+        <h2 className="text-lg font-black tracking-tight">Профил</h2>
+      </header>
 
-      <div className="grid gap-6">
-        <Card className="rounded-[2rem] border-primary/5 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-xl font-black flex items-center gap-3">
-              <User size={22} className="text-primary" /> Маълумоти умумӣ
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <InfoItem icon={<Mail size={18} />} label="Почта" value={profile.email} />
-            <InfoItem icon={<Calendar size={18} />} label="Санаи сабт" value={profile.createdAt ? format(new Date(profile.createdAt), "dd.MM.yyyy") : "—"} />
-          </CardContent>
-        </Card>
+      <div className="flex-1 overflow-y-auto p-4 md:p-0 space-y-6 pb-24">
+        <div className="flex flex-col items-center text-center space-y-4 bg-white p-10 rounded-[2.5rem] border shadow-sm">
+          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-black border-4 border-white shadow-xl">
+            {profile.name[0]?.toUpperCase() || '?'}
+          </div>
+          <div>
+            <h2 className="text-3xl font-black tracking-tight">{profile.name}</h2>
+            <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs mt-1">
+              {profile.role === 'korfarmo' ? 'Корфармо' : 'Корҷӯ'}
+            </p>
+          </div>
+        </div>
 
-        {profile.role === 'korfarmo' && (
-          <Card className="rounded-[2rem] border-primary/5 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={onViewMyJobs}>
+        <div className="grid gap-6">
+          <Card className="rounded-[2rem] border-primary/5 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl font-black flex items-center gap-3">
+                <User size={22} className="text-primary" /> Маълумоти умумӣ
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <InfoItem icon={<Mail size={18} />} label="Почта" value={profile.email} />
+              <InfoItem icon={<Calendar size={18} />} label="Санаи сабт" value={profile.createdAt ? format(new Date(profile.createdAt), "dd.MM.yyyy") : "—"} />
+            </CardContent>
+          </Card>
+
+          {profile.role === 'korfarmo' && (
+            <Card className="rounded-[2rem] border-primary/5 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={onViewMyJobs}>
+              <CardHeader className="flex-row items-center justify-between space-y-0 p-6">
+                <CardTitle className="text-xl font-black flex items-center gap-3">
+                  <Briefcase size={22} className="text-primary" /> Эълонҳои ман ({myJobsCount})
+                </CardTitle>
+                <ChevronRight className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
+              </CardHeader>
+            </Card>
+          )}
+
+          <Card className="rounded-[2rem] border-primary/5 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={onAbout}>
             <CardHeader className="flex-row items-center justify-between space-y-0 p-6">
               <CardTitle className="text-xl font-black flex items-center gap-3">
-                <Briefcase size={22} className="text-primary" /> Эълонҳои ман ({myJobsCount})
+                <Info size={22} className="text-primary" /> Дар бораи барнома
               </CardTitle>
               <ChevronRight className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
             </CardHeader>
           </Card>
-        )}
 
-        <Card className="rounded-[2rem] border-primary/5 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm" onClick={onAbout}>
-          <CardHeader className="flex-row items-center justify-between space-y-0 p-6">
-            <CardTitle className="text-xl font-black flex items-center gap-3">
-              <Info size={22} className="text-primary" /> Дар бораи барнома
-            </CardTitle>
-            <ChevronRight className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
-          </CardHeader>
-        </Card>
-
-        <Card className="rounded-[2rem] border-primary/5 shadow-sm overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-xl font-black flex items-center gap-3">
-              <KeyRound size={22} className="text-primary" /> Танзимот ва амният
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0 border-t">
-            <button 
-              onClick={() => setIsNameModalOpen(true)}
-              className="w-full flex items-center justify-between p-6 hover:bg-secondary/30 transition-colors border-b last:border-0"
-            >
-              <div className="flex items-center gap-3 font-bold">
-                <Pencil size={18} className="text-muted-foreground" />
-                Тағйир додани ном
-              </div>
-              <ChevronRight size={18} className="text-muted-foreground" />
-            </button>
-            <button 
-              onClick={() => setIsPassModalOpen(true)}
-              className="w-full flex items-center justify-between p-6 hover:bg-secondary/30 transition-colors"
-            >
-              <div className="flex items-center gap-3 font-bold">
-                <KeyRound size={18} className="text-muted-foreground" />
-                Иваз кардани парол
-              </div>
-              <ChevronRight size={18} className="text-muted-foreground" />
-            </button>
-          </CardContent>
-        </Card>
+          <Card className="rounded-[2rem] border-primary/5 shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="text-xl font-black flex items-center gap-3">
+                <KeyRound size={22} className="text-primary" /> Танзимот ва амният
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 border-t">
+              <button 
+                onClick={() => setIsNameModalOpen(true)}
+                className="w-full flex items-center justify-between p-6 hover:bg-secondary/30 transition-colors border-b last:border-0"
+              >
+                <div className="flex items-center gap-3 font-bold">
+                  <Pencil size={18} className="text-muted-foreground" />
+                  Тағйир додани ном
+                </div>
+                <ChevronRight size={18} className="text-muted-foreground" />
+              </button>
+              <button 
+                onClick={() => setIsPassModalOpen(true)}
+                className="w-full flex items-center justify-between p-6 hover:bg-secondary/30 transition-colors"
+              >
+                <div className="flex items-center gap-3 font-bold">
+                  <KeyRound size={18} className="text-muted-foreground" />
+                  Иваз кардани парол
+                </div>
+                <ChevronRight size={18} className="text-muted-foreground" />
+              </button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <Dialog open={isNameModalOpen} onOpenChange={setIsNameModalOpen}>

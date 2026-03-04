@@ -112,9 +112,12 @@ export default function KoryobTJ() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const isFullScreenView = isMobile && (
     activeView === "job-details" || 
-    (activeView === "chat" && activeChatEmail !== null) ||
+    activeView === "chat" || // Акнун рӯйхати чатҳо ҳам дар мобилӣ пурра аст
     activeView === "auth" ||
-    activeView === "create-job"
+    activeView === "create-job" ||
+    activeView === "profile" ||
+    activeView === "favorites" ||
+    activeView === "my-jobs"
   );
 
   if (currentUserProfile?.isBlocked) {
@@ -325,7 +328,7 @@ export default function KoryobTJ() {
           </div>
         )}
 
-        {activeView === "profile" && <ProfileView profile={currentUserProfile || undefined} onViewMyJobs={() => setActiveView("my-jobs")} onAbout={() => setActiveView("about")} />}
+        {activeView === "profile" && <ProfileView profile={currentUserProfile || undefined} onViewMyJobs={() => setActiveView("my-jobs")} onAbout={() => setActiveView("about")} onBack={() => setActiveView("jobs")} />}
         {activeView === "favorites" && <FavoritesView onSelectJob={(id) => handleJobClick(id)} onBack={() => setActiveView("jobs")} />}
         {activeView === "my-jobs" && <MyJobsView onBack={() => setActiveView("profile")} />}
         {activeView === "create-job" && <JobForm jobId={null} onSuccess={() => setActiveView("jobs")} onCancel={() => setActiveView("jobs")} />}

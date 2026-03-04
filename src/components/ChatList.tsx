@@ -24,13 +24,14 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
     const myEncodedEmail = encodeURIComponent(user.email).replace(/\./g, '%2E');
     const chatStats = new Map<string, { lastTime: number, hasUnread: boolean }>();
     
+    // Дарёфти маълумот дар бораи охирин паёмҳо аз ҳамаи чатҳо
     Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {
       if (chatKey.includes(myEncodedEmail)) {
         const parts = chatKey.split('--');
         const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
         const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.');
         
-        const messageList = Object.values(messages);
+        const messageList = Object.values(messages).sort((a: any, b: any) => (a.time || 0) - (b.time || 0));
         const lastMsg: any = messageList[messageList.length - 1];
         const hasUnread = messageList.some((m: any) => m.sender !== user.email && !m.read);
         
@@ -41,6 +42,7 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
       }
     });
 
+    // Тартиб додани рӯйхати корбарон аз рӯи вақти охирин паём
     return Object.entries(usersObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
       .filter((u: any) => chatStats.has(u.email))
@@ -54,7 +56,7 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
 
   return (
     <div className="flex flex-col h-full bg-white">
-      <div className="p-6 border-b font-black text-xl tracking-tighter bg-white sticky top-0 z-10 flex items-center justify-between">
+      <div className="p-5 border-b font-black text-xl tracking-tighter bg-white sticky top-0 z-10 flex items-center justify-between">
         Чатҳо
         <MessageCircle size={20} className="text-primary opacity-50" />
       </div>
@@ -89,7 +91,7 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="text-[10px] text-muted-foreground truncate uppercase font-black tracking-widest bg-secondary/50 px-2 py-0.5 rounded-md">
-                    {u.role === 'korfarmo' ? 'Корфармо' : 'Корҷуй'}
+                    {u.role === 'korfarmo' ? 'Корфармо' : 'Корҷӯ'}
                   </div>
                   {u.lastInteraction > 0 && (
                     <span className="text-[10px] text-muted-foreground/60 font-bold">
