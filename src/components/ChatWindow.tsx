@@ -139,23 +139,25 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
   return (
     <div className="flex flex-col h-full bg-[#FDFCFB] animate-in slide-in-from-right duration-300">
-      {/* Header - Optimized for Mobile */}
-      <div className="p-3 md:p-6 border-b bg-white flex items-center justify-between sticky top-0 z-20 shadow-sm backdrop-blur-xl bg-white/90">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50 h-9 w-9 md:h-10 md:w-10">
-            <ArrowLeft size={18} className="md:size-5" />
+      {/* Header - Compact UI for Mobile */}
+      <div className="p-2 md:p-4 border-b bg-white flex items-center justify-between sticky top-0 z-20 shadow-sm backdrop-blur-xl bg-white/90">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50 h-8 w-8 md:h-10 md:w-10">
+            <ArrowLeft size={16} className="md:size-5" />
           </Button>
           <div className="flex flex-col">
-            <h3 className="font-black text-md md:text-lg leading-tight tracking-tight truncate max-w-[150px] md:max-w-md">{partner?.name || "Чат"}</h3>
+            <h3 className="font-black text-sm md:text-lg leading-tight tracking-tight truncate max-w-[140px] md:max-w-md">
+              {partner?.name || "Чат"}
+            </h3>
             {partner?.lastSeen && (
-              <span className={cn("text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-0.5", Date.now() - partner.lastSeen < 300000 ? "text-green-500" : "text-muted-foreground/60")}>
+              <span className={cn("text-[8px] md:text-[10px] uppercase font-black tracking-widest mt-0.5", Date.now() - partner.lastSeen < 300000 ? "text-green-500" : "text-muted-foreground/60")}>
                 {Date.now() - partner.lastSeen < 300000 ? "Онлайн" : `Дида шуд: ${safeFormatTime(partner.lastSeen)}`}
               </span>
             )}
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-muted-foreground hover:text-destructive h-9 w-9 md:h-10 md:w-10 rounded-full">
-          <AlertTriangle size={18} className="md:size-5" />
+        <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-muted-foreground hover:text-destructive h-8 w-8 md:h-10 md:w-10 rounded-full">
+          <AlertTriangle size={16} className="md:size-5" />
         </Button>
       </div>
 
@@ -167,7 +169,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                  className="h-7 w-7 text-destructive hover:bg-destructive/10 rounded-full shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                   onClick={() => handleDeleteMessage(msg.id)}
                 >
                   <Trash2 size={14} />
@@ -185,7 +187,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                  className="h-7 w-7 text-destructive hover:bg-destructive/10 rounded-full shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                   onClick={() => handleDeleteMessage(msg.id)}
                 >
                   <Trash2 size={14} />
