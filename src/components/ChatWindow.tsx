@@ -38,8 +38,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     if (!messagesObj) return [];
     return Object.entries(messagesObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
-      // Филтр кардани паёмҳои холӣ ё харобшуда
-      .filter((msg: any) => msg.text && msg.sender)
+      .filter((msg: any) => msg.text && msg.text.trim() !== "" && msg.sender)
       .sort((a, b) => (a.time || 0) - (b.time || 0)) as any[];
   }, [messagesObj]);
 
@@ -141,7 +140,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
   return (
     <div className="flex flex-col h-full bg-[#FDFCFB] animate-in slide-in-from-right duration-300">
-      {/* Header - Compact UI */}
       <div className="p-2 md:p-4 border-b bg-white flex items-center justify-between sticky top-0 z-20 shadow-sm backdrop-blur-xl bg-white/90">
         <div className="flex items-center gap-2 md:gap-3">
           <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50 h-8 w-8 md:h-10 md:w-10">
@@ -163,8 +161,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         </Button>
       </div>
 
-      {/* Message Area */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 md:p-8 space-y-4 bg-[#F5F5F5]/30">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 md:p-8 space-y-3 bg-[#F5F5F5]/30">
         {messages.map((msg, i) => {
           const isMine = msg.sender === user?.email;
           return (
@@ -174,10 +171,10 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1"
+                    className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1"
                     onClick={() => handleDeleteMessage(msg.id)}
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={14} />
                   </Button>
                 )}
                 
@@ -194,10 +191,10 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1"
+                    className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1"
                     onClick={() => handleDeleteMessage(msg.id)}
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={14} />
                   </Button>
                 )}
               </div>
@@ -220,7 +217,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         )}
       </div>
 
-      {/* Input Area */}
       <div className="p-3 md:p-6 bg-white border-t sticky bottom-0 z-20 flex gap-2 md:gap-3 items-center">
         <Input 
           placeholder="Паём..." 
