@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo } from "react";
@@ -19,7 +18,11 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
   const { data: chatsObj } = useRTDBData("chats");
 
   const sortedUsers = useMemo(() => {
-    if (!usersObj || !chatsObj || !user?.email) return [];
+    if (!usersObj || !chatsObj || !user?.email) {
+      if (!usersObj) return [];
+      // Агар чатҳо набошанд, ақаллан рӯйхати корбаронро (бидуни тартиб) бармегардонем, вале танҳо онҳоеро, ки бо мо чат доранд.
+      return [];
+    }
     
     const myEncodedEmail = encodeURIComponent(user.email).replace(/\./g, '%2E');
     const chatStats = new Map<string, { lastTime: number, hasUnread: boolean }>();
