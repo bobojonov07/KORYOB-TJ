@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -26,14 +27,15 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   const [isReportOpen, setIsReportOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Нормализатсияи почтаҳо ба ҳарфҳои хурд барои пешгирӣ аз хатогии ID
   const chatId = useMemo(() => {
-    if (!user?.email) return "";
-    const e1 = encodeURIComponent(user.email).replace(/\./g, '%2E');
-    const e2 = encodeURIComponent(partnerEmail).replace(/\./g, '%2E');
+    if (!user?.email || !partnerEmail) return null;
+    const e1 = encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E');
+    const e2 = encodeURIComponent(partnerEmail.toLowerCase()).replace(/\./g, '%2E');
     return [e1, e2].sort().join("--");
   }, [user, partnerEmail]);
 
-  const { data: messagesObj } = useRTDBData(`chats/${chatId}`);
+  const { data: messagesObj } = useRTDBData(chatId ? `chats/${chatId}` : null);
   const messages = useMemo(() => {
     if (!messagesObj) return [];
     return Object.entries(messagesObj)
@@ -42,11 +44,11 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
       .sort((a, b) => (a.time || 0) - (b.time || 0)) as any[];
   }, [messagesObj]);
 
-  const partnerEncodedEmail = encodeURIComponent(partnerEmail).replace(/\./g, '%2E');
+  const partnerEncodedEmail = encodeURIComponent(partnerEmail.toLowerCase()).replace(/\./g, '%2E');
   const { data: partnerObj } = useRTDBData(`users/${partnerEncodedEmail}`);
   const partner = partnerObj as UserProfile | null;
 
-  const myEncodedEmail = user?.email ? encodeURIComponent(user.email).replace(/\./g, '%2E') : null;
+  const myEncodedEmail = user?.email ? encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E') : null;
   const { data: currentUserProfileObj } = useRTDBData(myEncodedEmail ? `users/${myEncodedEmail}` : null);
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
@@ -57,11 +59,11 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   }, [messages]);
 
   useEffect(() => {
-    if (!user || !messages.length || !rtdb || !myEncodedEmail) return;
+    if (!user || !messages.length || !rtdb || !myEncodedEmail || !chatId) return;
     
     let updated = false;
     messages.forEach((msg) => {
-      if (msg.sender !== user.email && !msg.read && msg.id) {
+      if (msg.sender.toLowerCase() !== user.email?.toLowerCase() && !msg.read && msg.id) {
         update(ref(rtdb, `chats/${chatId}/${msg.id}`), { read: true });
         updated = true;
       }
@@ -73,7 +75,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   }, [messages, user, chatId, rtdb, myEncodedEmail]);
 
   const handleSend = async () => {
-    if (!text.trim() || !user?.email || !currentUserProfile || !rtdb) return;
+    if (!text.trim() || !user?.email || !currentUserProfile || !rtdb || !chatId) return;
 
     if (currentUserProfile.isBlocked) {
       toast({ variant: "destructive", title: "Ҳисоб блок шудааст", description: "Шумо паём фиристода наметавонед." });
@@ -104,7 +106,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     }
 
     const msg = {
-      sender: user.email,
+      sender: user.email.toLowerCase(),
       text: text.trim(),
       time: Date.now(),
       read: false,
@@ -163,7 +165,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 md:p-8 space-y-3 bg-[#F5F5F5]/30">
         {messages.map((msg, i) => {
-          const isMine = msg.sender === user?.email;
+          const isMine = msg.sender.toLowerCase() === user?.email?.toLowerCase();
           return (
             <div key={msg.id || i} className={cn("flex flex-col max-w-[85%] group", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
               <div className="flex items-end gap-1.5 max-w-full">

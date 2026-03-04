@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -26,20 +27,21 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
       return [];
     }
     
-    const myEncodedEmail = encodeURIComponent(user.email).replace(/\./g, '%2E');
+    const myEncodedEmail = encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E');
     const chatStats = new Map<string, { lastTime: number, hasUnread: boolean, chatId: string }>();
     
     Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {
-      if (chatKey.includes(myEncodedEmail)) {
-        const parts = chatKey.split('--');
+      const parts = chatKey.split('--');
+      // Истифодаи exact match ба ҷои includes барои пешгирӣ аз хатогӣ
+      if (parts.includes(myEncodedEmail)) {
         const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
         const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.');
         
         const messageList = Object.values(messages).sort((a: any, b: any) => (a.time || 0) - (b.time || 0));
         const lastMsg: any = messageList[messageList.length - 1];
-        const hasUnread = messageList.some((m: any) => m.sender !== user.email && !m.read);
+        const hasUnread = messageList.some((m: any) => m.sender?.toLowerCase() !== user.email?.toLowerCase() && !m.read);
         
-        chatStats.set(partnerEmail, { 
+        chatStats.set(partnerEmail.toLowerCase(), { 
           lastTime: lastMsg?.time || 0,
           hasUnread,
           chatId: chatKey
@@ -49,12 +51,12 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
 
     return Object.entries(usersObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
-      .filter((u: any) => chatStats.has(u.email))
+      .filter((u: any) => chatStats.has(u.email.toLowerCase()))
       .map((u: any) => ({
         ...u,
-        lastInteraction: chatStats.get(u.email)?.lastTime || 0,
-        hasUnread: chatStats.get(u.email)?.hasUnread || false,
-        chatId: chatStats.get(u.email)?.chatId || ""
+        lastInteraction: chatStats.get(u.email.toLowerCase())?.lastTime || 0,
+        hasUnread: chatStats.get(u.email.toLowerCase())?.hasUnread || false,
+        chatId: chatStats.get(u.email.toLowerCase())?.chatId || ""
       }))
       .sort((a, b) => b.lastInteraction - a.lastInteraction);
   }, [usersObj, chatsObj, user]);
@@ -87,10 +89,10 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
               onClick={() => onSelect(u.email)}
               className={cn(
                 "p-4 md:p-5 cursor-pointer hover:bg-primary/5 transition-all flex items-center gap-3 md:gap-4 relative group",
-                activeChatEmail === u.email && "bg-primary/5"
+                activeChatEmail?.toLowerCase() === u.email.toLowerCase() && "bg-primary/5"
               )}
             >
-              {activeChatEmail === u.email && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary"></div>}
+              {activeChatEmail?.toLowerCase() === u.email.toLowerCase() && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary"></div>}
               
               <div className="relative">
                 <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary text-xl shadow-sm border border-primary/10">
