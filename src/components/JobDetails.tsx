@@ -44,7 +44,6 @@ export function JobDetails({ job, onBack, onChat }: JobDetailsProps) {
 
   const handleWhatsApp = () => {
     if (!job.phone) return;
-    // Тоза кардани рақам аз аломатҳои зиёдатӣ (+, фосила ва ғайра)
     const cleanPhone = job.phone.replace(/\D/g, "");
     window.open(`https://wa.me/${cleanPhone}`, "_blank");
   };
