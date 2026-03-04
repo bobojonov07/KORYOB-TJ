@@ -5,34 +5,33 @@
 ## 🎨 Чӣ тавр иконкаи (Logo) сайтро илова кунед:
 1. Сурати худро ба компютер бор кунед.
 2. Номи онро ба `icon.png` иваз кунед.
-3. Ин файлро дар папкаи `src/app/` ҷойгир кунед.
+3. Ин файлро дар папкаи `src/app/` ҷойгир кунед (Шумо аллакай инро иҷро кардед ✅).
 4. Фармонҳои бор карданро (дар поён) иҷро кунед.
 
 ## 🚀 Чӣ тавр версияи навро ба GitHub бор кунед (Update):
-Агар мушкилии "rejected" ё "divergent branches" барояд, ин 3 фармонро иҷро кунед:
+Агар мушкилии "rejected" ё "divergent branches" барояд, ин фармонҳоро паиҳам иҷро кунед:
 
 ```bash
 git add .
-git commit -m "Update: WhatsApp button and full-screen UI"
+git commit -m "Update: Icon metadata and WhatsApp integration"
 git config pull.rebase false
 git pull origin main
 git push origin main
 ```
 
 ### ⚠️ Агар хатогии "Need to specify how to reconcile divergent branches" барояд:
-Фармони зеринро иҷро кунед, то пайвастшавиро интихоб кунед:
-```bash
-git config pull.rebase false
-git pull origin main
-git push origin main
-```
+Танҳо ҳамин 3 фармонро иҷро кунед:
+1. `git config pull.rebase false`
+2. `git pull origin main`
+3. `git push origin main`
 
 ## ✨ Имкониятҳои нави ин версия:
 - **WhatsApp Integration**: Тугмаи мустақим ба WhatsApp дар тафсилоти эълон.
-- **Full-screen UI**: Экрани чат ва тафсилот дар мобилӣ пурра мебошанд.
-- **Ҳазфи чат ва паёмҳо**: Имконияти нест кардани таърихи суҳбат ва паёмҳо.
+- **Full-screen UI**: Экрани чат ва тафсилот дар мобилӣ пурра ва паймон мебошанд.
+- **Ҳазфи чат ва паёмҳо**: Имконияти нест кардани таърихи суҳбат ва паёмҳои алоҳида бо ранги сурх.
 - **Огоҳиномаҳо**: Нуқтаи норанҷӣ дар меню ҳангоми омадани паёми нав.
 - **Вақти тоҷикӣ**: Намоиши вақт ба забони тоҷикӣ ("1 рӯз пеш").
+- **Custom Icon**: Истифодаи `icon.png` ҳамчун нишони сайт.
 
 ---
 **Барномасоз:** Бобоҷонзода Аминҷон  

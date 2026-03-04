@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   description: 'Кори орзуи худро ёбед. Платформаи муосир барои пайваст кардани корҷӯён ва корфармоён. Барномасоз: Бобоҷонзода Аминҷон',
   keywords: 'кор, кор дар Тоҷикистон, ҷойи кор, Душанбе, Хуҷанд, корфармо, корҷӯ',
   authors: [{ name: 'Бобоҷонзода Аминҷон' }],
+  icons: {
+    icon: '/icon.png',
+    apple: '/icon.png',
+  },
 };
 
 export default function RootLayout({
