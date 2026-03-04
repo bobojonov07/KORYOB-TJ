@@ -31,43 +31,44 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
   const { data: chatsObj, loading: chatsLoading } = useRTDBData("chats");
 
   const sortedUsers = useMemo(() => {
-    if (!user?.email) return [];
+    if (!user?.email || !chatsObj) return [];
     
     const myEncodedEmail = encodeEmail(user.email);
-    const partnersMap = new Map<string, { lastTime: number, hasUnread: boolean, chatId: string }>();
-    
-    // 1. Find all chats I'm involved in
-    if (chatsObj) {
-      Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {
-        const parts = chatKey.split('--');
-        if (parts.includes(myEncodedEmail)) {
-          const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
-          // Simple way to get the plain email back for display/matching
-          const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.').toLowerCase();
-          
-          const messageList = Object.values(messages).sort((a: any, b: any) => (a.time || 0) - (b.time || 0));
-          const lastMsg: any = messageList[messageList.length - 1];
-          const hasUnread = messageList.some((m: any) => 
-            m.sender && 
-            m.sender.toLowerCase() !== user.email?.toLowerCase() && 
-            !m.read
-          );
-          
-          partnersMap.set(partnerEmail, { 
-            lastTime: lastMsg?.time || 0,
-            hasUnread,
-            chatId: chatKey
-          });
-        }
-      });
-    }
+    const chatStats = new Map<string, { lastTime: number; hasUnread: boolean; chatId: string }>();
 
-    // 2. Map partners to user data if available
-    const result = Array.from(partnersMap.entries()).map(([email, stats]) => {
-      // Find user data by email
+    // 1. Identify all chats where current user is a participant
+    Object.entries(chatsObj).forEach(([chatId, messages]: [string, any]) => {
+      const parts = chatId.split('--');
+      if (parts.length === 2 && parts.includes(myEncodedEmail)) {
+        const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
+        const partnerEmail = decodeURIComponent(partnerEncoded).toLowerCase();
+        
+        const messageList = Object.values(messages).sort((a: any, b: any) => (a.time || 0) - (b.time || 0));
+        const lastMsg: any = messageList[messageList.length - 1];
+        const hasUnread = messageList.some((m: any) => 
+          m.sender && 
+          m.sender.toLowerCase() !== user.email?.toLowerCase() && 
+          !m.read
+        );
+
+        chatStats.set(partnerEmail, {
+          lastTime: lastMsg?.time || 0,
+          hasUnread,
+          chatId
+        });
+      }
+    });
+
+    // 2. Map chat stats to user info (if available) or use plain email
+    if (chatStats.size === 0) return [];
+
+    const result = Array.from(chatStats.entries()).map(([email, stats]) => {
+      // Find user data by email with safety check
       let userData = null;
       if (usersObj) {
-        userData = Object.values(usersObj).find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
+        userData = Object.values(usersObj).find((u: any) => 
+          u && u.email && u.email.toLowerCase() === email.toLowerCase()
+        );
       }
 
       return {
@@ -100,7 +101,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-10 space-y-4">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">Боршавӣ...</p>
+        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Боршавӣ...</p>
       </div>
     );
   }
