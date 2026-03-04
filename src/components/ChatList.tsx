@@ -32,14 +32,17 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
     
     Object.entries(chatsObj).forEach(([chatKey, messages]: [string, any]) => {
       const parts = chatKey.split('--');
-      // Истифодаи exact match ба ҷои includes барои пешгирӣ аз хатогӣ
       if (parts.includes(myEncodedEmail)) {
         const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
         const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.');
         
         const messageList = Object.values(messages).sort((a: any, b: any) => (a.time || 0) - (b.time || 0));
         const lastMsg: any = messageList[messageList.length - 1];
-        const hasUnread = messageList.some((m: any) => m.sender?.toLowerCase() !== user.email?.toLowerCase() && !m.read);
+        const hasUnread = messageList.some((m: any) => 
+          m.sender && 
+          m.sender.toLowerCase() !== user.email?.toLowerCase() && 
+          !m.read
+        );
         
         chatStats.set(partnerEmail.toLowerCase(), { 
           lastTime: lastMsg?.time || 0,
@@ -51,7 +54,7 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
 
     return Object.entries(usersObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
-      .filter((u: any) => chatStats.has(u.email.toLowerCase()))
+      .filter((u: any) => u.email && chatStats.has(u.email.toLowerCase()))
       .map((u: any) => ({
         ...u,
         lastInteraction: chatStats.get(u.email.toLowerCase())?.lastTime || 0,
@@ -89,14 +92,14 @@ export function ChatList({ activeChatEmail, onSelect }: ChatListProps) {
               onClick={() => onSelect(u.email)}
               className={cn(
                 "p-4 md:p-5 cursor-pointer hover:bg-primary/5 transition-all flex items-center gap-3 md:gap-4 relative group",
-                activeChatEmail?.toLowerCase() === u.email.toLowerCase() && "bg-primary/5"
+                activeChatEmail?.toLowerCase() === u.email?.toLowerCase() && "bg-primary/5"
               )}
             >
-              {activeChatEmail?.toLowerCase() === u.email.toLowerCase() && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary"></div>}
+              {activeChatEmail?.toLowerCase() === u.email?.toLowerCase() && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary"></div>}
               
               <div className="relative">
                 <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary text-xl shadow-sm border border-primary/10">
-                  {u.name[0]?.toUpperCase() || '?'}
+                  {u.name?.[0]?.toUpperCase() || '?'}
                 </div>
                 {u.lastSeen && Date.now() - u.lastSeen < 300000 && (
                   <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-white"></div>

@@ -27,7 +27,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   const [isReportOpen, setIsReportOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Нормализатсияи почтаҳо ба ҳарфҳои хурд барои пешгирӣ аз хатогии ID
   const chatId = useMemo(() => {
     if (!user?.email || !partnerEmail) return null;
     const e1 = encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E');
@@ -44,8 +43,8 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
       .sort((a, b) => (a.time || 0) - (b.time || 0)) as any[];
   }, [messagesObj]);
 
-  const partnerEncodedEmail = encodeURIComponent(partnerEmail.toLowerCase()).replace(/\./g, '%2E');
-  const { data: partnerObj } = useRTDBData(`users/${partnerEncodedEmail}`);
+  const partnerEncodedEmail = partnerEmail ? encodeURIComponent(partnerEmail.toLowerCase()).replace(/\./g, '%2E') : null;
+  const { data: partnerObj } = useRTDBData(partnerEncodedEmail ? `users/${partnerEncodedEmail}` : null);
   const partner = partnerObj as UserProfile | null;
 
   const myEncodedEmail = user?.email ? encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E') : null;
@@ -63,7 +62,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     
     let updated = false;
     messages.forEach((msg) => {
-      if (msg.sender.toLowerCase() !== user.email?.toLowerCase() && !msg.read && msg.id) {
+      if (msg.sender && msg.sender.toLowerCase() !== user.email?.toLowerCase() && !msg.read && msg.id) {
         update(ref(rtdb, `chats/${chatId}/${msg.id}`), { read: true });
         updated = true;
       }
@@ -115,7 +114,9 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     const newMsgRef = push(ref(rtdb, `chats/${chatId}`));
     await set(newMsgRef, msg);
     
-    set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), true);
+    if (partnerEncodedEmail) {
+      set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), true);
+    }
   };
 
   const handleDeleteMessage = async (msgId: string) => {
@@ -165,7 +166,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 md:p-8 space-y-3 bg-[#F5F5F5]/30">
         {messages.map((msg, i) => {
-          const isMine = msg.sender.toLowerCase() === user?.email?.toLowerCase();
+          const isMine = msg.sender && msg.sender.toLowerCase() === user?.email?.toLowerCase();
           return (
             <div key={msg.id || i} className={cn("flex flex-col max-w-[85%] group", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
               <div className="flex items-end gap-1.5 max-w-full">
