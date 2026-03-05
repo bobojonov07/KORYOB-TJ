@@ -69,10 +69,15 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     const result = Array.from(chatStats.entries()).map(([email, stats]) => {
       let userData: any = null;
       if (usersObj) {
-        // Find user by email safely
-        userData = Object.values(usersObj).find((u: any) => 
-          u && u.email && u.email.toLowerCase() === email.toLowerCase()
-        );
+        const encoded = encodeEmail(email);
+        userData = usersObj[encoded];
+        
+        // If not found by key, try searching in values
+        if (!userData) {
+          userData = Object.values(usersObj).find((u: any) => 
+            u && u.email && u.email.toLowerCase() === email.toLowerCase()
+          );
+        }
       }
 
       return {
