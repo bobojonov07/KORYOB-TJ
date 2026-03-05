@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -323,7 +324,16 @@ export default function KoryobTJ() {
           </div>
         )}
 
-        {activeView === "profile" && <ProfileView profile={currentUserProfile} loading={profileLoading} onViewMyJobs={() => setActiveView("my-jobs")} onAbout={() => setActiveView("about")} onBack={() => setActiveView("jobs")} />}
+        {activeView === "profile" && (
+          <ProfileView 
+            profile={currentUserProfile} 
+            loading={profileLoading} 
+            onViewMyJobs={() => setActiveView("my-jobs")} 
+            onAbout={() => setActiveView("about")} 
+            onBack={() => setActiveView("jobs")}
+            onLogout={handleLogout}
+          />
+        )}
         {activeView === "favorites" && <FavoritesView onSelectJob={(id) => handleJobClick(id)} onBack={() => setActiveView("jobs")} />}
         {activeView === "my-jobs" && <MyJobsView onBack={() => setActiveView("profile")} />}
         {activeView === "create-job" && <JobForm jobId={null} onSuccess={() => setActiveView("jobs")} onCancel={() => setActiveView("jobs")} />}

@@ -48,15 +48,15 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
         if (snap.exists()) {
           const data = snap.val();
           setFormData({
-            title: data.title,
-            company: data.company,
-            city: data.city,
+            title: data.title || "",
+            company: data.company || "",
+            city: data.city || "",
             salary: data.salary || "",
             hours: data.hours || "",
             age: data.age || "",
             phone: data.phone || "",
-            gender: data.gender,
-            desc: data.desc,
+            gender: data.gender || "Фарқ надорад",
+            desc: data.desc || "",
           });
         }
       };
@@ -73,14 +73,39 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
       return;
     }
 
-    if (!formData.title || !formData.company || !formData.city || !formData.desc) {
-      toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан майдонҳои асосиро пур кунед." });
+    // 1. Санҷиши пур будани тамоми майдонҳои асосӣ
+    if (
+      !formData.title.trim() || 
+      !formData.company.trim() || 
+      !formData.city.trim() || 
+      !formData.salary.trim() || 
+      !formData.hours.trim() || 
+      !formData.age.trim() || 
+      !formData.phone.trim() || 
+      !formData.desc.trim()
+    ) {
+      toast({ 
+        variant: "destructive", 
+        title: "Хатогӣ", 
+        description: "Лутфан тамоми майдонҳоро пур кунед. Ҳеҷ сатр набояд холӣ бошад." 
+      });
       return;
     }
 
+    // 2. Валидатсияи рақами телефон (танҳо рақам ва на камтар аз 9 аломат)
+    const cleanPhone = formData.phone.replace(/\s+/g, '').replace(/\+/g, '');
+    if (!/^\d{9,}$/.test(cleanPhone)) {
+      toast({ 
+        variant: "destructive", 
+        title: "Хатои телефон", 
+        description: "Рақами телефон бояд танҳо аз рақамҳо иборат бошад ва на камтар аз 9 аломат." 
+      });
+      return;
+    }
+
+    // 3. Модераторӣ
     if (containsForbiddenWords(formData.title) || containsForbiddenWords(formData.desc)) {
       const userRef = ref(rtdb, `users/${encodedEmail}`);
-      
       await runTransaction(userRef, (userData) => {
         if (userData) {
           userData.warningCount = (userData.warningCount || 0) + 1;
@@ -151,15 +176,23 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
               <Input placeholder="Шаҳр" className="h-12 rounded-xl" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Маош (сомонӣ)</label>
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Маош (сомонӣ) *</label>
               <Input placeholder="Масалан: 2500" className="h-12 rounded-xl" value={formData.salary} onChange={e => setFormData({ ...formData, salary: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Телефон</label>
-              <Input placeholder="+992 93 123 45 67" className="h-12 rounded-xl" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Соатҳои корӣ *</label>
+              <Input placeholder="Масалан: 08:00 - 18:00" className="h-12 rounded-xl" value={formData.hours} onChange={e => setFormData({ ...formData, hours: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Синну сол *</label>
+              <Input placeholder="Масалан: 20-35" className="h-12 rounded-xl" value={formData.age} onChange={e => setFormData({ ...formData, age: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Телефон *</label>
+              <Input placeholder="931234567 (на кам аз 9 рақам)" className="h-12 rounded-xl" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Ҷинс</label>
+              <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Ҷинс *</label>
               <Select value={formData.gender} onValueChange={val => setFormData({ ...formData, gender: val })}>
                 <SelectTrigger className="h-12 rounded-xl">
                   <SelectValue />

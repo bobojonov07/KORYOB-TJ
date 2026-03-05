@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useRTDBData, useRTDB, useAuth } from "@/firebase";
-import { User, Briefcase, ChevronRight, Mail, Calendar, KeyRound, Pencil, Info, ChevronLeft, Loader2, Phone } from "lucide-react";
+import { User, Briefcase, ChevronRight, Mail, Calendar, KeyRound, Pencil, Info, ChevronLeft, Loader2, Phone, LogOut } from "lucide-react";
 import { format } from "date-fns";
 import { ref, update } from "firebase/database";
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
@@ -21,9 +21,10 @@ interface ProfileViewProps {
   onViewMyJobs: () => void;
   onAbout: () => void;
   onBack: () => void;
+  onLogout: () => void;
 }
 
-export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack }: ProfileViewProps) {
+export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, onLogout }: ProfileViewProps) {
   const rtdb = useRTDB();
   const auth = useAuth();
   const { toast } = useToast();
@@ -175,13 +176,23 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack }:
               </button>
               <button 
                 onClick={() => setIsPassModalOpen(true)}
-                className="w-full flex items-center justify-between p-6 hover:bg-secondary/30 transition-colors"
+                className="w-full flex items-center justify-between p-6 hover:bg-secondary/30 transition-colors border-b last:border-0"
               >
                 <div className="flex items-center gap-3 font-bold">
                   <KeyRound size={18} className="text-muted-foreground" />
                   Иваз кардани парол
                 </div>
                 <ChevronRight size={18} className="text-muted-foreground" />
+              </button>
+              <button 
+                onClick={onLogout}
+                className="w-full flex items-center justify-between p-6 hover:bg-destructive/5 transition-colors text-destructive"
+              >
+                <div className="flex items-center gap-3 font-bold">
+                  <LogOut size={18} />
+                  Баромад аз ҳисоб
+                </div>
+                <ChevronRight size={18} />
               </button>
             </CardContent>
           </Card>
