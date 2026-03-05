@@ -199,7 +199,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         <Button 
           onClick={handleSend} 
           size="icon" 
-          className="rounded-full h-12 w-12 shrink-0 bg-[#ff7b00] hover:bg-[#e66a00] shadow-lg active:scale-95 transition-all" 
+          className="rounded-full h-12 w-12 shrink-0 bg-primary hover:bg-primary/90 shadow-lg active:scale-95 transition-all" 
           disabled={currentUserProfile?.isBlocked || !text.trim()}
         >
           <Send size={20} />
