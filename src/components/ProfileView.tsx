@@ -184,16 +184,15 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
                 </div>
                 <ChevronRight size={18} className="text-muted-foreground" />
               </button>
-              <button 
-                onClick={onLogout}
-                className="w-full flex items-center justify-between p-6 hover:bg-destructive/5 transition-colors text-destructive"
-              >
-                <div className="flex items-center gap-3 font-bold">
-                  <LogOut size={18} />
-                  Баромад аз ҳисоб
-                </div>
-                <ChevronRight size={18} />
-              </button>
+              <div className="p-4 bg-destructive/5">
+                <Button 
+                  onClick={onLogout}
+                  variant="destructive"
+                  className="w-full h-14 rounded-2xl gap-3 text-lg font-black shadow-lg"
+                >
+                  <LogOut size={20} /> Баромад аз ҳисоб
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

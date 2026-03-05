@@ -38,7 +38,7 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
     desc: "",
   });
 
-  const encodedEmail = user?.email ? encodeURIComponent(user.email).replace(/\./g, '%2E') : null;
+  const encodedEmail = user?.email ? encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E') : null;
   const { data: profile } = useRTDBData(encodedEmail ? `users/${encodedEmail}` : null) as { data: UserProfile | null };
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
       return;
     }
 
-    // 1. Санҷиши пур будани тамоми майдонҳои асосӣ
+    // 1. Санҷиши пур будани тамоми майдонҳои асосӣ (Ягон сатр набояд холӣ бошад)
     if (
       !formData.title.trim() || 
       !formData.company.trim() || 
