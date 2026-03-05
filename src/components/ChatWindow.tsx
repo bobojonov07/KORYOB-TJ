@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -7,7 +8,6 @@ import { ChatMessage, UserProfile } from "@/app/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, ArrowLeft, Check, CheckCheck, AlertTriangle, MessageCircle, Trash2 } from "lucide-react";
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { containsForbiddenWords, MODERATION_RULES } from "@/app/lib/moderation";
 import { useToast } from "@/hooks/use-toast";
@@ -18,12 +18,9 @@ interface ChatWindowProps {
   onBack: () => void;
 }
 
-/**
- * Utility to encode email consistently for RTDB paths
- */
 const encodeEmail = (email: string) => {
   if (!email) return "";
-  return encodeURIComponent(email.toLowerCase()).replace(/\./g, '%2E').toLowerCase();
+  return encodeURIComponent(email.toLowerCase()).replace(/\./g, '%2E');
 };
 
 export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
@@ -34,12 +31,13 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   const [isReportOpen, setIsReportOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const myEncodedEmail = useMemo(() => user?.email ? encodeEmail(user.email) : null, [user]);
+  const partnerEncodedEmail = useMemo(() => partnerEmail ? encodeEmail(partnerEmail) : null, [partnerEmail]);
+
   const chatId = useMemo(() => {
-    if (!user?.email || !partnerEmail) return null;
-    const e1 = encodeEmail(user.email);
-    const e2 = encodeEmail(partnerEmail);
-    return [e1, e2].sort().join("--");
-  }, [user, partnerEmail]);
+    if (!myEncodedEmail || !partnerEncodedEmail) return null;
+    return [myEncodedEmail, partnerEncodedEmail].sort().join("--");
+  }, [myEncodedEmail, partnerEncodedEmail]);
 
   const { data: messagesObj } = useRTDBData(chatId ? `chats/${chatId}` : null);
   const messages = useMemo(() => {
@@ -47,14 +45,12 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     return Object.entries(messagesObj)
       .map(([id, val]: [string, any]) => ({ id, ...val }))
       .filter((msg: any) => msg && msg.text && msg.sender)
-      .sort((a, b) => (a.time || 0) - (b.time || 0)) as any[];
+      .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()) as any[];
   }, [messagesObj]);
 
-  const partnerEncodedEmail = useMemo(() => partnerEmail ? encodeEmail(partnerEmail) : null, [partnerEmail]);
   const { data: partnerObj } = useRTDBData(partnerEncodedEmail ? `users/${partnerEncodedEmail}` : null);
   const partner = partnerObj as UserProfile | null;
 
-  const myEncodedEmail = useMemo(() => user?.email ? encodeEmail(user.email) : null, [user]);
   const { data: currentUserProfileObj } = useRTDBData(myEncodedEmail ? `users/${myEncodedEmail}` : null);
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
@@ -64,7 +60,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     }
   }, [messages]);
 
-  // Mark messages as read
   useEffect(() => {
     if (!user || !messages.length || !rtdb || !myEncodedEmail || !chatId) return;
     
@@ -86,7 +81,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     if (!trimmedText || !user?.email || !currentUserProfile || !rtdb || !chatId) return;
 
     if (currentUserProfile.isBlocked) {
-      toast({ variant: "destructive", title: "Ҳисоб блок шудааст", description: "Шумо паём фиристода наметавонед." });
+      toast({ variant: "destructive", title: "Блок шудааст", description: "Шумо паём фиристода наметавонед." });
       return;
     }
 
@@ -96,19 +91,12 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         await runTransaction(userRef, (userData) => {
           if (userData) {
             userData.warningCount = (userData.warningCount || 0) + 1;
-            if (userData.warningCount >= MODERATION_RULES.MAX_WARNINGS) {
-              userData.isBlocked = true;
-            }
+            if (userData.warningCount >= MODERATION_RULES.MAX_WARNINGS) userData.isBlocked = true;
           }
           return userData;
         });
       }
-
-      toast({ 
-        variant: "destructive", 
-        title: "Огоҳӣ!", 
-        description: "Дар паёми шумо калимаҳои ноҷо ҳастанд. Баъди 3 огоҳӣ аккаунт блок мешавад." 
-      });
+      toast({ variant: "destructive", title: "Огоҳӣ!", description: "Дар паёми шумо калимаҳои ноҷо ҳастанд." });
       setText("");
       return;
     }
@@ -116,7 +104,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     const msg = {
       sender: user.email.toLowerCase(),
       text: trimmedText,
-      time: Date.now(),
+      time: new Date().toISOString(),
       read: false,
     };
     
@@ -131,109 +119,78 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
   const handleDeleteMessage = async (msgId: string) => {
     if (!rtdb || !msgId || !chatId) return;
-    if (confirm("Шумо мехоҳед ин паёмро ҳазф кунед?")) {
-      try {
-        await remove(ref(rtdb, `chats/${chatId}/${msgId}`));
-      } catch (err) {
-        toast({ variant: "destructive", title: "Хатогӣ", description: "Натавонистам паёмро ҳазф кунам" });
-      }
+    if (confirm("Ҳазф кардани паём?")) {
+      remove(ref(rtdb, `chats/${chatId}/${msgId}`));
     }
   };
 
-  const safeFormatTime = (time: any) => {
-    if (!time) return "";
-    try {
-      const date = new Date(time);
-      if (isNaN(date.getTime())) return "";
-      return format(date, "HH:mm");
-    } catch (e) {
-      return "";
-    }
+  const formatLastSeen = (timestamp: number | null) => {
+    if (!timestamp) return '—';
+    const diff = Date.now() - timestamp;
+    if (diff < 5 * 60 * 1000) return <span className="text-green-500 font-bold">Онлайн</span>;
+    return `Дида шуд: ${new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#FDFCFB] animate-in slide-in-from-right duration-300">
-      <div className="p-2 md:p-4 border-b bg-white flex items-center justify-between sticky top-0 z-20 shadow-sm backdrop-blur-xl bg-white/90">
-        <div className="flex items-center gap-2 md:gap-3">
-          <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50 h-8 w-8 md:h-10 md:w-10">
-            <ArrowLeft size={16} className="md:size-5" />
+    <div className="flex flex-col h-full bg-[#fdfcfb]">
+      <div className="p-3 border-b bg-white flex items-center justify-between sticky top-0 z-20 shadow-sm">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full hover:bg-gray-100">
+            <ArrowLeft size={20} />
           </Button>
           <div className="flex flex-col">
-            <h3 className="font-black text-sm md:text-lg leading-tight tracking-tight truncate max-w-[140px] md:max-w-md">
-              {partner?.name || partnerEmail.split('@')[0]}
-            </h3>
-            {partner?.lastSeen && (
-              <span className={cn("text-[8px] md:text-[10px] uppercase font-black tracking-widest mt-0.5", Date.now() - partner.lastSeen < 300000 ? "text-green-500" : "text-muted-foreground/60")}>
-                {Date.now() - partner.lastSeen < 300000 ? "Онлайн" : `Дида шуд: ${safeFormatTime(partner.lastSeen)}`}
-              </span>
-            )}
+            <h3 className="font-black text-md leading-tight">{partner?.name || partnerEmail.split('@')[0]}</h3>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              {formatLastSeen(partner?.lastSeen || null)}
+            </span>
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-muted-foreground hover:text-destructive h-8 w-8 md:h-10 md:w-10 rounded-full">
-          <AlertTriangle size={16} className="md:size-5" />
+        <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-muted-foreground hover:text-destructive">
+          <AlertTriangle size={18} />
         </Button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 md:p-8 space-y-3 bg-[#F5F5F5]/30">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
         {messages.map((msg, i) => {
-          const isMine = msg.sender && msg.sender.toLowerCase() === user?.email?.toLowerCase();
+          const isMine = msg.sender?.toLowerCase() === user?.email?.toLowerCase();
+          const time = new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           return (
             <div key={msg.id || i} className={cn("flex flex-col max-w-[85%] group", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
-              <div className="flex items-end gap-1.5 max-w-full">
-                {isMine && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleDeleteMessage(msg.id)}
-                  >
-                    <Trash2 size={14} />
-                  </Button>
-                )}
-                
-                <div className={cn(
-                  "p-3 rounded-2xl text-sm font-bold shadow-sm break-words relative", 
-                  isMine 
-                    ? "bg-primary text-white rounded-tr-none" 
-                    : "bg-white border border-primary/5 rounded-tl-none text-foreground"
-                )}>
-                  {msg.text}
+              <div className={cn(
+                "p-3 rounded-2xl text-[14px] font-medium shadow-sm break-words relative flex flex-col gap-1", 
+                isMine ? "bg-[#e0f7fa] text-[#222] rounded-tr-none" : "bg-[#f1f1f1] text-[#222] rounded-tl-none"
+              )}>
+                <span>{msg.text}</span>
+                <div className="flex items-center justify-end gap-1 mt-0.5">
+                  <span className="text-[9px] opacity-60 font-bold">{time}</span>
+                  {isMine && (
+                    <span className={cn(msg.read ? "text-[#00b8d4]" : "text-gray-400")}>
+                      {msg.read ? <CheckCheck size={12} /> : <Check size={12} />}
+                    </span>
+                  )}
                 </div>
-
-                {!isMine && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 mb-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleDeleteMessage(msg.id)}
-                  >
-                    <Trash2 size={14} />
-                  </Button>
-                )}
-              </div>
-              <div className="flex items-center gap-1.5 mt-1 px-1">
-                <span className="text-[9px] text-muted-foreground/60 font-black tracking-tighter">{safeFormatTime(msg.time)}</span>
-                {isMine && (
-                  <span className="text-primary">
-                    {msg.read ? <CheckCheck size={12} /> : <Check size={12} />}
-                  </span>
-                )}
+                <button 
+                  onClick={() => handleDeleteMessage(msg.id)}
+                  className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-destructive p-1 transition-opacity"
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
             </div>
           );
         })}
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center py-20 opacity-20 text-center space-y-4">
-            <MessageCircle size={56} className="text-primary" />
-            <p className="font-black text-md">Паём нависед</p>
+          <div className="h-full flex flex-col items-center justify-center opacity-20 py-20">
+            <MessageCircle size={64} className="text-primary" />
+            <p className="font-black mt-4">Паём нависед...</p>
           </div>
         )}
       </div>
 
-      <div className="p-3 md:p-6 bg-white border-t sticky bottom-0 z-20 flex gap-2 md:gap-3 items-center">
+      <div className="p-4 bg-white border-t sticky bottom-0 z-20 flex gap-3 items-center">
         <Input 
-          placeholder="Паём..." 
-          className="rounded-xl md:rounded-2xl h-12 md:h-14 bg-secondary/20 border-none font-bold px-4 md:px-6 focus-visible:ring-primary" 
+          placeholder="Паём нависед..." 
+          className="rounded-full h-12 bg-gray-100 border-none font-bold px-5 focus-visible:ring-primary" 
           value={text} 
           onChange={e => setText(e.target.value)} 
           onKeyDown={e => e.key === 'Enter' && handleSend()}
@@ -242,10 +199,10 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         <Button 
           onClick={handleSend} 
           size="icon" 
-          className="rounded-xl md:rounded-2xl h-12 w-12 md:h-14 md:w-14 shrink-0 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all" 
+          className="rounded-full h-12 w-12 shrink-0 bg-[#ff7b00] hover:bg-[#e66a00] shadow-lg active:scale-95 transition-all" 
           disabled={currentUserProfile?.isBlocked || !text.trim()}
         >
-          <Send size={20} className="md:size-5" />
+          <Send size={20} />
         </Button>
       </div>
 
