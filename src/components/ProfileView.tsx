@@ -26,7 +26,7 @@ import {
   Sparkles,
   Image as ImageIcon 
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { ref, update } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -60,6 +60,12 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
     if (!jobsObj || !profile?.email) return 0;
     return Object.values(jobsObj).filter((j: any) => j.postedEmail?.toLowerCase() === profile.email?.toLowerCase() && j.active).length;
   }, [jobsObj, profile]);
+
+  const formattedPremiumDate = useMemo(() => {
+    if (!profile?.premiumUntil) return "—";
+    const date = new Date(profile.premiumUntil);
+    return isValid(date) ? format(date, "dd.MM.yyyy") : "—";
+  }, [profile?.premiumUntil]);
 
   if (loading) {
     return (
@@ -194,7 +200,7 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
               <InfoItem icon={<Phone size={18} />} label="Телефон" value={profile.phone || "—"} />
               <InfoItem icon={<Calendar size={18} />} label="Санаи сабт" value={profile.createdAt ? format(new Date(profile.createdAt), "dd.MM.yyyy") : "—"} />
               {isPremium && (
-                 <InfoItem icon={<Crown size={18} />} label="Мӯҳлати Премиум" value={profile.premiumUntil ? format(new Date(profile.premiumUntil), "dd.MM.yyyy") : "—"} />
+                 <InfoItem icon={<Crown size={18} />} label="Мӯҳлати Премиум" value={formattedPremiumDate} />
               )}
             </CardContent>
           </Card>
