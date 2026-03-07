@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { UserProfile } from "@/app/lib/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -38,8 +38,16 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
     desc: "",
   });
 
+  const { data: allJobsObj } = useRTDBData("jobs");
   const encodedEmail = user?.email ? encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E') : null;
   const { data: profile } = useRTDBData(encodedEmail ? `users/${encodedEmail}` : null) as { data: UserProfile | null };
+
+  const hasActiveJob = useMemo(() => {
+    if (!allJobsObj || !user?.email) return false;
+    return Object.values(allJobsObj).some((job: any) => 
+      job.postedEmail?.toLowerCase() === user.email?.toLowerCase() && job.active === true
+    );
+  }, [allJobsObj, user]);
 
   useEffect(() => {
     if (jobId && rtdb) {
@@ -73,7 +81,15 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
       return;
     }
 
-    // 1. Санҷиши пур будани тамоми майдонҳои асосӣ (Ягон сатр набояд холӣ бошад)
+    if (!jobId && hasActiveJob) {
+      toast({ 
+        variant: "destructive", 
+        title: "Лимит", 
+        description: "Шумо аллакай як эълони фаъол доред. Як корбар танҳо як эълон карда метавонад." 
+      });
+      return;
+    }
+
     if (
       !formData.title.trim() || 
       !formData.company.trim() || 
@@ -92,7 +108,6 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
       return;
     }
 
-    // 2. Валидатсияи рақами телефон (танҳо рақам ва на камтар аз 9 аломат)
     const cleanPhone = formData.phone.replace(/\s+/g, '').replace(/\+/g, '');
     if (!/^\d{9,}$/.test(cleanPhone)) {
       toast({ 
@@ -103,7 +118,6 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
       return;
     }
 
-    // 3. Модераторӣ
     if (containsForbiddenWords(formData.title) || containsForbiddenWords(formData.desc)) {
       const userRef = ref(rtdb, `users/${encodedEmail}`);
       await runTransaction(userRef, (userData) => {
@@ -134,7 +148,7 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
         await set(newJobRef, {
           ...formData,
           postedBy: profile.name,
-          postedEmail: profile.email,
+          postedEmail: profile.email.toLowerCase(),
           postedUid: user.uid,
           postedAt: new Date().toISOString(),
           active: true,

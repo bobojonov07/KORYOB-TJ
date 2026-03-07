@@ -1,14 +1,15 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useUser, useRTDB, useRTDBData } from "@/firebase";
 import { ref, remove } from "firebase/database";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { MessageCircle, Trash2, ChevronLeft, Loader2 } from "lucide-react";
+import { MessageCircle, Trash2, ChevronLeft, Loader2, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface ChatListProps {
   activeChatEmail: string | null;
@@ -25,6 +26,8 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
   const { user } = useUser();
   const rtdb = useRTDB();
   const { toast } = useToast();
+  const [showOnlyUnread, setShowOnlyUnread] = useState(false);
+  
   const { data: usersObj, loading: usersLoading } = useRTDBData("users");
   const { data: chatsObj, loading: chatsLoading } = useRTDBData("chats");
 
@@ -34,7 +37,6 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     const myEncodedEmail = encodeEmail(user.email);
     const chatPartnersMap = new Map<string, { lastTime: number; lastText: string; hasUnread: boolean; chatId: string }>();
 
-    // Ҷамъоварии ҳамаи чатҳо ва ёфтани паёми охирин барои ҳар як ҳамсӯҳбат
     Object.entries(chatsObj).forEach(([chatId, messages]: [string, any]) => {
       if (chatId.includes(myEncodedEmail)) {
         const parts = chatId.split('--');
@@ -43,7 +45,6 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
         const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
         const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.');
         
-        // Сорткунии паёмҳо барои ёфтани охирин паём
         const messageList = Object.values(messages || {}).sort((a: any, b: any) => 
           new Date(a.time).getTime() - new Date(b.time).getTime()
         );
@@ -64,8 +65,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       }
     });
 
-    // Табдил додани Map ба массив ва сорт кардан: охирин дар боло
-    return Array.from(chatPartnersMap.entries())
+    let result = Array.from(chatPartnersMap.entries())
       .map(([email, stats]) => {
         const encoded = encodeEmail(email);
         const userData = usersObj[encoded];
@@ -77,8 +77,14 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           ...stats
         };
       })
-      .sort((a, b) => b.lastTime - a.lastTime); // МАНТИҚИ АСОСӢ: Охирин паём дар боло
-  }, [usersObj, chatsObj, user]);
+      .sort((a, b) => b.lastTime - a.lastTime);
+
+    if (showOnlyUnread) {
+      result = result.filter(u => u.hasUnread);
+    }
+
+    return result;
+  }, [usersObj, chatsObj, user, showOnlyUnread]);
 
   const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
     e.stopPropagation();
@@ -114,17 +120,30 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
 
   return (
     <div className="flex flex-col h-full bg-white">
-      <div className="p-4 border-b font-black text-xl tracking-tighter bg-white sticky top-0 z-10 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {onBack && (
-            <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden rounded-full h-10 w-10">
-              <ChevronLeft size={20} />
-            </Button>
-          )}
-          Чатҳо
+      <div className="p-4 border-b bg-white sticky top-0 z-10 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 font-black text-xl tracking-tighter">
+            {onBack && (
+              <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden rounded-full h-10 w-10">
+                <ChevronLeft size={20} />
+              </Button>
+            )}
+            Чатҳо
+          </div>
+          <MessageCircle size={20} className="text-primary" />
         </div>
-        <MessageCircle size={20} className="text-primary" />
+        
+        <Button 
+          variant={showOnlyUnread ? "default" : "outline"} 
+          size="sm" 
+          onClick={() => setShowOnlyUnread(!showOnlyUnread)}
+          className="w-full rounded-xl text-[10px] font-black uppercase tracking-widest gap-2"
+        >
+          <Filter size={14} />
+          {showOnlyUnread ? "Намоиши ҳама" : "Танҳо нахондаҳо"}
+        </Button>
       </div>
+
       <ScrollArea className="flex-1">
         <div className="divide-y divide-primary/5">
           {sortedChatPartners.map(u => {
@@ -152,9 +171,9 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
                   <div className="flex justify-between items-center mb-0.5">
                     <div className="flex items-center gap-1 truncate">
                       <span className="font-black text-sm truncate">{u.name}</span>
-                      <span className="text-[8px] text-muted-foreground uppercase font-black tracking-widest bg-gray-100 px-1 py-0.5 rounded">
+                      <Badge variant="secondary" className="text-[8px] h-4 px-1 rounded uppercase font-black tracking-widest bg-gray-100 text-muted-foreground">
                         {u.role === 'korfarmo' ? 'Корфармо' : 'Корҷӯ'}
-                      </span>
+                      </Badge>
                     </div>
                     <span className="text-[10px] text-muted-foreground/60 font-bold whitespace-nowrap ml-2">
                       {formatLastSeen(u.lastTime)}
@@ -188,7 +207,9 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           {sortedChatPartners.length === 0 && (
             <div className="p-16 text-center space-y-4 opacity-40">
               <MessageCircle size={48} className="mx-auto text-muted-foreground" />
-              <p className="font-black text-sm">Рӯйхати чатҳо холӣ аст</p>
+              <p className="font-black text-sm">
+                {showOnlyUnread ? "Паёмҳои нахонда ёфт нашуданд" : "Рӯйхати чатҳо холӣ аст"}
+              </p>
             </div>
           )}
         </div>

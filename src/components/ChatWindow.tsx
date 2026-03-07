@@ -85,6 +85,11 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
       return;
     }
 
+    if (trimmedText.length > 1000) {
+      toast({ variant: "destructive", title: "Лимит", description: "Лимити шумо ба охир расид (макс. 1000 аломат)." });
+      return;
+    }
+
     if (containsForbiddenWords(trimmedText)) {
       if (myEncodedEmail) {
         const userRef = ref(rtdb, `users/${myEncodedEmail}`);
@@ -187,23 +192,30 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         )}
       </div>
 
-      <div className="p-4 bg-white border-t sticky bottom-0 z-20 flex gap-3 items-center">
-        <Input 
-          placeholder="Паём нависед..." 
-          className="rounded-full h-12 bg-gray-100 border-none font-bold px-5 focus-visible:ring-primary" 
-          value={text} 
-          onChange={e => setText(e.target.value)} 
-          onKeyDown={e => e.key === 'Enter' && handleSend()}
-          disabled={currentUserProfile?.isBlocked}
-        />
-        <Button 
-          onClick={handleSend} 
-          size="icon" 
-          className="rounded-full h-12 w-12 shrink-0 bg-primary hover:bg-primary/90 shadow-lg active:scale-95 transition-all" 
-          disabled={currentUserProfile?.isBlocked || !text.trim()}
-        >
-          <Send size={20} />
-        </Button>
+      <div className="p-4 bg-white border-t sticky bottom-0 z-20 flex flex-col gap-2">
+        <div className="flex gap-3 items-center">
+          <Input 
+            placeholder="Паём нависед..." 
+            className="rounded-full h-12 bg-gray-100 border-none font-bold px-5 focus-visible:ring-primary" 
+            value={text} 
+            onChange={e => setText(e.target.value)} 
+            onKeyDown={e => e.key === 'Enter' && handleSend()}
+            disabled={currentUserProfile?.isBlocked}
+          />
+          <Button 
+            onClick={handleSend} 
+            size="icon" 
+            className="rounded-full h-12 w-12 shrink-0 bg-primary hover:bg-primary/90 shadow-lg active:scale-95 transition-all" 
+            disabled={currentUserProfile?.isBlocked || !text.trim()}
+          >
+            <Send size={20} />
+          </Button>
+        </div>
+        <div className="flex justify-end pr-4">
+           <span className={cn("text-[10px] font-bold", text.length > 1000 ? "text-destructive" : "text-muted-foreground")}>
+             {text.length} / 1000
+           </span>
+        </div>
       </div>
 
       <ReportDialog 
