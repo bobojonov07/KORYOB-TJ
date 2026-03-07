@@ -34,28 +34,45 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
   const [role, setRole] = useState<"korjob" | "korfarmo">("korjob");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
+  const validateEmail = (email: string) => {
+    return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+  };
+
   const handleAction = async () => {
     if (!auth || !rtdb) return;
     
     const cleanEmail = email.trim().toLowerCase();
 
     if (mode === "signup") {
-      if (!name || name.length < 3) {
-        toast({ variant: "destructive", title: "Хатогӣ", description: "Ном бояд на камтар аз 3 аломат бошад." });
+      if (!name || name.trim().length < 3) {
+        toast({ variant: "destructive", title: "Хатои ном", description: "Ном бояд на камтар аз 3 аломат бошад." });
         return;
       }
-      if (!phone) {
-        toast({ variant: "destructive", title: "Хатогӣ", description: "Рақами телефонро ворид кунед." });
+      if (!phone || phone.replace(/\D/g, '').length < 9) {
+        toast({ variant: "destructive", title: "Хатои телефон", description: "Рақами телефон бояд на камтар аз 9 рақам бошад." });
+        return;
+      }
+      if (!validateEmail(cleanEmail)) {
+        toast({ variant: "destructive", title: "Хатои почта", description: "Лутфан почтаи дурустро ворид кунед (масалан: .com)." });
+        return;
+      }
+      if (password.length < 6) {
+        toast({ variant: "destructive", title: "Хатои парол", description: "Парол бояд на камтар аз 6 аломат бошад." });
         return;
       }
       if (password !== confirmPassword) {
-        toast({ variant: "destructive", title: "Хатогӣ", description: "Паролҳо мувофиқат намекунанд." });
+        toast({ variant: "destructive", title: "Хатои парол", description: "Паролҳо мувофиқат намекунанд." });
         return;
       }
       if (!agreedToTerms) {
         toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан ба шартҳои истифода розӣ шавед." });
         return;
       }
+    }
+
+    if (mode === "login" && (!email || !password)) {
+      toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан почта ва паролро ворид кунед." });
+      return;
     }
 
     setLoading(true);
@@ -86,17 +103,29 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
           lastSeen: Date.now(),
           warningCount: 0,
           reportsCount: 0,
-          isBlocked: false
+          isBlocked: false,
+          isPremium: false
         });
         toast({ title: "Хуш омадед!", description: "Сабти ном бомуваффақият гузашт." });
         onAuthSuccess();
       } else {
+        if (!validateEmail(cleanEmail)) {
+          toast({ variant: "destructive", title: "Хатогӣ", description: "Почтаи дурустро нависед." });
+          setLoading(false);
+          return;
+        }
         await sendPasswordResetEmail(auth, cleanEmail);
         toast({ title: "Ирсол шуд", description: "Пайванд ба почтаи шумо фиристода шуд." });
         setMode("login");
       }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Хатогӣ", description: "Хатогии техникӣ ё маълумоти нодуруст." });
+      console.error(error);
+      let msg = "Хатогии техникӣ ё маълумоти нодуруст.";
+      if (error.code === 'auth/email-already-in-use') msg = "Ин почта аллакай истифода шудааст.";
+      if (error.code === 'auth/wrong-password') msg = "Пароли нодуруст.";
+      if (error.code === 'auth/user-not-found') msg = "Корбар ёфт нашуд.";
+      
+      toast({ variant: "destructive", title: "Хатогӣ", description: msg });
     } finally {
       setLoading(false);
     }
@@ -129,7 +158,6 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
         <div className="bg-white p-6 rounded-[2.5rem] shadow-xl space-y-4 border border-primary/5">
           {mode === "signup" && (
             <div className="space-y-3">
-              <Label className="text-[11px] font-black text-muted-foreground uppercase tracking-widest ml-1">Ман кистам?</Label>
               <div className="grid grid-cols-2 gap-3">
                 <button 
                   onClick={() => setRole("korjob")}
@@ -158,24 +186,24 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
           {mode === "signup" && (
             <>
               <div className="space-y-1">
-                <Label className="text-[11px] font-bold text-muted-foreground ml-1">Ном ва насаб</Label>
+                <Label className="text-[11px] font-bold text-muted-foreground ml-1">Ном ва насаб (на камтар аз 3 ҳарф)</Label>
                 <div className="relative">
                   <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
                   <Input placeholder="Номи шумо" value={name} onChange={e => setName(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
                 </div>
               </div>
               <div className="space-y-1">
-                <Label className="text-[11px] font-bold text-muted-foreground ml-1">Рақами телефон</Label>
+                <Label className="text-[11px] font-bold text-muted-foreground ml-1">Рақами телефон (9 рақам)</Label>
                 <div className="relative">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
-                  <Input placeholder="+992 000 00 00 00" value={phone} onChange={e => setPhone(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
+                  <Input placeholder="931234567" value={phone} onChange={e => setPhone(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
                 </div>
               </div>
             </>
           )}
 
           <div className="space-y-1">
-            <Label className="text-[11px] font-bold text-muted-foreground ml-1">Почтаи электронӣ</Label>
+            <Label className="text-[11px] font-bold text-muted-foreground ml-1">Почтаи электронӣ (.com)</Label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
               <Input type="email" placeholder="example@mail.tj" value={email} onChange={e => setEmail(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
@@ -184,7 +212,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
 
           {mode !== "forgot" && (
             <div className="space-y-1">
-              <Label className="text-[11px] font-bold text-muted-foreground ml-1">Парол</Label>
+              <Label className="text-[11px] font-bold text-muted-foreground ml-1">Парол (на камтар аз 6 аломат)</Label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
                 <Input type="password" placeholder="******" value={password} onChange={e => setPassword(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
@@ -204,13 +232,6 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
 
           {mode === "signup" && (
             <div className="bg-muted/30 p-4 rounded-2xl space-y-3 border">
-              <Label className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Шартҳои истифода ва амният</Label>
-              <ScrollArea className="h-20 text-[10px] text-muted-foreground font-medium leading-relaxed">
-                <p>1. Модераторӣ: Истифодаи дашном ва калимаҳои ноҷо қатъиян манъ аст.</p>
-                <p>2. Блоккунӣ: Барои риоя накардани қоидаҳо (3 огоҳӣ ё 5 гузориш) аккаунт ба таври худкор блок мешавад.</p>
-                <p>3. Махфият: Маълумоти шумо танҳо барои коркард дар дохили платформа истифода мешавад.</p>
-                <p>4. Ҷавобгарӣ: Барномасоз Бобоҷонзода Аминҷон барои саҳеҳии маълумот дар эълонҳо ҷавобгар нест.</p>
-              </ScrollArea>
               <div className="flex items-center space-x-2">
                 <Checkbox id="terms" checked={agreedToTerms} onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} />
                 <label htmlFor="terms" className="text-[11px] text-muted-foreground font-bold cursor-pointer">

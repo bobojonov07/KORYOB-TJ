@@ -54,12 +54,24 @@ export default function KoryobTJ() {
 
   const { data: requestsObj } = useRTDBData("premiumRequests");
   
-  // Автоматикӣ Премиумро аз ду манбаъ месанҷад
+  // Автоматикӣ Премиумро бо назардошти мӯҳлат месанҷад
   const isUserPremium = useMemo(() => {
-    if (currentUserProfile?.isPremium) return true;
-    if (!requestsObj || !user) return false;
-    // Агар ақаллан як дархости ин корбар дар база "isPremium: true" бошад
-    return Object.values(requestsObj).some((req: any) => req.uid === user.uid && req.isPremium === true);
+    let premium = currentUserProfile?.isPremium === true;
+    
+    // Санҷиши мӯҳлат агар premiumUntil вуҷуд дошта бошад
+    if (premium && currentUserProfile?.premiumUntil) {
+      const expiry = new Date(currentUserProfile.premiumUntil).getTime();
+      if (expiry < Date.now()) {
+        premium = false; // Мӯҳлат гузашт
+      }
+    }
+
+    if (!premium && requestsObj && user) {
+      const hasAcceptedRequest = Object.values(requestsObj).some((req: any) => req.uid === user.uid && req.isPremium === true);
+      if (hasAcceptedRequest) premium = true;
+    }
+    
+    return premium;
   }, [currentUserProfile, requestsObj, user]);
 
   const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
@@ -67,16 +79,13 @@ export default function KoryobTJ() {
 
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-bg');
 
-  // Огоҳинома барои фаъол шудани Премиум
   const lastPremiumStatus = useRef<boolean>(false);
   useEffect(() => {
-    if (isUserPremium) {
-      if (lastPremiumStatus.current === false) {
-        toast({
-          title: "ПРЕМИУМ ФАЪОЛ ШУД!",
-          description: "Табрик! Акнун тамоми имкониятҳои VIP барои шумо кушодаанд.",
-        });
-      }
+    if (isUserPremium && lastPremiumStatus.current === false) {
+      toast({
+        title: "ПРЕМИУМ ФАЪОЛ ШУД!",
+        description: "Табрик! Акнун тамоми имкониятҳои VIP барои шумо кушодаанд.",
+      });
     }
     lastPremiumStatus.current = isUserPremium;
   }, [isUserPremium, toast]);
