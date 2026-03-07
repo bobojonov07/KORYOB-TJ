@@ -63,10 +63,15 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
   }, [jobsObj, profile]);
 
   const formattedPremiumDate = useMemo(() => {
-    if (!profile?.premiumUntil) return "—";
-    const date = new Date(profile.premiumUntil);
-    return isValid(date) ? format(date, "dd.MM.yyyy") : "—";
-  }, [profile?.premiumUntil]);
+    // Агар корбар премиум бошад ва сана дошта бошад
+    if (profile?.premiumUntil) {
+      const date = new Date(profile.premiumUntil);
+      if (isValid(date)) return format(date, "dd.MM.yyyy");
+    }
+    // Агар корбар премиум бошад вале сана набошад, мӯҳлати стандартиро нишон медиҳем
+    if (isPremium) return "3 моҳ (Стандарт)";
+    return "—";
+  }, [profile?.premiumUntil, isPremium]);
 
   if (loading) {
     return (
@@ -344,4 +349,3 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string
     </div>
   );
 }
-
