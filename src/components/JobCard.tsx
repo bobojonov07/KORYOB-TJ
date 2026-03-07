@@ -83,10 +83,14 @@ export function JobCard({ job, onClick, onChat, isOwner, compact = false }: JobC
                <Sparkles className="text-yellow-400 opacity-30" size={40} />
             </div>
           )}
-          <div className="absolute bottom-2 left-2">
+          <div className="absolute bottom-2 left-2 flex items-center gap-2">
             <Badge className="bg-white/90 text-primary border-none text-[8px] font-black uppercase tracking-widest px-2 py-0.5">
               {job.city}
             </Badge>
+            {/* Просмотр барои VIP эълонҳо илова шуд */}
+            <div className="bg-black/50 text-white rounded-lg px-2 py-0.5 flex items-center gap-1 text-[8px] font-black">
+              <Eye size={10} /> {job.views || 0}
+            </div>
           </div>
         </div>
 

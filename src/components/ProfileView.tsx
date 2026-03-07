@@ -140,7 +140,8 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
 
       <div className="flex-1 overflow-y-auto p-4 md:p-0 space-y-6 pb-24">
         
-        {!isPremium && (
+        {/* Премиум фақат барои Корфармо нишон дода мешавад */}
+        {!isPremium && profile.role === 'korfarmo' && (
           <div 
             onClick={() => setIsPremiumModalOpen(true)}
             className="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 rounded-[2rem] text-white flex items-center justify-between cursor-pointer hover:scale-[1.02] transition-all shadow-xl shadow-orange-200"
@@ -155,7 +156,10 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
 
         <div className="flex flex-col items-center text-center space-y-4 bg-white p-10 rounded-[2.5rem] border shadow-sm border-primary/5">
           <div 
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => {
+              if (profile.role === 'korfarmo') fileInputRef.current?.click();
+              else toast({ title: "Танҳо барои корфармоён", description: "Иловаи акс дар профил танҳо барои корфармоёни Премиум дастрас аст." });
+            }}
             className="relative w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-black border-4 border-white shadow-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
           >
             {profile.profileImage ? (
