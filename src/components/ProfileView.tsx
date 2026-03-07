@@ -30,6 +30,7 @@ import {
 import { format } from "date-fns";
 import { ref, update } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 interface ProfileViewProps {
