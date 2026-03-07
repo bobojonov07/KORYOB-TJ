@@ -86,7 +86,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     }
 
     if (trimmedText.length > 1000) {
-      toast({ variant: "destructive", title: "Лимит", description: "Лимити шумо ба охир расид (макс. 1000 аломат)." });
+      toast({ variant: "destructive", title: "Лимити шумо ба охир расид", description: "Максимум 1000 аломат иҷозат дода мешавад." });
       return;
     }
 
@@ -187,7 +187,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center opacity-20 py-20">
             <MessageCircle size={64} className="text-primary" />
-            <p className="font-black mt-4">Паём нависед...</p>
+            <p className="font-black mt-4 uppercase tracking-tighter">Паём нависед...</p>
           </div>
         )}
       </div>
@@ -206,15 +206,16 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
             onClick={handleSend} 
             size="icon" 
             className="rounded-full h-12 w-12 shrink-0 bg-primary hover:bg-primary/90 shadow-lg active:scale-95 transition-all" 
-            disabled={currentUserProfile?.isBlocked || !text.trim()}
+            disabled={currentUserProfile?.isBlocked || !text.trim() || text.length > 1000}
           >
             <Send size={20} />
           </Button>
         </div>
-        <div className="flex justify-end pr-4">
-           <span className={cn("text-[10px] font-bold", text.length > 1000 ? "text-destructive" : "text-muted-foreground")}>
-             {text.length} / 1000
+        <div className="flex justify-between items-center px-4">
+           <span className={cn("text-[9px] font-black uppercase tracking-widest", text.length > 1000 ? "text-destructive" : "text-muted-foreground")}>
+             {text.length} / 1000 аломат
            </span>
+           {text.length > 1000 && <span className="text-[9px] font-black text-destructive uppercase tracking-widest">Лимит ба охир расид!</span>}
         </div>
       </div>
 

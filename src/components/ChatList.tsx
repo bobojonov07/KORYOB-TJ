@@ -64,14 +64,14 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           role: userData?.role || 'korjob',
           lastSeen: userData?.lastSeen || null,
           lastTime: new Date(lastMsg.time).getTime() || 0,
-          lastText: lastMsg.text || "Паёмҳо мавҷуд нест",
+          lastText: lastMsg.text || "Паём...",
           hasUnread,
           chatId
         });
       }
     });
 
-    // Sort by last message time (descending) - newer on top
+    // Сорткунии қатъӣ: Охирин суҳбат дар боло
     let result = partners.sort((a, b) => b.lastTime - a.lastTime);
 
     if (showOnlyUnread) {
@@ -108,7 +108,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-10 space-y-4">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Боршавӣ...</p>
+        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">Боршавии суҳбатҳо...</p>
       </div>
     );
   }
@@ -117,7 +117,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     <div className="flex flex-col h-full bg-white">
       <div className="p-4 border-b bg-white sticky top-0 z-10 space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 font-black text-xl tracking-tighter">
+          <div className="flex items-center gap-2 font-black text-xl tracking-tighter uppercase">
             {onBack && (
               <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden rounded-full h-10 w-10">
                 <ChevronLeft size={20} />
@@ -132,7 +132,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           variant={showOnlyUnread ? "default" : "outline"} 
           size="sm" 
           onClick={() => setShowOnlyUnread(!showOnlyUnread)}
-          className="w-full rounded-xl text-[10px] font-black uppercase tracking-widest gap-2"
+          className="w-full rounded-xl text-[10px] font-black uppercase tracking-widest gap-2 h-10"
         >
           <Filter size={14} />
           {showOnlyUnread ? "Намоиши ҳама" : "Танҳо нахондаҳо"}
@@ -148,8 +148,8 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
                 key={u.email} 
                 onClick={() => onSelect(u.email)}
                 className={cn(
-                  "p-4 cursor-pointer hover:bg-gray-50 transition-all flex items-center gap-3 relative group",
-                  activeChatEmail?.toLowerCase() === u.email?.toLowerCase() && "bg-orange-50/50"
+                  "p-4 cursor-pointer hover:bg-gray-50 transition-all flex items-center gap-3 relative group border-l-4 border-transparent",
+                  activeChatEmail?.toLowerCase() === u.email?.toLowerCase() && "bg-orange-50/50 border-l-primary"
                 )}
               >
                 <div className="relative shrink-0">
@@ -157,38 +157,38 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
                     {u.name?.[0]?.toUpperCase() || '?'}
                   </div>
                   <div className={cn(
-                    "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white",
+                    "absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm",
                     isOnline ? "bg-green-500" : "bg-gray-300"
                   )}></div>
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center mb-0.5">
-                    <div className="flex items-center gap-1 truncate">
-                      <span className="font-black text-sm truncate">{u.name}</span>
-                      <Badge variant="secondary" className="text-[8px] h-4 px-1 rounded uppercase font-black tracking-widest bg-gray-100 text-muted-foreground">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <span className="font-black text-sm truncate text-foreground">{u.name}</span>
+                      <Badge variant="secondary" className="text-[7px] h-3.5 px-1.5 rounded uppercase font-black tracking-widest bg-gray-100 text-muted-foreground border-none">
                         {u.role === 'korfarmo' ? 'Корфармо' : 'Корҷӯ'}
                       </Badge>
                     </div>
-                    <span className="text-[10px] text-muted-foreground/60 font-bold whitespace-nowrap ml-2">
-                      {formatLastSeen(u.lastTime)}
+                    <span className="text-[9px] text-muted-foreground/60 font-black whitespace-nowrap ml-2">
+                      {new Date(u.lastTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <p className={cn(
-                      "text-xs truncate font-medium",
-                      u.hasUnread ? "text-foreground font-black" : "text-muted-foreground"
+                      "text-xs truncate font-medium flex-1",
+                      u.hasUnread ? "text-foreground font-black" : "text-muted-foreground/70"
                     )}>
                       {u.lastText}
                     </p>
                     <div className="flex items-center gap-2">
                       {u.hasUnread && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0 animate-pulse"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0 animate-pulse shadow-sm shadow-primary/50"></div>
                       )}
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-destructive/40 hover:text-destructive hover:bg-destructive/5 rounded-full md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                        className="h-6 w-6 text-destructive/30 hover:text-destructive hover:bg-destructive/5 rounded-full md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                         onClick={(e) => handleDeleteChat(e, u.chatId)}
                       >
                         <Trash2 size={12} />
@@ -202,7 +202,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           {sortedChatPartners.length === 0 && (
             <div className="p-16 text-center space-y-4 opacity-40">
               <MessageCircle size={48} className="mx-auto text-muted-foreground" />
-              <p className="font-black text-sm">
+              <p className="font-black text-xs uppercase tracking-widest">
                 {showOnlyUnread ? "Паёмҳои нахонда ёфт нашуданд" : "Рӯйхати чатҳо холӣ аст"}
               </p>
             </div>
