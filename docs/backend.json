@@ -12,7 +12,9 @@
         "phone": { "type": "string" },
         "role": { "type": "string", "enum": ["korjob", "korfarmo"] },
         "lastSeen": { "type": "number" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" },
+        "isPremium": { "type": "boolean" },
+        "premiumUntil": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "name", "email", "role"]
     },
@@ -35,7 +37,9 @@
         "postedUid": { "type": "string" },
         "postedAt": { "type": "string" },
         "views": { "type": "number" },
-        "active": { "type": "boolean" }
+        "active": { "type": "boolean" },
+        "isPremium": { "type": "boolean" },
+        "image": { "type": "string" }
       },
       "required": ["title", "company", "city", "postedUid", "active"]
     },
@@ -46,10 +50,23 @@
       "properties": {
         "sender": { "type": "string" },
         "text": { "type": "string" },
-        "time": { "type": "number" },
+        "time": { "type": "string" },
         "read": { "type": "boolean" }
       },
       "required": ["sender", "text", "time"]
+    },
+    "PremiumRequest": {
+      "title": "Premium Request",
+      "description": "User request for premium status with receipt",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "userName": { "type": "string" },
+        "receiptImage": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] }
+      }
     }
   },
   "auth": {
@@ -67,6 +84,10 @@
     "/chats/{chatId}": {
       "schema": "ChatMessage",
       "description": "Direct messages between users"
+    },
+    "/premiumRequests/{requestId}": {
+      "schema": "PremiumRequest",
+      "description": "Requests for premium account status"
     }
   }
 }

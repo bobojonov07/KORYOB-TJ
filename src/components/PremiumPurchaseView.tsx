@@ -1,15 +1,15 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useRTDB, useUser, useRTDBData } from "@/firebase";
 import { ref, push, set } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, Crown, CreditCard, Copy, ImageIcon, CheckCircle2, Loader2, X, Sparkles } from "lucide-react";
+import { ChevronLeft, Crown, CreditCard, Copy, ImageIcon, CheckCircle2, Loader2, X, Sparkles, AlertCircle } from "lucide-react";
 import Image from "next/image";
-import { UserProfile } from "@/app/lib/types";
+import { UserProfile, PremiumRequest } from "@/app/lib/types";
 
 interface PremiumPurchaseViewProps {
   onBack: () => void;
@@ -27,9 +27,16 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
 
   const encodedEmail = user?.email ? encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E') : null;
   const { data: profile } = useRTDBData(encodedEmail ? `users/${encodedEmail}` : null) as { data: UserProfile | null };
+  const { data: requestsObj } = useRTDBData("premiumRequests");
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText("975638778");
+  // Санҷиш: оё корбар аллакай дархости фаъол дорад?
+  const pendingRequest = useMemo(() => {
+    if (!requestsObj || !user) return null;
+    return Object.values(requestsObj).find((req: any) => req.uid === user.uid && req.status === 'pending');
+  }, [requestsObj, user]);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
     toast({ title: "Нусхабардорӣ шуд", description: "Рақами корт нусхабардорӣ шуд." });
   };
 
@@ -68,16 +75,35 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
     }
   };
 
+  if (pendingRequest) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center p-6 text-center space-y-8">
+        <div className="bg-yellow-500/10 p-8 rounded-full animate-pulse border border-yellow-500/20">
+          <Loader2 size={80} className="text-yellow-500 animate-spin" />
+        </div>
+        <div className="space-y-4 max-w-sm">
+          <h2 className="text-3xl font-black text-white tracking-tighter uppercase">ДАР ҲОЛИ САНҶИШ</h2>
+          <p className="text-gray-400 font-bold leading-relaxed">
+            Шумо аллакай дархост фиристодаед. Лутфан интизор шавед, мо онро дар давоми 24 соат тафтиш карда, Премиумро фаъол месозем.
+          </p>
+        </div>
+        <Button onClick={onBack} className="w-full max-w-xs h-14 rounded-2xl font-black text-lg bg-white text-black hover:bg-gray-200">
+          БА ГЛАВНИЙ
+        </Button>
+      </div>
+    );
+  }
+
   if (submitted) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center space-y-8">
-        <div className="bg-green-500/20 p-8 rounded-full animate-pulse">
+        <div className="bg-green-500/20 p-8 rounded-full">
           <CheckCircle2 size={80} className="text-green-500" />
         </div>
         <div className="space-y-4 max-w-sm">
-          <h2 className="text-3xl font-black text-white tracking-tighter uppercase">ДАРХОСТ ҚАБУЛ ШУД!</h2>
+          <h2 className="text-3xl font-black text-white tracking-tighter uppercase">ҚАБУЛ ШУД!</h2>
           <p className="text-gray-400 font-bold leading-relaxed">
-            Ташаккур! Мо дархости шуморо дар давоми 24 соат тафтиш карда, режими ПРЕМИУМ-ро фаъол месозем.
+            Ташаккур! Мо дархости шуморо дар давоми 24 соат тафтиш карда, ПРЕМИУМ-ро фаъол месозем.
           </p>
         </div>
         <Button onClick={onBack} className="w-full max-w-xs h-14 rounded-2xl font-black text-lg bg-white text-black hover:bg-gray-200">
@@ -107,30 +133,44 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
 
         <Card className="bg-gradient-to-br from-[#1A1A1A] to-[#0D0D0D] border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl">
           <CardHeader className="border-b border-white/5 p-8">
-            <CardTitle className="text-white text-xl font-black flex items-center gap-3">
+            <CardTitle className="text-white text-xl font-black flex items-center gap-3 uppercase tracking-tighter">
               <CreditCard className="text-yellow-500" /> ДАСТУРИ ПАРДОХТ
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8 space-y-8">
-            <div className="space-y-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Корти мо (Душанбе Сити)</span>
+            <div className="space-y-6">
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">ВАРИАНТИ 1: ДУШАНБЕ СИТИ</span>
                 <div className="flex items-center justify-between bg-black/40 p-4 rounded-2xl border border-white/5">
                   <span className="text-xl font-black text-white tracking-widest">975638778</span>
-                  <Button variant="ghost" size="icon" onClick={handleCopy} className="text-yellow-500 hover:bg-yellow-500/10">
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy("975638778")} className="text-yellow-500 hover:bg-yellow-500/10">
                     <Copy size={20} />
                   </Button>
                 </div>
               </div>
+
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">ВАРИАНТИ 2: СПИТАМЕН БАНК</span>
+                <div className="flex items-center justify-between bg-black/40 p-4 rounded-2xl border border-white/5">
+                  <span className="text-xl font-black text-white tracking-widest">975638778</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy("975638778")} className="text-yellow-500 hover:bg-yellow-500/10">
+                    <Copy size={20} />
+                  </Button>
+                </div>
+              </div>
+
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Соҳиби корт</span>
-                <p className="text-lg font-black text-white">Б.А</p>
+                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Соҳиби корт</span>
+                <p className="text-lg font-black text-white ml-1">Б.А</p>
               </div>
             </div>
 
             <div className="p-5 bg-yellow-500/5 border border-yellow-500/20 rounded-2xl">
-              <p className="text-xs text-yellow-500 font-bold leading-relaxed">
-                <span className="font-black">ДИҚҚАТ:</span> Маблағро гузаронед ва акси (чек)-ро дар поён илова кунед. Мо дар давоми 24 соат премиумро фаъол мекунем.
+              <p className="text-xs text-yellow-500 font-bold leading-relaxed flex gap-2">
+                <AlertCircle size={16} className="shrink-0" />
+                <span>
+                  <span className="font-black">ДИҚҚАТ:</span> Маблағро гузаронед ва акси (чек)-ро дар поён илова кунед. Мо дар давоми 24 соат премиумро фаъол мекунем.
+                </span>
               </p>
             </div>
 
