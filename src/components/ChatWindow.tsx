@@ -60,8 +60,8 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
   // Лимити 3000 аломат: агар ҳатто яке аз иштирокчиён Премиум бошад
-  const isPremium = currentUserProfile?.isPremium && currentUserProfile?.premiumUntil && new Date(currentUserProfile.premiumUntil) > new Date();
-  const partnerIsPremium = partner?.isPremium && partner?.premiumUntil && new Date(partner.premiumUntil) > new Date();
+  const isPremium = currentUserProfile?.isPremium === true;
+  const partnerIsPremium = partner?.isPremium === true;
   
   const maxLimit = (isPremium || partnerIsPremium) ? 3000 : 1000;
 

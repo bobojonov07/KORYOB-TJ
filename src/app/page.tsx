@@ -131,8 +131,6 @@ export default function KoryobTJ() {
   );
 
   if (currentUserProfile?.isBlocked) {
-    const isFakeReceiptBlock = currentUserProfile.blockReason === 'fake_receipt' || 
-                              currentUserProfile.isBlocked && currentUserProfile.blockReason === 'Аз сабаби вориди акси бардурӯғ аккаунти шумо блок шуд';
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-6">
         <div className="max-w-md w-full bg-white rounded-[2.5rem] p-8 text-center shadow-2xl space-y-6 border border-destructive/20 overflow-hidden">

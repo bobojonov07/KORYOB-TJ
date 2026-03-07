@@ -53,7 +53,7 @@ export function JobForm({ jobId, onSuccess, onCancel, onUpgrade }: JobFormProps)
     ).length;
   }, [allJobsObj, user]);
 
-  const isPremium = profile?.isPremium && profile?.premiumUntil && new Date(profile.premiumUntil) > new Date();
+  const isPremium = profile?.isPremium === true;
 
   useEffect(() => {
     if (jobId && rtdb) {

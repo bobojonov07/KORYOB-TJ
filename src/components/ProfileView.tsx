@@ -23,8 +23,7 @@ import {
   Phone, 
   LogOut, 
   Crown, 
-  Sparkles, 
-  MessageCircle,
+  Sparkles,
   Image as ImageIcon 
 } from "lucide-react";
 import { format } from "date-fns";
@@ -61,7 +60,7 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
     return Object.values(jobsObj).filter((j: any) => j.postedEmail?.toLowerCase() === profile.email?.toLowerCase() && j.active).length;
   }, [jobsObj, profile]);
 
-  const isPremium = profile?.isPremium && profile?.premiumUntil && new Date(profile.premiumUntil) > new Date();
+  const isPremium = profile?.isPremium === true;
 
   if (loading) {
     return (
