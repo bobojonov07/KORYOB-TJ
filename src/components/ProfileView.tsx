@@ -9,10 +9,26 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useRTDBData, useRTDB, useAuth } from "@/firebase";
-import { User, Briefcase, ChevronRight, Mail, Calendar, KeyRound, Pencil, Info, ChevronLeft, Loader2, Phone, LogOut, Crown, Sparkles, MessageCircle } from "lucide-react";
+import { 
+  User, 
+  Briefcase, 
+  ChevronRight, 
+  Mail, 
+  Calendar, 
+  KeyRound, 
+  Pencil, 
+  Info, 
+  ChevronLeft, 
+  Loader2, 
+  Phone, 
+  LogOut, 
+  Crown, 
+  Sparkles, 
+  MessageCircle,
+  Image as ImageIcon 
+} from "lucide-react";
 import { format } from "date-fns";
 import { ref, update } from "firebase/database";
-import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
@@ -41,7 +57,7 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
   
   const myJobsCount = useMemo(() => {
     if (!jobsObj || !profile?.email) return 0;
-    return Object.values(jobsObj).filter((j: any) => j.postedEmail?.toLowerCase() === profile.email?.toLowerCase()).length;
+    return Object.values(jobsObj).filter((j: any) => j.postedEmail?.toLowerCase() === profile.email?.toLowerCase() && j.active).length;
   }, [jobsObj, profile]);
 
   const isPremium = profile?.isPremium && profile?.premiumUntil && new Date(profile.premiumUntil) > new Date();
@@ -130,7 +146,7 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
             className="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 rounded-[2rem] text-white flex items-center justify-between cursor-pointer hover:scale-[1.02] transition-all shadow-xl shadow-orange-200"
           >
             <div className="space-y-1">
-              <h3 className="font-black text-xl flex items-center gap-2"><Crown size={24} /> PREMUM ХАРЕД</h3>
+              <h3 className="font-black text-xl flex items-center gap-2"><Crown size={24} /> PREMIUM ХАРЕД</h3>
               <p className="text-[10px] font-bold uppercase tracking-widest opacity-90">Имкониятҳои бештар: 5 эълон, аксҳо, чати 3000 аломат</p>
             </div>
             <ChevronRight />
