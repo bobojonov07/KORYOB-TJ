@@ -59,8 +59,11 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   const { data: currentUserProfileObj } = useRTDBData(myEncodedEmail ? `users/${myEncodedEmail}` : null);
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
+  // Лимити 3000 аломат: агар ҳатто яке аз иштирокчиён Премиум бошад
   const isPremium = currentUserProfile?.isPremium && currentUserProfile?.premiumUntil && new Date(currentUserProfile.premiumUntil) > new Date();
-  const maxLimit = isPremium ? 3000 : 1000;
+  const partnerIsPremium = partner?.isPremium && partner?.premiumUntil && new Date(partner.premiumUntil) > new Date();
+  
+  const maxLimit = (isPremium || partnerIsPremium) ? 3000 : 1000;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -237,7 +240,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
         </div>
         <div className="flex justify-between items-center px-4">
            <span className={cn("text-[9px] font-black uppercase tracking-widest", (totalChatCharacters + text.length > maxLimit) ? "text-destructive" : "text-muted-foreground")}>
-             Умумӣ: {totalChatCharacters + text.length} / {maxLimit} {isPremium && "(PREMIUM)"}
+             Умумӣ: {totalChatCharacters + text.length} / {maxLimit} {(isPremium || partnerIsPremium) && "(PREMIUM)"}
            </span>
            {(totalChatCharacters + text.length > maxLimit) && <span className="text-[9px] font-black text-destructive uppercase tracking-widest">Лимити суҳбат ба охир расид!</span>}
         </div>
