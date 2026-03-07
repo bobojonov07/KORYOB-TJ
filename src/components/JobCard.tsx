@@ -5,7 +5,7 @@ import { JobListing, UserProfile } from "@/app/lib/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Clock, Banknote, Building2, MapPin, Heart, ArrowRight, Crown } from "lucide-react";
+import { Eye, Clock, Banknote, Building2, MapPin, Heart, ArrowRight, Crown, Sparkles } from "lucide-react";
 import { useUser, useRTDB, useRTDBData } from "@/firebase";
 import { ref, update, runTransaction } from "firebase/database";
 import { cn } from "@/lib/utils";
@@ -68,25 +68,43 @@ export function JobCard({ job, onClick, onChat, isOwner, compact = false }: JobC
     return (
       <div 
         onClick={onClick}
-        className="shrink-0 w-64 h-full bg-white rounded-3xl border border-yellow-500/30 shadow-lg shadow-yellow-500/5 p-4 space-y-3 cursor-pointer hover:scale-[1.02] transition-all relative overflow-hidden"
+        className="shrink-0 w-64 bg-white rounded-[2rem] border-2 border-yellow-500/20 shadow-[0_10px_30px_rgba(255,123,0,0.1)] p-4 space-y-3 cursor-pointer hover:scale-[1.03] transition-all relative overflow-hidden group"
       >
-        <div className="absolute top-2 right-2 z-10">
-          <Crown className="text-yellow-500 fill-yellow-500" size={16} />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400"></div>
+        <div className="absolute top-3 right-3 z-10 bg-yellow-400 text-white p-1 rounded-lg shadow-md group-hover:rotate-12 transition-transform">
+          <Crown size={14} fill="currentColor" />
         </div>
-        {job.image && (
-          <div className="relative h-28 w-full rounded-2xl overflow-hidden bg-secondary">
-            <Image src={job.image} alt={job.title} fill className="object-cover" />
+        
+        <div className="relative h-32 w-full rounded-2xl overflow-hidden bg-secondary mb-2">
+          {job.image ? (
+            <Image src={job.image} alt={job.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-yellow-50/50">
+               <Sparkles className="text-yellow-400 opacity-30" size={40} />
+            </div>
+          )}
+          <div className="absolute bottom-2 left-2">
+            <Badge className="bg-white/90 text-primary border-none text-[8px] font-black uppercase tracking-widest px-2 py-0.5">
+              {job.city}
+            </Badge>
           </div>
-        )}
+        </div>
+
         <div className="space-y-1">
-          <h3 className="font-black text-sm truncate leading-tight uppercase">{job.title}</h3>
+          <h3 className="font-black text-sm truncate leading-tight uppercase group-hover:text-primary transition-colors">{job.title}</h3>
           <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
              <Building2 size={10} className="text-primary" /> {job.company}
           </p>
         </div>
-        <div className="flex items-center justify-between pt-2">
-          <span className="text-xs font-black text-primary">{job.salary ? `${job.salary} TJS` : 'Маош —'}</span>
-          <span className="text-[9px] font-black text-muted-foreground uppercase">{job.city}</span>
+
+        <div className="flex items-center justify-between pt-1 border-t border-primary/5">
+          <div className="flex flex-col">
+            <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Маош</span>
+            <span className="text-xs font-black text-primary">{job.salary ? `${job.salary} TJS` : '—'}</span>
+          </div>
+          <div className="bg-primary/5 p-1.5 rounded-full text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+            <ArrowRight size={14} />
+          </div>
         </div>
       </div>
     );
@@ -103,8 +121,8 @@ export function JobCard({ job, onClick, onChat, isOwner, compact = false }: JobC
         </div>
       )}
       {job.image && (
-        <div className="relative h-48 w-full cursor-pointer" onClick={onClick}>
-          <Image src={job.image} alt={job.title} fill className="object-cover" />
+        <div className="relative h-48 w-full cursor-pointer overflow-hidden" onClick={onClick}>
+          <Image src={job.image} alt={job.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
         </div>
       )}

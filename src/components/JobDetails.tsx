@@ -64,22 +64,27 @@ export function JobDetails({ job, onBack, onChat }: JobDetailsProps) {
         </Button>
       </header>
 
-      <main className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-6 md:space-y-8">
+      <main className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-6 md:space-y-8 pb-12">
         
         {job.image && (
-          <div className="relative h-64 md:h-96 w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white">
-            <Image src={job.image} alt={job.title} fill className="object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+          <div className="relative h-72 md:h-[500px] w-full rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-2xl border-4 border-white group">
+            <Image src={job.image} alt={job.title} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
             {job.isPremium && (
-              <div className="absolute top-6 right-6 bg-yellow-500 text-white p-3 rounded-2xl shadow-xl flex items-center gap-2 font-black text-xs uppercase tracking-widest">
+              <div className="absolute top-6 right-6 bg-yellow-500 text-white p-3 rounded-2xl shadow-xl flex items-center gap-2 font-black text-[10px] uppercase tracking-widest animate-pulse">
                 <Crown size={16} fill="currentColor" /> VIP ПРЕМИУМ
               </div>
             )}
+            <div className="absolute bottom-6 left-8 right-8">
+               <h1 className="text-white text-3xl md:text-5xl font-black tracking-tighter leading-tight drop-shadow-lg">
+                 {job.title}
+               </h1>
+            </div>
           </div>
         )}
 
         <section className="bg-white p-6 md:p-10 rounded-[2.5rem] md:rounded-[3rem] shadow-xl shadow-primary/5 border border-primary/5 space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+          {!job.image && (
             <div className="space-y-4">
               <Badge className="bg-primary/10 text-primary border-primary/20 px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">
                 {job.company}
@@ -88,12 +93,15 @@ export function JobDetails({ job, onBack, onChat }: JobDetailsProps) {
                 {job.title}
                 {job.isPremium && <Crown className="text-yellow-500 fill-yellow-500" />}
               </h1>
-              <div className="flex items-center gap-2.5 text-muted-foreground font-black text-sm uppercase tracking-wide bg-secondary/30 w-fit px-4 py-2 rounded-xl">
-                <MapPin className="text-primary w-5 h-5" /> {job.city}
-              </div>
+            </div>
+          )}
+          
+          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+            <div className="flex items-center gap-2.5 text-muted-foreground font-black text-sm uppercase tracking-wide bg-secondary/30 w-fit px-4 py-2 rounded-xl">
+              <MapPin className="text-primary w-5 h-5" /> {job.city}
             </div>
             {!isOwner && user && (
-              <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-full h-12 w-12">
+              <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-full h-12 w-12 ml-auto">
                 <AlertTriangle size={24} />
               </Button>
             )}
@@ -129,7 +137,7 @@ export function JobDetails({ job, onBack, onChat }: JobDetailsProps) {
                   className="flex-1 rounded-[2rem] gap-4 h-16 md:h-20 text-xl font-black bg-[#25D366] hover:bg-[#128C7E] text-white shadow-2xl shadow-green-500/20 transition-all hover:scale-[1.02] active:scale-95 border-none"
                 >
                   <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 0 5.415 0 12.05c0 2.122.554 4.197 1.607 6.031L0 24l6.105-1.602a11.803 11.803 0 005.94 1.604h.005c6.634 0 12.048-5.417 12.048-12.052 0-3.211-1.252-6.227-3.525-8.502z"/>
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 0 5.415 0 12.05c0 2.122.554 4.197 1.607 6.031L0 24l6.105-1.602a11.803 11.803 0 005.94 1.604h.005c6.634 0 12.048-5.417 12.048-12.052 0-3.211-1.252-6.227-3.525-8.502z"/>
                   </svg>
                   WhatsApp
                 </Button>

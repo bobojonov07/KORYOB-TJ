@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { containsForbiddenWords, MODERATION_RULES } from "@/app/lib/moderation";
 import { useToast } from "@/hooks/use-toast";
 import { ReportDialog } from "./ReportDialog";
+import Image from "next/image";
 
 interface ChatWindowProps {
   partnerEmail: string;
@@ -154,14 +155,23 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
           <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full hover:bg-gray-100">
             <ArrowLeft size={20} />
           </Button>
-          <div className="flex flex-col">
-            <h3 className="font-black text-md leading-tight flex items-center gap-1">
-              {partner?.name || partnerEmail.split('@')[0]}
-              {partner?.isPremium && <Crown size={12} className="text-yellow-500 fill-yellow-500" />}
-            </h3>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              {formatLastSeen(partner?.lastSeen || null)}
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-black text-primary overflow-hidden border">
+              {partner?.profileImage ? (
+                <Image src={partner.profileImage} alt={partner.name} fill className="object-cover" />
+              ) : (
+                partner?.name?.[0]?.toUpperCase() || '?'
+              )}
+            </div>
+            <div className="flex flex-col">
+              <h3 className="font-black text-sm leading-tight flex items-center gap-1">
+                {partner?.name || partnerEmail.split('@')[0]}
+                {partner?.isPremium && <Crown size={12} className="text-yellow-500 fill-yellow-500" />}
+              </h3>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                {formatLastSeen(partner?.lastSeen || null)}
+              </span>
+            </div>
           </div>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-muted-foreground hover:text-destructive">

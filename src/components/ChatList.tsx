@@ -10,6 +10,7 @@ import { MessageCircle, Trash2, ChevronLeft, Loader2, Filter } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 interface ChatListProps {
   activeChatEmail: string | null;
@@ -66,12 +67,12 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           lastTime: new Date(lastMsg.time).getTime() || 0,
           lastText: lastMsg.text || "Паём...",
           hasUnread,
-          chatId
+          chatId,
+          profileImage: userData?.profileImage || null
         });
       }
     });
 
-    // Сорткунии қатъӣ: Охирин суҳбат ҳамеша дар боло
     let result = partners.sort((a, b) => b.lastTime - a.lastTime);
 
     if (showOnlyUnread) {
@@ -144,8 +145,12 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
                 )}
               >
                 <div className="relative shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center font-black text-primary text-xl border-2 border-white shadow-sm">
-                    {u.name?.[0]?.toUpperCase() || '?'}
+                  <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center font-black text-primary text-xl border-2 border-white shadow-sm overflow-hidden">
+                    {u.profileImage ? (
+                      <Image src={u.profileImage} alt={u.name} fill className="object-cover" />
+                    ) : (
+                      u.name?.[0]?.toUpperCase() || '?'
+                    )}
                   </div>
                   <div className={cn(
                     "absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm",
