@@ -12,7 +12,10 @@ export interface UserProfile {
   warningCount?: number;
   reportsCount?: number;
   isBlocked?: boolean;
-  favorites?: string[]; // Array of job IDs
+  favorites?: string[];
+  isPremium?: boolean;
+  premiumUntil?: string;
+  profileImage?: string; // Data URI
 }
 
 export interface JobListing {
@@ -32,6 +35,8 @@ export interface JobListing {
   postedAt: string;
   views: number;
   active: boolean;
+  image?: string; // Data URI for Premium users
+  isPremium?: boolean;
 }
 
 export interface ChatMessage {

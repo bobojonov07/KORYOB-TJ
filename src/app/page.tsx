@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, Menu, Home, List, Info, ShieldAlert, Heart, ChevronLeft } from "lucide-react";
+import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, Menu, Home, List, Info, ShieldAlert, Heart, Crown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { signOut } from "firebase/auth";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const CITIES = ["Ҳама шаҳрҳо", "Душанбе", "Хуҷанд", "Бохтар", "Кӯлоб", "Истаравшан", "Исфара", "Конибодом", "Турсунзода", "Ваҳдат", "Роғун", "Норак", "Панҷакент", "Ҳисор"];
 
@@ -45,10 +46,9 @@ export default function KoryobTJ() {
   }, [jobsObj]);
 
   const userEncodedEmail = user?.email ? encodeURIComponent(user.email.toLowerCase()).replace(/\./g, '%2E') : null;
-  const { data: currentUserProfileObj, loading: profileLoading } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
+  const { data: currentUserProfileObj } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
-  // Огоҳинома барои паёмҳои нав
   const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
   const hasUnreadMessages = !!unreadStatus;
 
@@ -58,9 +58,13 @@ export default function KoryobTJ() {
     }
   }, [user, userEncodedEmail, rtdb]);
 
+  const premiumJobs = useMemo(() => {
+    return jobsData.filter(j => j.active && j.isPremium).sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
+  }, [jobsData]);
+
   const filteredJobs = useMemo(() => {
     if (!jobsData) return [];
-    let list = jobsData.filter(j => j.active);
+    let list = jobsData.filter(j => j.active && !j.isPremium);
     
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -73,7 +77,8 @@ export default function KoryobTJ() {
     if (cityFilter !== "Ҳама шаҳрҳо") {
       list = list.filter(j => j.city === cityFilter);
     }
-    return user ? list : list.slice(0, 5);
+    const final = list.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
+    return user ? final : final.slice(0, 5);
   }, [jobsData, searchQuery, cityFilter, user]);
 
   const selectedJob = jobsData.find(j => j.id === selectedJobId);
@@ -126,14 +131,9 @@ export default function KoryobTJ() {
           <div className="bg-destructive/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-destructive animate-pulse">
             <ShieldAlert size={48} />
           </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Аккаунт Блок шуд</h2>
-            <p className="text-muted-foreground font-medium leading-relaxed">
-              Мутаассифона, ҳисоби шумо барои риоя накардани қоидаҳои платформа блок карда шуд.
-            </p>
-          </div>
-          <Button onClick={handleLogout} className="w-full h-14 rounded-2xl text-lg font-black" variant="destructive">
-            <LogOut size={20} className="mr-2" /> Баромад аз ҳисоб
+          <h2 className="text-2xl font-black">Аккаунт Блок шуд</h2>
+          <Button onClick={handleLogout} className="w-full h-14 rounded-2xl font-black" variant="destructive">
+            <LogOut size={20} className="mr-2" /> Баромад
           </Button>
         </div>
       </div>
@@ -175,13 +175,12 @@ export default function KoryobTJ() {
                 </div>
                 <NavButton icon={<Heart size={20}/>} label="Писандидаҳо" active={activeView === 'favorites'} onClick={() => setActiveView("favorites")} />
                 {currentUserProfile?.role === 'korfarmo' && (
-                  <NavButton icon={<List size={20}/>} label="Эълонҳои ман" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} />
+                  <NavButton icon={<List size={20}/>} label="Эълонҳо" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} />
                 )}
                 <NavButton icon={<UserIcon size={20}/>} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
               </>
             )}
             <NavButton icon={<Info size={20}/>} label="Оиди мо" active={activeView === 'about'} onClick={() => setActiveView("about")} />
-            
             {!user ? (
               <Button onClick={() => setActiveView("auth")} className="rounded-xl font-black px-6">Воридшавӣ</Button>
             ) : (
@@ -203,21 +202,16 @@ export default function KoryobTJ() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[85%] rounded-l-[2.5rem] p-6">
-                  <SheetHeader>
-                    <SheetTitle className="text-left font-black text-primary text-xl tracking-tighter">МЕНЮ</SheetTitle>
-                  </SheetHeader>
+                  <SheetHeader><SheetTitle className="text-left font-black text-primary text-xl tracking-tighter uppercase">МЕНЮ</SheetTitle></SheetHeader>
                   <div className="flex flex-col gap-3 mt-8">
                     <MobileNavItem icon={<Home size={20}/>} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />
-                    <div className="relative">
-                      <MobileNavItem icon={<MessageCircle size={20}/>} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
-                      {hasUnreadMessages && <div className="absolute top-1/2 -translate-y-1/2 right-4 w-3 h-3 bg-primary rounded-full border-2 border-white"></div>}
-                    </div>
+                    <MobileNavItem icon={<MessageCircle size={20}/>} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
                     <MobileNavItem icon={<Heart size={20}/>} label="Писандидаҳо" active={activeView === 'favorites'} onClick={() => setActiveView("favorites")} />
-                    <MobileNavItem icon={<Info size={20}/>} label="Оиди мо" active={activeView === 'about'} onClick={() => setActiveView("about")} />
                     {currentUserProfile?.role === 'korfarmo' && (
                       <MobileNavItem icon={<List size={20}/>} label="Эълонҳои ман" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} />
                     )}
                     <MobileNavItem icon={<UserIcon size={20}/>} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
+                    <MobileNavItem icon={<Info size={20}/>} label="Оиди мо" active={activeView === 'about'} onClick={() => setActiveView("about")} />
                     <div className="mt-auto pt-6 border-t">
                       <Button variant="ghost" className="w-full justify-start gap-4 h-12 text-md font-black rounded-xl text-destructive" onClick={handleLogout}>
                         <LogOut size={20} /> Баромад
@@ -231,59 +225,67 @@ export default function KoryobTJ() {
         </header>
       )}
 
-      <main className={cn(
-        "flex-1 overflow-y-auto",
-        isFullScreenView ? "p-0 h-screen" : "container max-w-7xl mx-auto p-4 md:p-12"
-      )}>
+      <main className={cn("flex-1 overflow-y-auto", isFullScreenView ? "p-0 h-screen" : "container max-w-7xl mx-auto p-4 md:p-12")}>
         {activeView === "jobs" && (
-          <div className="space-y-8">
+          <div className="space-y-12">
             <section className="bg-gradient-to-br from-primary/10 to-white p-6 md:p-16 rounded-[2.5rem] border border-primary/5 text-center space-y-6">
               <div className="space-y-3">
-                <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tighter leading-tight">
-                  Кори орзуи худро <br /> <span className="text-primary">пайдо кунед</span>
-                </h2>
-                <p className="text-muted-foreground text-sm md:text-lg font-medium">Платформаи муосири корёбӣ дар Тоҷикистон</p>
+                <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tighter leading-tight">Кори орзуи худро <br /> <span className="text-primary">пайдо кунед</span></h2>
+                <p className="text-muted-foreground text-sm font-medium">Платформаи муосири корёбӣ дар Тоҷикистон</p>
               </div>
-
               <div className="flex flex-col md:flex-row gap-3 max-w-4xl mx-auto pt-4">
                 <div className="relative flex-[2]">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
-                  <Input 
-                    placeholder="Ҷустуҷӯи кор..." 
-                    className="pl-12 h-12 md:h-14 rounded-2xl bg-white border-none shadow-sm font-medium"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+                  <Input placeholder="Ҷустуҷӯ..." className="pl-12 h-14 rounded-2xl bg-white border-none shadow-sm font-bold" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                 </div>
                 <div className="flex-1">
                   <Select value={cityFilter} onValueChange={setCityFilter}>
-                    <SelectTrigger className="h-12 md:h-14 rounded-2xl bg-white border-none shadow-sm font-bold">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-5 h-5 text-primary" />
-                        <SelectValue placeholder="Шаҳр" />
-                      </div>
+                    <SelectTrigger className="h-14 rounded-2xl bg-white border-none shadow-sm font-bold">
+                      <div className="flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /><SelectValue placeholder="Шаҳр" /></div>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
-                      {CITIES.map(city => (
-                        <SelectItem key={city} value={city} className="font-bold">{city}</SelectItem>
-                      ))}
+                      {CITIES.map(city => (<SelectItem key={city} value={city} className="font-bold">{city}</SelectItem>))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
             </section>
 
+            {premiumJobs.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between px-2">
+                  <h3 className="text-xl font-black flex items-center gap-2 uppercase tracking-tighter">
+                    <Crown className="text-yellow-500 fill-yellow-500" /> VIP PREMIUM ЭЪЛОНҲО
+                  </h3>
+                </div>
+                <ScrollArea className="w-full whitespace-nowrap">
+                  <div className="flex gap-4 pb-4 px-2 h-full">
+                    {premiumJobs.map(job => (
+                      <JobCard 
+                        key={job.id} 
+                        job={job} 
+                        compact 
+                        onClick={() => handleJobClick(job.id)} 
+                        onChat={() => handleStartChat(job.postedEmail)}
+                        isOwner={user?.uid === job.postedUid}
+                      />
+                    ))}
+                  </div>
+                  <ScrollBar orientation="horizontal" className="hidden" />
+                </ScrollArea>
+              </div>
+            )}
+
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl md:text-2xl font-black text-foreground tracking-tight">Эълонҳои ҷорӣ</h3>
+                <h3 className="text-xl md:text-2xl font-black text-foreground tracking-tighter uppercase">Эълонҳои ҷорӣ</h3>
                 {currentUserProfile?.role === 'korfarmo' && (
-                  <Button onClick={() => setActiveView("create-job")} className="rounded-xl gap-2 h-10 px-4 text-sm font-black shadow-md">
-                    <Plus size={18} /> Илова
+                  <Button onClick={() => setActiveView("create-job")} className="rounded-xl gap-2 h-12 px-6 text-sm font-black shadow-lg bg-primary">
+                    <Plus size={18} /> НАШРИ ЭЪЛОН
                   </Button>
                 )}
               </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
                 {filteredJobs.length > 0 ? (
                   filteredJobs.map(job => (
                     <JobCard 
@@ -296,7 +298,7 @@ export default function KoryobTJ() {
                   ))
                 ) : (
                   <div className="col-span-full text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-primary/5">
-                    <p className="text-muted-foreground font-black">Эълонҳо ёфт нашуданд.</p>
+                    <p className="text-muted-foreground font-black uppercase tracking-widest text-xs opacity-50">Эълонҳо ёфт нашуданд</p>
                   </div>
                 )}
               </div>
@@ -305,8 +307,8 @@ export default function KoryobTJ() {
         )}
 
         {activeView === "chat" && (
-          <div className="h-full md:h-[calc(100vh-200px)] lg:h-[80vh]">
-            <div className="flex h-full bg-white md:rounded-[2rem] md:shadow-xl overflow-hidden md:border border-primary/5">
+          <div className="h-full md:h-[calc(100vh-200px)]">
+            <div className="flex h-full bg-white md:rounded-[2.5rem] md:shadow-2xl overflow-hidden md:border border-primary/5">
               <div className={cn("flex flex-col border-r w-full md:w-1/3", activeChatEmail && "hidden md:flex")}>
                 <ChatList activeChatEmail={activeChatEmail} onSelect={setActiveChatEmail} onBack={() => setActiveView("jobs")} />
               </div>
@@ -315,8 +317,8 @@ export default function KoryobTJ() {
                   <ChatWindow partnerEmail={activeChatEmail} onBack={() => setActiveChatEmail(null)} />
                 ) : (
                   <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-secondary/5">
-                    <MessageCircle size={48} className="opacity-20 mb-4" />
-                    <p className="font-bold">Чатҳоро аз рӯйхат интихоб кунед</p>
+                    <MessageCircle size={48} className="opacity-10 mb-4" />
+                    <p className="font-black uppercase tracking-widest text-xs">Суҳбатро интихоб кунед</p>
                   </div>
                 )}
               </div>
@@ -324,16 +326,7 @@ export default function KoryobTJ() {
           </div>
         )}
 
-        {activeView === "profile" && (
-          <ProfileView 
-            profile={currentUserProfile} 
-            loading={profileLoading} 
-            onViewMyJobs={() => setActiveView("my-jobs")} 
-            onAbout={() => setActiveView("about")} 
-            onBack={() => setActiveView("jobs")}
-            onLogout={handleLogout}
-          />
-        )}
+        {activeView === "profile" && <ProfileView profile={currentUserProfile} onViewMyJobs={() => setActiveView("my-jobs")} onAbout={() => setActiveView("about")} onBack={() => setActiveView("jobs")} onLogout={handleLogout} />}
         {activeView === "favorites" && <FavoritesView onSelectJob={(id) => handleJobClick(id)} onBack={() => setActiveView("jobs")} />}
         {activeView === "my-jobs" && <MyJobsView onBack={() => setActiveView("profile")} />}
         {activeView === "create-job" && <JobForm jobId={null} onSuccess={() => setActiveView("jobs")} onCancel={() => setActiveView("jobs")} />}
@@ -341,22 +334,13 @@ export default function KoryobTJ() {
       </main>
 
       {user && !isFullScreenView && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t px-6 py-3 flex items-center justify-between z-50 rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-          <MobileNavTab icon={<Home size={22} />} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t px-8 py-4 flex items-center justify-between z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+          <MobileNavTab icon={<Home size={24} />} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />
           <div className="relative">
-            <MobileNavTab icon={<MessageCircle size={22} />} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
+            <MobileNavTab icon={<MessageCircle size={24} />} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
             {hasUnreadMessages && <div className="absolute top-0 right-1 w-3 h-3 bg-primary rounded-full border-2 border-white"></div>}
           </div>
-          
-          {currentUserProfile?.role === 'korfarmo' ? (
-            <button onClick={() => setActiveView("create-job")} className="bg-primary text-white p-3.5 rounded-2xl -mt-12 shadow-xl border-4 border-white active:scale-90 transition-all">
-              <Plus size={28} />
-            </button>
-          ) : (
-            <MobileNavTab icon={<Heart size={22} />} label="Писанд" active={activeView === 'favorites'} onClick={() => setActiveView("favorites")} />
-          )}
-
-          <MobileNavTab icon={<UserIcon size={22} />} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
+          <MobileNavTab icon={<UserIcon size={24} />} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
         </div>
       )}
     </div>
@@ -365,13 +349,7 @@ export default function KoryobTJ() {
 
 function NavButton({ icon, label, active, onClick }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void }) {
   return (
-    <button 
-      onClick={onClick} 
-      className={cn(
-        "flex items-center gap-2 px-3 py-2 rounded-xl transition-all font-black text-sm",
-        active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary/50"
-      )}
-    >
+    <button onClick={onClick} className={cn("flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-black text-sm uppercase tracking-tighter", active ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-secondary")}>
       {icon} <span>{label}</span>
     </button>
   );
@@ -379,7 +357,7 @@ function NavButton({ icon, label, active, onClick }: { icon: React.ReactNode, la
 
 function MobileNavItem({ icon, label, active, onClick }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void }) {
   return (
-    <Button variant="ghost" className={cn("justify-start gap-4 h-12 text-md font-bold rounded-xl", active && "bg-primary/10 text-primary")} onClick={onClick}>
+    <Button variant="ghost" className={cn("justify-start gap-4 h-14 text-md font-black rounded-2xl uppercase tracking-widest", active && "bg-primary/10 text-primary")} onClick={onClick}>
       {icon} {label}
     </Button>
   );

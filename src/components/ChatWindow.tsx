@@ -7,7 +7,7 @@ import { ref, push, update, set, runTransaction, remove } from "firebase/databas
 import { ChatMessage, UserProfile } from "@/app/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ArrowLeft, Check, CheckCheck, AlertTriangle, MessageCircle, Trash2 } from "lucide-react";
+import { Send, ArrowLeft, Check, CheckCheck, AlertTriangle, MessageCircle, Trash2, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { containsForbiddenWords, MODERATION_RULES } from "@/app/lib/moderation";
 import { useToast } from "@/hooks/use-toast";
@@ -58,6 +58,9 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   const { data: currentUserProfileObj } = useRTDBData(myEncodedEmail ? `users/${myEncodedEmail}` : null);
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
+  const isPremium = currentUserProfile?.isPremium && currentUserProfile?.premiumUntil && new Date(currentUserProfile.premiumUntil) > new Date();
+  const maxLimit = isPremium ? 3000 : 1000;
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -89,12 +92,11 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
       return;
     }
 
-    // Лимити умумии 1000 аломат барои тамоми суҳбат
-    if (totalChatCharacters + trimmedText.length > 1000) {
+    if (totalChatCharacters + trimmedText.length > maxLimit) {
       toast({ 
         variant: "destructive", 
         title: "Лимити суҳбат ба охир расид", 
-        description: `Шумораи умумии аломатҳо дар ин суҳбат аз 1000 гузашт. (Ҳозир: ${totalChatCharacters})` 
+        description: `Шумораи умумии аломатҳо аз ${maxLimit} гузашт.` 
       });
       return;
     }
@@ -153,7 +155,10 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
             <ArrowLeft size={20} />
           </Button>
           <div className="flex flex-col">
-            <h3 className="font-black text-md leading-tight">{partner?.name || partnerEmail.split('@')[0]}</h3>
+            <h3 className="font-black text-md leading-tight flex items-center gap-1">
+              {partner?.name || partnerEmail.split('@')[0]}
+              {partner?.isPremium && <Crown size={12} className="text-yellow-500 fill-yellow-500" />}
+            </h3>
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
               {formatLastSeen(partner?.lastSeen || null)}
             </span>
@@ -215,16 +220,16 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
             onClick={handleSend} 
             size="icon" 
             className="rounded-full h-12 w-12 shrink-0 bg-primary hover:bg-primary/90 shadow-lg active:scale-95 transition-all" 
-            disabled={currentUserProfile?.isBlocked || !text.trim() || (totalChatCharacters + text.trim().length > 1000)}
+            disabled={currentUserProfile?.isBlocked || !text.trim() || (totalChatCharacters + text.trim().length > maxLimit)}
           >
             <Send size={20} />
           </Button>
         </div>
         <div className="flex justify-between items-center px-4">
-           <span className={cn("text-[9px] font-black uppercase tracking-widest", (totalChatCharacters + text.length > 1000) ? "text-destructive" : "text-muted-foreground")}>
-             Умумӣ: {totalChatCharacters + text.length} / 1000 аломат
+           <span className={cn("text-[9px] font-black uppercase tracking-widest", (totalChatCharacters + text.length > maxLimit) ? "text-destructive" : "text-muted-foreground")}>
+             Умумӣ: {totalChatCharacters + text.length} / {maxLimit} {isPremium && "(PREMIUM)"}
            </span>
-           {(totalChatCharacters + text.length > 1000) && <span className="text-[9px] font-black text-destructive uppercase tracking-widest">Лимити суҳбат ба охир расид!</span>}
+           {(totalChatCharacters + text.length > maxLimit) && <span className="text-[9px] font-black text-destructive uppercase tracking-widest">Лимити суҳбат ба охир расид!</span>}
         </div>
       </div>
 

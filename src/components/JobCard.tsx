@@ -1,24 +1,24 @@
+
 "use client";
 
 import { JobListing, UserProfile } from "@/app/lib/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Clock, Banknote, Building2, MapPin, Heart, ArrowRight } from "lucide-react";
+import { Eye, Clock, Banknote, Building2, MapPin, Heart, ArrowRight, Crown } from "lucide-react";
 import { useUser, useRTDB, useRTDBData } from "@/firebase";
 import { ref, update, runTransaction } from "firebase/database";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface JobCardProps {
   job: JobListing;
   onClick: () => void;
   onChat: () => void;
   isOwner: boolean;
+  compact?: boolean;
 }
 
-/**
- * Функсияи махсус барои нишон додани вақт ба забони тоҷикӣ
- */
 function formatTajikTime(dateStr: string) {
   const date = new Date(dateStr);
   const now = new Date();
@@ -28,15 +28,15 @@ function formatTajikTime(dateStr: string) {
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
   if (diffInMinutes < 1) return "Ҳозир";
-  if (diffInMinutes < 60) return `${diffInMinutes} дақиқа пеш`;
+  if (diffInMinutes < 60) return `${diffInMinutes} дақ. пеш`;
   if (diffInHours < 24) return `${diffInHours} соат пеш`;
   if (diffInDays === 1) return "Дирӯз";
   if (diffInDays < 30) return `${diffInDays} рӯз пеш`;
   
-  return date.toLocaleDateString('tg-TJ', { day: 'numeric', month: 'long', year: 'numeric' });
+  return date.toLocaleDateString('tg-TJ', { day: 'numeric', month: 'long' });
 }
 
-export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
+export function JobCard({ job, onClick, onChat, isOwner, compact = false }: JobCardProps) {
   const { user } = useUser();
   const rtdb = useRTDB();
   
@@ -64,8 +64,50 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
     });
   };
 
+  if (compact) {
+    return (
+      <div 
+        onClick={onClick}
+        className="shrink-0 w-64 h-full bg-white rounded-3xl border border-yellow-500/30 shadow-lg shadow-yellow-500/5 p-4 space-y-3 cursor-pointer hover:scale-[1.02] transition-all relative overflow-hidden"
+      >
+        <div className="absolute top-2 right-2 z-10">
+          <Crown className="text-yellow-500 fill-yellow-500" size={16} />
+        </div>
+        {job.image && (
+          <div className="relative h-28 w-full rounded-2xl overflow-hidden bg-secondary">
+            <Image src={job.image} alt={job.title} fill className="object-cover" />
+          </div>
+        )}
+        <div className="space-y-1">
+          <h3 className="font-black text-sm truncate leading-tight uppercase">{job.title}</h3>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+             <Building2 size={10} className="text-primary" /> {job.company}
+          </p>
+        </div>
+        <div className="flex items-center justify-between pt-2">
+          <span className="text-xs font-black text-primary">{job.salary ? `${job.salary} TJS` : 'Маош —'}</span>
+          <span className="text-[9px] font-black text-muted-foreground uppercase">{job.city}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Card className="hover:shadow-[0_30px_60px_rgba(255,123,0,0.15)] transition-all duration-500 group overflow-hidden border-primary/10 rounded-[2.5rem] bg-white flex flex-col h-full border hover:-translate-y-2 active:scale-[0.98]">
+    <Card className={cn(
+      "hover:shadow-[0_30px_60px_rgba(255,123,0,0.15)] transition-all duration-500 group overflow-hidden rounded-[2.5rem] bg-white flex flex-col h-full border hover:-translate-y-2 active:scale-[0.98]",
+      job.isPremium ? "border-yellow-500/40 border-2" : "border-primary/10"
+    )}>
+      {job.isPremium && (
+        <div className="bg-yellow-500 text-white text-[9px] font-black py-1 px-4 text-center tracking-widest flex items-center justify-center gap-2">
+          <Crown size={12} fill="currentColor" /> VIP ПРЕМИУМ ЭЪЛОН
+        </div>
+      )}
+      {job.image && (
+        <div className="relative h-48 w-full cursor-pointer" onClick={onClick}>
+          <Image src={job.image} alt={job.title} fill className="object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+        </div>
+      )}
       <CardHeader className="pb-4 space-y-5">
         <div className="flex justify-between items-start">
           <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-4 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-1.5">
@@ -106,12 +148,12 @@ export function JobCard({ job, onClick, onChat, isOwner }: JobCardProps) {
           <div className="flex items-center gap-2.5 bg-primary/5 px-4 py-2.5 rounded-2xl border border-primary/10 shadow-sm">
             <Banknote className="w-5 h-5 text-primary font-bold" />
             <span className="text-sm font-black text-primary tracking-tight">
-              {job.salary ? `${job.salary} сомонӣ` : 'Маош —'}
+              {job.salary ? `${job.salary} TJS` : 'Маош —'}
             </span>
           </div>
           <div className="flex items-center gap-2.5 bg-secondary/30 px-4 py-2.5 rounded-2xl border border-primary/5">
             <Eye className="w-5 h-5 text-muted-foreground/60" />
-            <span className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest">{job.views || 0} тамошо</span>
+            <span className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest">{job.views || 0}</span>
           </div>
         </div>
         <p className="text-sm text-muted-foreground/80 line-clamp-3 leading-relaxed font-bold italic border-l-4 border-primary/20 pl-4 py-1">

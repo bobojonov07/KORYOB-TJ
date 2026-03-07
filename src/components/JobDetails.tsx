@@ -1,15 +1,17 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { JobListing } from "@/app/lib/types";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Phone, Calendar, User, MessageCircle, Banknote, Clock, Users, AlertTriangle, ChevronLeft, Share2 } from "lucide-react";
+import { MapPin, Phone, Calendar, User, MessageCircle, Banknote, Clock, Users, AlertTriangle, ChevronLeft, Share2, Crown } from "lucide-react";
 import { useUser, useRTDB } from "@/firebase";
 import { ref, runTransaction } from "firebase/database";
 import { ReportDialog } from "./ReportDialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface JobDetailsProps {
   job: JobListing;
@@ -63,13 +65,29 @@ export function JobDetails({ job, onBack, onChat }: JobDetailsProps) {
       </header>
 
       <main className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-6 md:space-y-8">
+        
+        {job.image && (
+          <div className="relative h-64 md:h-96 w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white">
+            <Image src={job.image} alt={job.title} fill className="object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            {job.isPremium && (
+              <div className="absolute top-6 right-6 bg-yellow-500 text-white p-3 rounded-2xl shadow-xl flex items-center gap-2 font-black text-xs uppercase tracking-widest">
+                <Crown size={16} fill="currentColor" /> VIP ПРЕМИУМ
+              </div>
+            )}
+          </div>
+        )}
+
         <section className="bg-white p-6 md:p-10 rounded-[2.5rem] md:rounded-[3rem] shadow-xl shadow-primary/5 border border-primary/5 space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <div className="space-y-4">
               <Badge className="bg-primary/10 text-primary border-primary/20 px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">
                 {job.company}
               </Badge>
-              <h1 className="text-3xl md:text-5xl font-black tracking-tighter leading-[1.1] text-foreground">{job.title}</h1>
+              <h1 className="text-3xl md:text-5xl font-black tracking-tighter leading-[1.1] text-foreground flex items-center gap-3">
+                {job.title}
+                {job.isPremium && <Crown className="text-yellow-500 fill-yellow-500" />}
+              </h1>
               <div className="flex items-center gap-2.5 text-muted-foreground font-black text-sm uppercase tracking-wide bg-secondary/30 w-fit px-4 py-2 rounded-xl">
                 <MapPin className="text-primary w-5 h-5" /> {job.city}
               </div>
@@ -82,7 +100,7 @@ export function JobDetails({ job, onBack, onChat }: JobDetailsProps) {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 pt-4">
-            <DetailItem icon={<Banknote className="text-primary" />} label="Маош" value={job.salary ? `${job.salary} сомонӣ` : '—'} />
+            <DetailItem icon={<Banknote className="text-primary" />} label="Маош" value={job.salary ? `${job.salary} TJS` : '—'} />
             <DetailItem icon={<Clock className="text-primary" />} label="Соатҳо" value={job.hours || '—'} />
             <DetailItem icon={<Calendar className="text-primary" />} label="Синну сол" value={job.age || '—'} />
             <DetailItem icon={<Users className="text-primary" />} label="Ҷинс" value={job.gender} />
