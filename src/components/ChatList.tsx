@@ -46,9 +46,8 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
         const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
         const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.');
         
-        const messageList = Object.values(messages || {}).sort((a: any, b: any) => 
-          new Date(a.time).getTime() - new Date(b.time).getTime()
-        );
+        const messageList = Object.entries(messages || {}).map(([id, val]: [string, any]) => ({ id, ...val }))
+          .sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime());
         
         if (messageList.length === 0) return;
 
@@ -64,7 +63,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           name: userData?.name || partnerEmail.split('@')[0],
           role: userData?.role || 'korjob',
           lastSeen: userData?.lastSeen || null,
-          lastTime: new Date(lastMsg.time).getTime() || 0,
+          lastTime: new Date(lastMsg.time).getTime(),
           lastText: lastMsg.text || "Паём...",
           hasUnread,
           chatId,
@@ -73,7 +72,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       }
     });
 
-    // СОРТКУНИИ ҚАТЪӢ: Охирин паём (фиристода ё қабулшуда) ҳамеша дар боло
+    // СОРТКУНИИ ҚАТЪӢ: Охирин паём ҳамеша дар боло
     let result = partners.sort((a, b) => b.lastTime - a.lastTime);
 
     if (showOnlyUnread) {

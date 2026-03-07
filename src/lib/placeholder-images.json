@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Modern professional warm-toned office workspace, high quality desktop setup",
+      "imageUrl": "https://picsum.photos/seed/koryob-hero-modern-v2/1920/1080",
+      "imageHint": "modern office"
+    }
+  ]
 }
