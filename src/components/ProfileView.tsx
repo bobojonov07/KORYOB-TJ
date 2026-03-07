@@ -34,6 +34,7 @@ import Image from "next/image";
 
 interface ProfileViewProps {
   profile?: UserProfile | null;
+  isPremium?: boolean;
   loading?: boolean;
   onViewMyJobs: () => void;
   onAbout: () => void;
@@ -42,7 +43,7 @@ interface ProfileViewProps {
   onUpgrade: () => void;
 }
 
-export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, onLogout, onUpgrade }: ProfileViewProps) {
+export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout, onBack, onLogout, onUpgrade }: ProfileViewProps) {
   const rtdb = useRTDB();
   const auth = useAuth();
   const { toast } = useToast();
@@ -59,8 +60,6 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
     if (!jobsObj || !profile?.email) return 0;
     return Object.values(jobsObj).filter((j: any) => j.postedEmail?.toLowerCase() === profile.email?.toLowerCase() && j.active).length;
   }, [jobsObj, profile]);
-
-  const isPremium = profile?.isPremium === true;
 
   if (loading) {
     return (

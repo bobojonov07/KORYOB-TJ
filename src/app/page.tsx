@@ -52,24 +52,34 @@ export default function KoryobTJ() {
   const { data: currentUserProfileObj } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
+  const { data: requestsObj } = useRTDBData("premiumRequests");
+  
+  // Автоматикӣ Премиумро аз ду манбаъ месанҷад
+  const isUserPremium = useMemo(() => {
+    if (currentUserProfile?.isPremium) return true;
+    if (!requestsObj || !user) return false;
+    // Агар ақаллан як дархости ин корбар дар база "isPremium: true" бошад
+    return Object.values(requestsObj).some((req: any) => req.uid === user.uid && req.isPremium === true);
+  }, [currentUserProfile, requestsObj, user]);
+
   const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
   const hasUnreadMessages = !!unreadStatus;
 
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-bg');
 
   // Огоҳинома барои фаъол шудани Премиум
-  const lastPremiumStatus = useRef<boolean | undefined>(undefined);
+  const lastPremiumStatus = useRef<boolean>(false);
   useEffect(() => {
-    if (currentUserProfile) {
-      if (lastPremiumStatus.current === false && currentUserProfile.isPremium === true) {
+    if (isUserPremium) {
+      if (lastPremiumStatus.current === false) {
         toast({
           title: "ПРЕМИУМ ФАЪОЛ ШУД!",
           description: "Табрик! Акнун тамоми имкониятҳои VIP барои шумо кушодаанд.",
         });
       }
-      lastPremiumStatus.current = currentUserProfile.isPremium;
     }
-  }, [currentUserProfile?.isPremium, toast, currentUserProfile]);
+    lastPremiumStatus.current = isUserPremium;
+  }, [isUserPremium, toast]);
 
   useEffect(() => {
     if (user && userEncodedEmail && rtdb) {
@@ -378,7 +388,7 @@ export default function KoryobTJ() {
           </div>
         )}
 
-        {activeView === "profile" && <ProfileView profile={currentUserProfile} onViewMyJobs={() => setActiveView("my-jobs")} onAbout={() => setActiveView("about")} onBack={() => setActiveView("jobs")} onLogout={handleLogout} onUpgrade={() => setActiveView("premium-purchase")} />}
+        {activeView === "profile" && <ProfileView profile={currentUserProfile} isPremium={isUserPremium} onViewMyJobs={() => setActiveView("my-jobs")} onAbout={() => setActiveView("about")} onBack={() => setActiveView("jobs")} onLogout={handleLogout} onUpgrade={() => setActiveView("premium-purchase")} />}
         {activeView === "favorites" && <FavoritesView onSelectJob={(id) => handleJobClick(id)} onBack={() => setActiveView("jobs")} />}
         {activeView === "my-jobs" && <MyJobsView onBack={() => setActiveView("profile")} />}
         {activeView === "create-job" && <JobForm jobId={null} onSuccess={() => setActiveView("jobs")} onCancel={() => setActiveView("jobs")} onUpgrade={() => setActiveView("premium-purchase")} />}
