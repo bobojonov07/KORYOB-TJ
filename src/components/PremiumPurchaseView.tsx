@@ -31,7 +31,8 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
 
   const pendingRequest = useMemo(() => {
     if (!requestsObj || !user) return null;
-    return Object.values(requestsObj).find((req: any) => req.uid === user.uid && req.status === 'pending');
+    // Дархости фаъол - агар isPremium ҳоло ҳам false бошад
+    return Object.values(requestsObj).find((req: any) => req.uid === user.uid && req.isPremium === false);
   }, [requestsObj, user]);
 
   const handleCopy = (text: string) => {
@@ -63,7 +64,7 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
         userName: profile.name,
         receiptImage: receipt,
         timestamp: Date.now(),
-        status: 'pending'
+        isPremium: false // Ҳолати ибтидоӣ - санҷиш
       });
       setSubmitted(true);
       toast({ title: "Фиристода шуд", description: "Дархости шумо қабул шуд." });
@@ -73,6 +74,25 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
       setLoading(false);
     }
   };
+
+  if (profile?.isPremium) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center p-6 text-center space-y-8">
+        <div className="bg-yellow-500/20 p-8 rounded-full border border-yellow-500/50">
+          <Crown size={80} className="text-yellow-500 fill-yellow-500" />
+        </div>
+        <div className="space-y-4 max-w-sm">
+          <h2 className="text-3xl font-black text-white tracking-tighter uppercase">ШУМО ПРЕМИУМ ҲАСТЕД!</h2>
+          <p className="text-gray-400 font-bold leading-relaxed">
+            Тамоми имкониятҳои VIP барои шумо фаъол мебошанд. Ташаккур барои истифода аз KORYOB.TJ!
+          </p>
+        </div>
+        <Button onClick={onBack} className="w-full max-w-xs h-14 rounded-2xl font-black text-lg bg-white text-black hover:bg-gray-200">
+          БА ГЛАВНИЙ
+        </Button>
+      </div>
+    );
+  }
 
   if (pendingRequest) {
     return (

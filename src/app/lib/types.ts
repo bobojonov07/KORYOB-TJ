@@ -44,7 +44,7 @@ export interface ChatMessage {
   id?: string;
   sender: string;
   text: string;
-  time: number;
+  time: string;
   read: boolean;
 }
 
@@ -63,5 +63,5 @@ export interface PremiumRequest {
   userName: string;
   receiptImage: string; // Data URI
   timestamp: number;
-  status: 'pending' | 'approved' | 'rejected';
+  isPremium: boolean;
 }
