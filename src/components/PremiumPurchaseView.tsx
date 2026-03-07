@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useRTDB, useUser, useRTDBData } from "@/firebase";
 import { ref, push, set } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, Crown, CreditCard, Copy, ImageIcon, CheckCircle2, Loader2, X, Sparkles, AlertCircle } from "lucide-react";
+import { ChevronLeft, Crown, CreditCard, Copy, ImageIcon, CheckCircle2, Loader2, X, Sparkles, AlertCircle, ShieldAlert } from "lucide-react";
 import Image from "next/image";
 import { UserProfile, PremiumRequest } from "@/app/lib/types";
 
@@ -29,7 +29,6 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
   const { data: profile } = useRTDBData(encodedEmail ? `users/${encodedEmail}` : null) as { data: UserProfile | null };
   const { data: requestsObj } = useRTDBData("premiumRequests");
 
-  // Санҷиш: оё корбар аллакай дархости фаъол дорад?
   const pendingRequest = useMemo(() => {
     if (!requestsObj || !user) return null;
     return Object.values(requestsObj).find((req: any) => req.uid === user.uid && req.status === 'pending');
@@ -165,13 +164,19 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
               </div>
             </div>
 
-            <div className="p-5 bg-yellow-500/5 border border-yellow-500/20 rounded-2xl">
-              <p className="text-xs text-yellow-500 font-bold leading-relaxed flex gap-2">
+            <div className="p-5 bg-red-500/10 border border-red-500/30 rounded-2xl space-y-3">
+              <p className="text-xs text-red-500 font-bold leading-relaxed flex gap-2">
                 <AlertCircle size={16} className="shrink-0" />
                 <span>
-                  <span className="font-black">ДИҚҚАТ:</span> Маблағро гузаронед ва акси (чек)-ро дар поён илова кунед. Мо дар давоми 24 соат премиумро фаъол мекунем.
+                  <span className="font-black">ДИҚҚАТ:</span> Маблағро гузаронед ва акси (чек)-ро дар поён илова кунед.
                 </span>
               </p>
+              <div className="flex gap-2 items-center bg-red-500/20 p-3 rounded-xl border border-red-500/40">
+                <ShieldAlert className="text-red-500 shrink-0" size={18} />
+                <p className="text-[10px] font-black text-red-400 uppercase tracking-tighter leading-tight">
+                  Дар ҳолати боргузории акси бардурӯғ мо аккаунти шуморо блок мекунем.
+                </p>
+              </div>
             </div>
 
             <div className="space-y-4">

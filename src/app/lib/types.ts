@@ -12,6 +12,7 @@ export interface UserProfile {
   warningCount?: number;
   reportsCount?: number;
   isBlocked?: boolean;
+  blockReason?: string;
   favorites?: string[];
   isPremium?: boolean;
   premiumUntil?: string;

@@ -131,16 +131,24 @@ export default function KoryobTJ() {
   );
 
   if (currentUserProfile?.isBlocked) {
+    const isFakeReceiptBlock = currentUserProfile.blockReason === 'fake_receipt' || 
+                              currentUserProfile.isBlocked && currentUserProfile.blockReason === 'Аз сабаби вориди акси бардурӯғ аккаунти шумо блок шуд';
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-6">
         <div className="max-w-md w-full bg-white rounded-[2.5rem] p-8 text-center shadow-2xl space-y-6 border border-destructive/20 overflow-hidden">
-          <div className="bg-destructive/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-destructive animate-pulse">
-            <ShieldAlert size={48} />
+          <div className="bg-destructive/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto text-destructive animate-pulse">
+            <ShieldAlert size={56} />
           </div>
-          <h2 className="text-2xl font-black">Аккаунт Блок шуд</h2>
-          <Button onClick={handleLogout} className="w-full h-14 rounded-2xl font-black" variant="destructive">
-            <LogOut size={20} className="mr-2" /> Баромад
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black uppercase tracking-tighter">Аккаунт Блок шуд</h2>
+            <p className="text-muted-foreground font-bold text-sm leading-relaxed">
+              {currentUserProfile.blockReason || "Аз сабаби вориди акси бардурӯғ аккаунти шумо блок шуд"}
+            </p>
+          </div>
+          <Button onClick={handleLogout} className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs" variant="destructive">
+            <LogOut size={18} className="mr-2" /> Баромад аз ҳисоб
           </Button>
+          <p className="text-[10px] text-muted-foreground/60 font-black uppercase tracking-widest pt-4">© KORYOB.TJ Security Service</p>
         </div>
       </div>
     );
