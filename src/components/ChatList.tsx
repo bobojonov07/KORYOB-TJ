@@ -51,7 +51,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
         const messageList = Object.entries(messages || {})
           .map(([id, val]: [string, any]) => ({ id, ...val }))
           .filter(m => m.time && m.sender && m.text)
-          .sort((a, b) => Date.parse(a.time) - Date.parse(b.time));
+          .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
         
         if (messageList.length === 0) return;
 
@@ -67,7 +67,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           name: userData?.name || partnerEmail.split('@')[0],
           role: userData?.role || 'korjob',
           lastSeen: userData?.lastSeen || null,
-          lastTime: Date.parse(lastMsg.time), // Вақти охирин паём ҳамчун рақам
+          lastTime: new Date(lastMsg.time).getTime() || 0, // Вақти охирин паём ҳамчун рақам
           lastText: lastMsg.text || "Паём...",
           hasUnread,
           chatId,
@@ -76,7 +76,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       }
     });
 
-    // СОРТКУНИИ ҚАТЪӢ: Охирин паём (вақти калонтарин) дар боло
+    // СОРТКУНИИ ҚАТЪӢ: Охирин паём (вақти калонтарин) ҳамеша дар боло
     let result = partners.sort((a, b) => b.lastTime - a.lastTime);
 
     if (showOnlyUnread) {
@@ -84,7 +84,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     }
 
     return result;
-  }, [usersObj, chatsObj, user, showOnlyUnread]);
+  }, [usersObj, chatsObj, user?.email, showOnlyUnread, usersObj]);
 
   const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
     e.stopPropagation();

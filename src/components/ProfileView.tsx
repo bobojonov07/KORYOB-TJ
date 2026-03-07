@@ -92,7 +92,7 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
     const file = e.target.files?.[0];
     if (file && rtdb) {
       if (!isPremium) {
-        toast({ variant: "destructive", title: "Танҳо барои Премиум", description: "Барои иловаи акс Премиум харед." });
+        toast({ variant: "destructive", title: "Танҳо барои Премиум", description: "Барои иловаи акс дар профил Премиум харед." });
         return;
       }
       if (file.size > 1024 * 1024) {
@@ -123,30 +123,46 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
         {!isPremium && profile.role === 'korfarmo' && (
           <div 
             onClick={onUpgrade}
-            className="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 rounded-[2rem] text-white flex items-center justify-between cursor-pointer hover:scale-[1.02] transition-all shadow-xl shadow-orange-200"
+            className="bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600 p-6 rounded-[2.5rem] text-white flex items-center justify-between cursor-pointer hover:scale-[1.02] transition-all shadow-xl shadow-orange-200 relative overflow-hidden group"
           >
-            <div className="space-y-1">
-              <h3 className="font-black text-xl flex items-center gap-2"><Crown size={24} /> PREMIUM ХАРЕД</h3>
-              <p className="text-[10px] font-bold uppercase tracking-widest opacity-90">Имкониятҳои бештар: 5 эълон, аксҳо, чати 3000 аломат</p>
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform"></div>
+            <div className="space-y-1 relative z-10">
+              <h3 className="font-black text-xl flex items-center gap-2 uppercase tracking-tighter"><Crown size={24} fill="white" /> PREMIUM ХАРЕД</h3>
+              <p className="text-[10px] font-black uppercase tracking-widest opacity-90">Нашри то 5 эълон + Акси профил + Чат 3000 аломат</p>
             </div>
-            <ChevronRight />
+            <ChevronRight className="relative z-10" />
           </div>
         )}
 
         <div className="flex flex-col items-center text-center space-y-4 bg-white p-10 rounded-[2.5rem] border shadow-sm border-primary/5">
-          <div 
-            onClick={() => {
-              if (profile.role === 'korfarmo') fileInputRef.current?.click();
-              else toast({ title: "Танҳо барои корфармоён", description: "Иловаи акс дар профил танҳо барои корфармоёни Премиум дастрас аст." });
-            }}
-            className="relative w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-black border-4 border-white shadow-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-          >
-            {profile.profileImage ? (
-              <Image src={profile.profileImage} alt="Profile" fill className="object-cover" />
-            ) : (
-              profile.name?.[0]?.toUpperCase() || '?'
+          <div className="relative">
+            <div 
+              onClick={() => {
+                if (isPremium) fileInputRef.current?.click();
+                else toast({ variant: "destructive", title: "Танҳо барои Премиум", description: "Иловаи акс дар профил баъд аз хариди Премиум дастрас мешавад." });
+              }}
+              className={cn(
+                "relative w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-black border-4 shadow-xl overflow-hidden cursor-pointer transition-all",
+                isPremium ? "border-yellow-400 hover:opacity-80" : "border-white opacity-60 grayscale"
+              )}
+            >
+              {profile.profileImage ? (
+                <Image src={profile.profileImage} alt="Profile" fill className="object-cover" />
+              ) : (
+                profile.name?.[0]?.toUpperCase() || '?'
+              )}
+              {!isPremium && (
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                   <KeyRound size={32} className="text-white opacity-80" />
+                </div>
+              )}
+              <input type="file" ref={fileInputRef} onChange={handleProfileImageChange} accept="image/*" className="hidden" />
+            </div>
+            {!isPremium && profile.role === 'korfarmo' && (
+              <p className="text-[9px] font-black text-primary uppercase mt-2 tracking-widest flex items-center justify-center gap-1">
+                <Sparkles size={10} /> Акси профил (Premium)
+              </p>
             )}
-            <input type="file" ref={fileInputRef} onChange={handleProfileImageChange} accept="image/*" className="hidden" />
           </div>
           <div>
             <h2 className="text-3xl font-black tracking-tighter uppercase flex items-center justify-center gap-2">
@@ -158,8 +174,8 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
                 {profile.role === 'korfarmo' ? 'Корфармо' : 'Корҷӯ'}
               </p>
               {isPremium && (
-                <p className="bg-yellow-500 text-white font-black uppercase tracking-widest text-[10px] px-3 py-1 rounded-lg">
-                  VIP PREMIUM
+                <p className="bg-yellow-500 text-white font-black uppercase tracking-widest text-[10px] px-3 py-1 rounded-lg flex items-center gap-1">
+                  <Crown size={10} fill="currentColor" /> VIP PREMIUM
                 </p>
               )}
             </div>
