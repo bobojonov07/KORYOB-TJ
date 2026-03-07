@@ -232,7 +232,7 @@ export default function KoryobTJ() {
       <main className={cn("flex-1 overflow-y-auto", isFullScreenView ? "p-0 h-screen" : "container max-w-7xl mx-auto p-4 md:p-12")}>
         {activeView === "jobs" && (
           <div className="space-y-12">
-            <section className="relative overflow-hidden p-6 md:p-20 rounded-[2.5rem] text-center space-y-6 min-h-[400px] flex flex-col justify-center items-center shadow-2xl border border-primary/10">
+            <section className="relative overflow-hidden p-6 md:p-20 rounded-[2.5rem] text-center space-y-6 min-h-[450px] flex flex-col justify-center items-center shadow-2xl border border-primary/10">
               {heroImg && (
                 <div className="absolute inset-0 z-0">
                   <Image 
@@ -240,16 +240,17 @@ export default function KoryobTJ() {
                     alt="Koryob Background" 
                     fill 
                     className="object-cover"
+                    priority
                     data-ai-hint={heroImg.imageHint}
                   />
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+                  <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
                 </div>
               )}
               <div className="relative z-10 space-y-4 max-w-2xl">
                 <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-tight drop-shadow-lg">
                   Кори орзуи худро <br /> <span className="text-primary">пайдо кунед</span>
                 </h2>
-                <p className="text-white/80 text-lg font-bold tracking-wide">Платформаи муосири корёбӣ дар Тоҷикистон</p>
+                <p className="text-white/90 text-lg font-bold tracking-wide">Платформаи муосири корёбӣ дар Тоҷикистон</p>
                 <div className="flex flex-col md:flex-row gap-3 pt-6 w-full">
                   <div className="relative flex-[2]">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
