@@ -10,8 +10,9 @@ import { useAuth, useRTDB } from "@/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { ref, set, get } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, Briefcase, Lock, Mail, User as UserIcon, Phone, UserCheck, Building2 } from "lucide-react";
+import { ChevronLeft, Briefcase, Lock, Mail, User as UserIcon, Phone, UserCheck, Building2, ShieldCheck, ScrollText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AuthViewProps {
   onBack: () => void;
@@ -43,27 +44,22 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
     const cleanEmail = email.trim().toLowerCase();
 
     if (mode === "signup") {
-      // 1. Тафтиши майдонҳои холӣ
       if (!name.trim() || !phone.trim() || !email.trim() || !password.trim()) {
         toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан тамоми майдонҳоро пур кунед." });
         return;
       }
-      // 2. Ном на камтар аз 3 ҳарф
       if (name.trim().length < 3) {
         toast({ variant: "destructive", title: "Хатои ном", description: "Ном бояд на камтар аз 3 аломат бошад." });
         return;
       }
-      // 3. Рақам на камтар аз 9 рақам
       if (phone.replace(/\D/g, '').length < 9) {
         toast({ variant: "destructive", title: "Хатои телефон", description: "Рақами телефон бояд на камтар аз 9 рақам бошад." });
         return;
       }
-      // 4. Почтаи дуруст
       if (!validateEmail(cleanEmail)) {
         toast({ variant: "destructive", title: "Хатои почта", description: "Лутфан почтаи дурустро ворид кунед (масалан: example@mail.com)." });
         return;
       }
-      // 5. Парол на камтар аз 6 аломат
       if (password.length < 6) {
         toast({ variant: "destructive", title: "Хатои парол", description: "Парол бояд на камтар аз 6 аломат бошад." });
         return;
@@ -73,7 +69,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
         return;
       }
       if (!agreedToTerms) {
-        toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан ба шартҳои истифода розӣ шавед." });
+        toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан ба шартҳо ва сиёсати махфият розӣ шавед." });
         return;
       }
     }
@@ -123,7 +119,10 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
           return;
         }
         await sendPasswordResetEmail(auth, cleanEmail);
-        toast({ title: "Ирсол шуд", description: "Пайванд ба почтаи шумо фиристода шуд." });
+        toast({ 
+          title: "Ирсол шуд", 
+          description: "Пайванд ба почтаи шумо фиристода шуд. Лутфан папкаи 'Spam'-ро низ тафтиш кунед." 
+        });
         setMode("login");
       }
     } catch (error: any) {
@@ -158,7 +157,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
           <div className="space-y-1">
             <h1 className="text-3xl font-black tracking-tighter">KORYOB.TJ</h1>
             <p className="text-muted-foreground text-xs font-bold px-4 leading-relaxed">
-              {mode === "signup" ? "Интихоб кунед ва ҳамроҳ шавед" : "Ба ҳисоби худ ворид шавед"}
+              {mode === "signup" ? "Маълумоти худро ворид кунед" : mode === "login" ? "Ба ҳисоби худ ворид шавед" : "Почтаи худро нависед"}
             </p>
           </div>
         </div>
@@ -194,7 +193,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
           {mode === "signup" && (
             <>
               <div className="space-y-1">
-                <Label className="text-[11px] font-bold text-muted-foreground ml-1">Ном ва насаб (на камтар аз 3 ҳарф)</Label>
+                <Label className="text-[11px] font-bold text-muted-foreground ml-1">Ном ва насаб (ҳадди ақал 3 ҳарф)</Label>
                 <div className="relative">
                   <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
                   <Input placeholder="Номи шумо" value={name} onChange={e => setName(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
@@ -211,16 +210,16 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
           )}
 
           <div className="space-y-1">
-            <Label className="text-[11px] font-bold text-muted-foreground ml-1">Почтаи электронӣ (.com)</Label>
+            <Label className="text-[11px] font-bold text-muted-foreground ml-1">Почтаи электронӣ</Label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
-              <Input type="email" placeholder="example@mail.tj" value={email} onChange={e => setEmail(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
+              <Input type="email" placeholder="example@mail.com" value={email} onChange={e => setEmail(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
             </div>
           </div>
 
           {mode !== "forgot" && (
             <div className="space-y-1">
-              <Label className="text-[11px] font-bold text-muted-foreground ml-1">Парол (на камтар аз 6 аломат)</Label>
+              <Label className="text-[11px] font-bold text-muted-foreground ml-1">Парол (ҳадди ақал 6 аломат)</Label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
                 <Input type="password" placeholder="******" value={password} onChange={e => setPassword(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
@@ -229,28 +228,46 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
           )}
 
           {mode === "signup" && (
-            <div className="space-y-1">
-              <Label className="text-[11px] font-bold text-muted-foreground ml-1">Такрори парол</Label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
-                <Input type="password" placeholder="******" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
+            <>
+              <div className="space-y-1">
+                <Label className="text-[11px] font-bold text-muted-foreground ml-1">Такрори парол</Label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-4 h-4" />
+                  <Input type="password" placeholder="******" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="rounded-xl h-12 pl-10 bg-secondary/10 border-none font-bold" />
+                </div>
               </div>
-            </div>
+
+              <div className="space-y-2 pt-2">
+                <Label className="text-[11px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
+                  <ScrollText size={14} /> Шартҳои истифода ва махфият
+                </Label>
+                <div className="border rounded-2xl bg-secondary/5 overflow-hidden">
+                  <ScrollArea className="h-28 p-4 text-[10px] text-muted-foreground font-bold leading-relaxed text-justify">
+                    <p className="mb-2">1. Масъулият: Шумо барои саҳеҳии маълумоти худ ва эълонҳое, ки нашр мекунед, пурра ҷавобгар ҳастед.</p>
+                    <p className="mb-2">2. Эълонҳо: Нашри эълонҳои бардурӯғ, фиребгарона ва хилофи қонунҳои ҶТ қатъиян манъ аст.</p>
+                    <p className="mb-2">3. Модератсия: Система ва маъмурият ҳуқуқ доранд, ки дар сурати вайрон кардани қоидаҳо, аккаунти шуморо бе огоҳӣ блок кунанд.</p>
+                    <p className="mb-2">4. Маълумоти шахсӣ: Шумо розигӣ медиҳед, ки маълумоти шумо барои фаъолияти платформа ва тамос истифода шавад.</p>
+                    <p className="mb-2">5. Бехатарӣ: Барои чеки қалбакӣ ва дашном дар чатҳо, аккаунт фавран ва якумрӣ блок карда мешавад.</p>
+                    <p>6. Тағйирот: Маъмурият ҳуқуқ дорад шартҳоро дар ҳар вақт тағйир диҳад.</p>
+                  </ScrollArea>
+                </div>
+                <div className="flex items-start space-x-2 pt-2">
+                  <Checkbox 
+                    id="terms" 
+                    checked={agreedToTerms} 
+                    onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} 
+                    className="mt-0.5"
+                  />
+                  <label htmlFor="terms" className="text-[11px] text-muted-foreground font-bold cursor-pointer leading-tight">
+                    Ман шартҳои истифода ва сиёсати махфиятро пурра хондам ва ба онҳо розӣ ҳастам.
+                  </label>
+                </div>
+              </div>
+            </>
           )}
 
-          {mode === "signup" && (
-            <div className="bg-muted/30 p-4 rounded-2xl space-y-3 border">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="terms" checked={agreedToTerms} onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} />
-                <label htmlFor="terms" className="text-[11px] text-muted-foreground font-bold cursor-pointer">
-                  Ман ба шартҳо ва қоидаҳо розӣ ҳастам.
-                </label>
-              </div>
-            </div>
-          )}
-
-          <Button onClick={handleAction} disabled={loading} className="w-full h-12 rounded-xl text-md font-black shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95">
-            {loading ? "Интизор..." : mode === "login" ? "Ворид шудан" : mode === "signup" ? "Сабти ном" : "Ирсол"}
+          <Button onClick={handleAction} disabled={loading} className="w-full h-12 rounded-xl text-md font-black shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95 mt-4">
+            {loading ? "Интизор..." : mode === "login" ? "Ворид шудан" : mode === "signup" ? "Қайд шудан" : "Ирсол"}
           </Button>
 
           <div className="text-center pt-2">
