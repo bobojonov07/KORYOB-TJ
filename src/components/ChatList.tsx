@@ -35,7 +35,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     if (!user?.email || !chatsObj || !usersObj) return [];
     
     const myEncodedEmail = encodeEmail(user.email);
-    const chatPartnersMap = new Map<string, { lastTime: number; lastText: string; hasUnread: boolean; chatId: string }>();
+    const partners: any[] = [];
 
     Object.entries(chatsObj).forEach(([chatId, messages]: [string, any]) => {
       if (chatId.includes(myEncodedEmail)) {
@@ -49,35 +49,30 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           new Date(a.time).getTime() - new Date(b.time).getTime()
         );
         
+        if (messageList.length === 0) return;
+
         const lastMsg: any = messageList[messageList.length - 1];
         const hasUnread = messageList.some((m: any) => 
           m.sender && m.sender.toLowerCase() !== user.email?.toLowerCase() && !m.read
         );
 
-        if (lastMsg) {
-          chatPartnersMap.set(partnerEmail, {
-            lastTime: new Date(lastMsg.time).getTime(),
-            lastText: lastMsg.text,
-            hasUnread,
-            chatId
-          });
-        }
+        const userData = usersObj[partnerEncoded];
+
+        partners.push({
+          email: partnerEmail,
+          name: userData?.name || partnerEmail.split('@')[0],
+          role: userData?.role || 'korjob',
+          lastSeen: userData?.lastSeen || null,
+          lastTime: new Date(lastMsg.time).getTime() || 0,
+          lastText: lastMsg.text || "Паёмҳо мавҷуд нест",
+          hasUnread,
+          chatId
+        });
       }
     });
 
-    let result = Array.from(chatPartnersMap.entries())
-      .map(([email, stats]) => {
-        const encoded = encodeEmail(email);
-        const userData = usersObj[encoded];
-        return {
-          email,
-          name: userData?.name || email.split('@')[0],
-          role: userData?.role || 'korjob',
-          lastSeen: userData?.lastSeen || null,
-          ...stats
-        };
-      })
-      .sort((a, b) => b.lastTime - a.lastTime);
+    // Sort by last message time (descending) - newer on top
+    let result = partners.sort((a, b) => b.lastTime - a.lastTime);
 
     if (showOnlyUnread) {
       result = result.filter(u => u.hasUnread);
@@ -184,7 +179,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
                       "text-xs truncate font-medium",
                       u.hasUnread ? "text-foreground font-black" : "text-muted-foreground"
                     )}>
-                      {u.lastText || "Паёмҳо мавҷуд нест"}
+                      {u.lastText}
                     </p>
                     <div className="flex items-center gap-2">
                       {u.hasUnread && (
