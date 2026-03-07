@@ -23,8 +23,7 @@ import {
   Phone, 
   LogOut, 
   Crown, 
-  Sparkles,
-  Image as ImageIcon 
+  Sparkles 
 } from "lucide-react";
 import { format, isValid } from "date-fns";
 import { ref, update } from "firebase/database";
@@ -63,12 +62,10 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
   }, [jobsObj, profile]);
 
   const formattedPremiumDate = useMemo(() => {
-    // Агар корбар премиум бошад ва сана дошта бошад
     if (profile?.premiumUntil) {
       const date = new Date(profile.premiumUntil);
       if (isValid(date)) return format(date, "dd.MM.yyyy");
     }
-    // Агар корбар премиум бошад вале сана набошад, мӯҳлати стандартиро нишон медиҳем
     if (isPremium) return "3 моҳ (Стандарт)";
     return "—";
   }, [profile?.premiumUntil, isPremium]);

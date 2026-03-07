@@ -54,11 +54,11 @@ export default function KoryobTJ() {
 
   const { data: requestsObj } = useRTDBData("premiumRequests");
   
-  // Автоматикӣ Премиумро бо назардошти мӯҳлат месанҷад
+  // Автоматикӣ Премиумро месанҷад ва хомӯш мекунад агар мӯҳлат гузарад
   const isUserPremium = useMemo(() => {
     let premium = currentUserProfile?.isPremium === true;
     
-    // Санҷиши мӯҳлат агар premiumUntil вуҷуд дошта бошад
+    // Санҷиши мӯҳлат
     if (premium && currentUserProfile?.premiumUntil) {
       const expiry = new Date(currentUserProfile.premiumUntil).getTime();
       if (expiry < Date.now()) {
@@ -74,13 +74,9 @@ export default function KoryobTJ() {
     return premium;
   }, [currentUserProfile, requestsObj, user]);
 
-  const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
-  const hasUnreadMessages = !!unreadStatus;
-
-  const heroImg = PlaceHolderImages.find(img => img.id === 'hero-bg');
-
   const lastPremiumStatus = useRef<boolean>(false);
   useEffect(() => {
+    // Огоҳинома вақте Премиум фаъол мешавад
     if (isUserPremium && lastPremiumStatus.current === false) {
       toast({
         title: "ПРЕМИУМ ФАЪОЛ ШУД!",
@@ -89,6 +85,11 @@ export default function KoryobTJ() {
     }
     lastPremiumStatus.current = isUserPremium;
   }, [isUserPremium, toast]);
+
+  const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
+  const hasUnreadMessages = !!unreadStatus;
+
+  const heroImg = PlaceHolderImages.find(img => img.id === 'hero-bg');
 
   useEffect(() => {
     if (user && userEncodedEmail && rtdb) {

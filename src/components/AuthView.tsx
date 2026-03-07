@@ -10,8 +10,7 @@ import { useAuth, useRTDB } from "@/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { ref, set, get } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronLeft, Briefcase, Lock, Mail, User as UserIcon, Phone, Sparkles, UserCheck, Building2 } from "lucide-react";
+import { ChevronLeft, Briefcase, Lock, Mail, User as UserIcon, Phone, UserCheck, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AuthViewProps {
@@ -44,18 +43,27 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
     const cleanEmail = email.trim().toLowerCase();
 
     if (mode === "signup") {
-      if (!name || name.trim().length < 3) {
+      // 1. Тафтиши майдонҳои холӣ
+      if (!name.trim() || !phone.trim() || !email.trim() || !password.trim()) {
+        toast({ variant: "destructive", title: "Хатогӣ", description: "Лутфан тамоми майдонҳоро пур кунед." });
+        return;
+      }
+      // 2. Ном на камтар аз 3 ҳарф
+      if (name.trim().length < 3) {
         toast({ variant: "destructive", title: "Хатои ном", description: "Ном бояд на камтар аз 3 аломат бошад." });
         return;
       }
-      if (!phone || phone.replace(/\D/g, '').length < 9) {
+      // 3. Рақам на камтар аз 9 рақам
+      if (phone.replace(/\D/g, '').length < 9) {
         toast({ variant: "destructive", title: "Хатои телефон", description: "Рақами телефон бояд на камтар аз 9 рақам бошад." });
         return;
       }
+      // 4. Почтаи дуруст
       if (!validateEmail(cleanEmail)) {
-        toast({ variant: "destructive", title: "Хатои почта", description: "Лутфан почтаи дурустро ворид кунед (масалан: .com)." });
+        toast({ variant: "destructive", title: "Хатои почта", description: "Лутфан почтаи дурустро ворид кунед (масалан: example@mail.com)." });
         return;
       }
+      // 5. Парол на камтар аз 6 аломат
       if (password.length < 6) {
         toast({ variant: "destructive", title: "Хатои парол", description: "Парол бояд на камтар аз 6 аломат бошад." });
         return;
@@ -82,7 +90,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
         const userSnap = await get(ref(rtdb, `users/${encodedEmail}`));
         
         if (userSnap.exists() && userSnap.val().isBlocked) {
-          toast({ variant: "destructive", title: "Блок шудааст", description: "Аккаунти шумо блок шудааст." });
+          toast({ variant: "destructive", title: "Блок шудааст", description: userSnap.val().blockReason || "Аккаунти шумо блок шудааст." });
           setLoading(false);
           return;
         }
@@ -144,7 +152,7 @@ export function AuthView({ onBack, onAuthSuccess }: AuthViewProps) {
 
       <main className="flex-1 flex flex-col max-w-md mx-auto w-full pt-6 space-y-6 pb-12">
         <div className="text-center space-y-3">
-          <div className="bg-primary text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-primary/30 rotate-3 animate-float">
+          <div className="bg-primary text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-primary/30 rotate-3">
             <Briefcase size={32} />
           </div>
           <div className="space-y-1">
