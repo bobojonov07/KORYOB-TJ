@@ -39,9 +39,10 @@ interface ProfileViewProps {
   onAbout: () => void;
   onBack: () => void;
   onLogout: () => void;
+  onUpgrade: () => void;
 }
 
-export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, onLogout }: ProfileViewProps) {
+export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, onLogout, onUpgrade }: ProfileViewProps) {
   const rtdb = useRTDB();
   const auth = useAuth();
   const { toast } = useToast();
@@ -50,7 +51,6 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
 
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
-  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [newName, setNewName] = useState(profile?.name || "");
   const [passData, setPassData] = useState({ current: "", new: "" });
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -109,26 +109,6 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
     }
   };
 
-  const buyPremium = async () => {
-    if (!rtdb) return;
-    setUpdateLoading(true);
-    try {
-      const encodedEmail = encodeURIComponent(profile.email.toLowerCase()).replace(/\./g, '%2E');
-      const until = new Date();
-      until.setMonth(until.getMonth() + 3);
-      await update(ref(rtdb, `users/${encodedEmail}`), { 
-        isPremium: true, 
-        premiumUntil: until.toISOString() 
-      });
-      toast({ title: "Табрик!", description: "Режими ПРЕМИУМ фаъол шуд. Акнун имкониятҳои шумо бештар аст!" });
-      setIsPremiumModalOpen(false);
-    } catch (e) {
-      toast({ variant: "destructive", title: "Хатогӣ", description: "Натавонистам Премиумро фаъол кунам" });
-    } finally {
-      setUpdateLoading(false);
-    }
-  };
-
   return (
     <div className="max-w-3xl mx-auto md:py-6 space-y-6 h-full flex flex-col bg-[#FDFCFB]">
       <header className="md:hidden flex items-center gap-4 p-4 border-b bg-white sticky top-0 z-20">
@@ -140,10 +120,9 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
 
       <div className="flex-1 overflow-y-auto p-4 md:p-0 space-y-6 pb-24">
         
-        {/* Премиум фақат барои Корфармо нишон дода мешавад */}
         {!isPremium && profile.role === 'korfarmo' && (
           <div 
-            onClick={() => setIsPremiumModalOpen(true)}
+            onClick={onUpgrade}
             className="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 rounded-[2rem] text-white flex items-center justify-between cursor-pointer hover:scale-[1.02] transition-all shadow-xl shadow-orange-200"
           >
             <div className="space-y-1">
@@ -253,36 +232,6 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
         </div>
       </div>
 
-      <Dialog open={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen}>
-        <DialogContent className="rounded-3xl max-w-sm border-none p-0 overflow-hidden bg-white">
-          <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-8 text-white text-center space-y-4">
-            <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-xl">
-              <Crown size={32} />
-            </div>
-            <h3 className="text-3xl font-black tracking-tighter">VIP PREMIUM</h3>
-            <p className="text-sm font-bold opacity-90 leading-relaxed">Платформаро бо тамоми имкониятҳояш истифода баред!</p>
-          </div>
-          <div className="p-8 space-y-6">
-            <div className="space-y-3">
-               <PremiumBenefit icon={<Briefcase size={16}/>} label="Нашри то 5 эълони фаъол" />
-               <PremiumBenefit icon={<ImageIcon size={16}/>} label="Иловаи акс ба профил ва эълонҳо" />
-               <PremiumBenefit icon={<MessageCircle size={16}/>} label="Лимити чат: 3000 аломат" />
-               <PremiumBenefit icon={<Sparkles size={16}/>} label="Эълони шумо дар аввали рӯйхат (VIP)" />
-            </div>
-            <div className="pt-4 border-t text-center space-y-4">
-               <div>
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Нарх</p>
-                  <p className="text-3xl font-black text-primary">20 TJS / 3 моҳ</p>
-               </div>
-               <Button onClick={buyPremium} disabled={updateLoading} className="w-full h-14 rounded-2xl text-md font-black shadow-xl shadow-primary/20 bg-primary active:scale-95 transition-all">
-                 {updateLoading ? "Фаъол шуда истодааст..." : "ҲОЛО ХАРИДАН"}
-               </Button>
-               <p className="text-[9px] text-muted-foreground font-bold italic leading-tight">Барои пардохт метавонед бо рақами +992 200 70 20 32 дар тамос шавед.</p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       <Dialog open={isNameModalOpen} onOpenChange={setIsNameModalOpen}>
         <DialogContent className="rounded-3xl max-w-sm border-none p-8">
           <DialogHeader><DialogTitle className="text-xl font-black tracking-tighter uppercase">Тағйири ном</DialogTitle></DialogHeader>
@@ -312,15 +261,6 @@ export function ProfileView({ profile, loading, onViewMyJobs, onAbout, onBack, o
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function PremiumBenefit({ icon, label }: { icon: React.ReactNode, label: string }) {
-  return (
-    <div className="flex items-center gap-3 text-xs font-bold text-foreground">
-      <div className="bg-yellow-100 text-yellow-600 p-1.5 rounded-lg">{icon}</div>
-      {label}
     </div>
   );
 }

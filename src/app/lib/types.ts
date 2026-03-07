@@ -54,3 +54,13 @@ export interface UserReport {
   reason: string;
   timestamp: number;
 }
+
+export interface PremiumRequest {
+  id: string;
+  uid: string;
+  email: string;
+  userName: string;
+  receiptImage: string; // Data URI
+  timestamp: number;
+  status: 'pending' | 'approved' | 'rejected';
+}

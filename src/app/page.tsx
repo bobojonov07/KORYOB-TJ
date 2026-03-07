@@ -19,6 +19,7 @@ import { ProfileView } from "@/components/ProfileView";
 import { MyJobsView } from "@/components/MyJobsView";
 import { AboutView } from "@/components/AboutView";
 import { FavoritesView } from "@/components/FavoritesView";
+import { PremiumPurchaseView } from "@/components/PremiumPurchaseView";
 import { useToast } from "@/hooks/use-toast";
 import { signOut } from "firebase/auth";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -38,7 +39,7 @@ export default function KoryobTJ() {
   const [searchQuery, setSearchQuery] = useState("");
   const [cityFilter, setCityFilter] = useState("Ҳама шаҳрҳо");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<"jobs" | "chat" | "profile" | "my-jobs" | "create-job" | "about" | "favorites" | "auth" | "job-details">("jobs");
+  const [activeView, setActiveView] = useState<"jobs" | "chat" | "profile" | "my-jobs" | "create-job" | "about" | "favorites" | "auth" | "job-details" | "premium-purchase">("jobs");
   const [activeChatEmail, setActiveChatEmail] = useState<string | null>(null);
 
   const { data: jobsObj } = useRTDBData("jobs");
@@ -125,7 +126,8 @@ export default function KoryobTJ() {
     activeView === "create-job" ||
     activeView === "profile" ||
     activeView === "favorites" ||
-    activeView === "my-jobs"
+    activeView === "my-jobs" ||
+    activeView === "premium-purchase"
   );
 
   if (currentUserProfile?.isBlocked) {
@@ -146,6 +148,10 @@ export default function KoryobTJ() {
 
   if (activeView === "auth") {
     return <AuthView onBack={() => setActiveView("jobs")} onAuthSuccess={() => setActiveView("jobs")} />;
+  }
+
+  if (activeView === "premium-purchase") {
+    return <PremiumPurchaseView onBack={() => setActiveView("profile")} />;
   }
 
   if (activeView === "job-details" && selectedJob) {
@@ -352,10 +358,10 @@ export default function KoryobTJ() {
           </div>
         )}
 
-        {activeView === "profile" && <ProfileView profile={currentUserProfile} onViewMyJobs={() => setActiveView("my-jobs")} onAbout={() => setActiveView("about")} onBack={() => setActiveView("jobs")} onLogout={handleLogout} />}
+        {activeView === "profile" && <ProfileView profile={currentUserProfile} onViewMyJobs={() => setActiveView("my-jobs")} onAbout={() => setActiveView("about")} onBack={() => setActiveView("jobs")} onLogout={handleLogout} onUpgrade={() => setActiveView("premium-purchase")} />}
         {activeView === "favorites" && <FavoritesView onSelectJob={(id) => handleJobClick(id)} onBack={() => setActiveView("jobs")} />}
         {activeView === "my-jobs" && <MyJobsView onBack={() => setActiveView("profile")} />}
-        {activeView === "create-job" && <JobForm jobId={null} onSuccess={() => setActiveView("jobs")} onCancel={() => setActiveView("jobs")} />}
+        {activeView === "create-job" && <JobForm jobId={null} onSuccess={() => setActiveView("jobs")} onCancel={() => setActiveView("jobs")} onUpgrade={() => setActiveView("premium-purchase")} />}
         {activeView === "about" && <AboutView onBack={() => setActiveView("jobs")} />}
       </main>
 

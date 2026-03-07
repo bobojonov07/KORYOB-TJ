@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRTDB, useUser, useRTDBData } from "@/firebase";
 import { ref, push, set, update, get, runTransaction } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Image as ImageIcon, X } from "lucide-react";
+import { ArrowLeft, Send, Image as ImageIcon, X, Crown, Sparkles, ChevronRight } from "lucide-react";
 import { containsForbiddenWords, MODERATION_RULES } from "@/app/lib/moderation";
 import Image from "next/image";
 
@@ -19,9 +19,10 @@ interface JobFormProps {
   jobId: string | null;
   onSuccess: () => void;
   onCancel: () => void;
+  onUpgrade: () => void;
 }
 
-export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
+export function JobForm({ jobId, onSuccess, onCancel, onUpgrade }: JobFormProps) {
   const rtdb = useRTDB();
   const { user } = useUser();
   const { toast } = useToast();
@@ -173,10 +174,24 @@ export function JobForm({ jobId, onSuccess, onCancel }: JobFormProps) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-4 md:py-8 px-4">
+    <div className="max-w-2xl mx-auto py-4 md:py-8 px-4 space-y-8">
       <Button variant="ghost" onClick={onCancel} className="mb-4 gap-2 font-black uppercase tracking-widest text-xs">
         <ArrowLeft size={16} /> Бозгашт
       </Button>
+
+      {!isPremium && (
+        <div 
+          onClick={onUpgrade}
+          className="bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-500 p-6 rounded-[2.5rem] text-white flex items-center justify-between cursor-pointer hover:scale-[1.02] transition-all shadow-xl shadow-orange-200 overflow-hidden relative"
+        >
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="space-y-1 relative z-10">
+            <h3 className="font-black text-xl flex items-center gap-2 uppercase tracking-tighter"><Crown size={24} fill="white" /> ПРЕМИУМ ХАРЕД</h3>
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-90">Нашри то 5 эълон + Аксҳо + VIP статус</p>
+          </div>
+          <ChevronRight className="relative z-10" />
+        </div>
+      )}
 
       <Card className="border-primary/10 shadow-2xl rounded-[2.5rem] overflow-hidden border">
         <CardHeader className="bg-primary text-white p-8">
