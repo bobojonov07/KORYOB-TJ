@@ -229,10 +229,10 @@ export default function KoryobTJ() {
         </header>
       )}
 
-      <main className={cn("flex-1 overflow-y-auto", isFullScreenView ? "p-0 h-screen" : "container max-w-7xl mx-auto p-4 md:p-12")}>
+      <main className={cn("flex-1 overflow-y-auto", isFullScreenView ? "p-0 h-screen" : "container max-w-7xl mx-auto p-4 md:p-12 md:px-0")}>
         {activeView === "jobs" && (
           <div className="space-y-12">
-            <section className="relative overflow-hidden p-6 md:p-20 rounded-none text-center space-y-6 min-h-[450px] flex flex-col justify-center items-center shadow-2xl border border-primary/10">
+            <section className="relative overflow-hidden p-6 md:p-24 rounded-none text-center space-y-6 min-h-[500px] flex flex-col justify-center items-center shadow-lg border-b border-primary/10">
               {heroImg && (
                 <div className="absolute inset-0 z-0">
                   <Image 
@@ -246,25 +246,25 @@ export default function KoryobTJ() {
                   <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px]"></div>
                 </div>
               )}
-              <div className="relative z-10 space-y-4 max-w-2xl">
-                <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-tight drop-shadow-lg">
+              <div className="relative z-10 space-y-6 max-w-3xl">
+                <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-[1.1] drop-shadow-2xl">
                   Кори орзуи худро <br /> <span className="text-primary">пайдо кунед</span>
                 </h2>
-                <p className="text-white/90 text-lg font-bold tracking-wide">Платформаи муосири корёбӣ дар Тоҷикистон</p>
-                <div className="flex flex-col md:flex-row gap-3 pt-6 w-full">
+                <p className="text-white/95 text-xl font-bold tracking-wide max-w-xl mx-auto">Платформаи муосири корёбӣ ва кордиҳӣ дар тамоми Тоҷикистон</p>
+                <div className="flex flex-col md:flex-row gap-4 pt-8 w-full">
                   <div className="relative flex-[2]">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary w-6 h-6" />
                     <Input 
                       placeholder="Ҷустуҷӯ: вазифа, ширкат..." 
-                      className="pl-12 h-14 rounded-2xl bg-white/95 border-none shadow-xl font-bold text-foreground" 
+                      className="pl-14 h-16 rounded-2xl bg-white/95 border-none shadow-2xl font-bold text-lg text-foreground" 
                       value={searchQuery} 
                       onChange={(e) => setSearchQuery(e.target.value)} 
                     />
                   </div>
                   <div className="flex-1">
                     <Select value={cityFilter} onValueChange={setCityFilter}>
-                      <SelectTrigger className="h-14 rounded-2xl bg-white/95 border-none shadow-xl font-bold text-foreground">
-                        <div className="flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /><SelectValue placeholder="Шаҳр" /></div>
+                      <SelectTrigger className="h-16 rounded-2xl bg-white/95 border-none shadow-2xl font-bold text-lg text-foreground">
+                        <div className="flex items-center gap-3"><MapPin className="w-6 h-6 text-primary" /><SelectValue placeholder="Шаҳр" /></div>
                       </SelectTrigger>
                       <SelectContent className="rounded-xl">
                         {CITIES.map(city => (<SelectItem key={city} value={city} className="font-bold">{city}</SelectItem>))}
@@ -275,56 +275,58 @@ export default function KoryobTJ() {
               </div>
             </section>
 
-            {premiumJobs.length > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between px-2">
-                  <h3 className="text-xl font-black flex items-center gap-2 uppercase tracking-tighter">
-                    <Crown className="text-yellow-500 fill-yellow-500" /> VIP PREMIUM ЭЪЛОНҲО
-                  </h3>
+            <div className="px-4 md:px-0 space-y-12">
+              {premiumJobs.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between px-2">
+                    <h3 className="text-xl font-black flex items-center gap-2 uppercase tracking-tighter">
+                      <Crown className="text-yellow-500 fill-yellow-500" /> VIP PREMIUM ЭЪЛОНҲО
+                    </h3>
+                  </div>
+                  <ScrollArea className="w-full whitespace-nowrap">
+                    <div className="flex gap-6 pb-6 px-2 h-full">
+                      {premiumJobs.map(job => (
+                        <JobCard 
+                          key={job.id} 
+                          job={job} 
+                          compact 
+                          onClick={() => handleJobClick(job.id)} 
+                          onChat={() => handleStartChat(job.postedEmail)}
+                          isOwner={user?.uid === job.postedUid}
+                        />
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" className="hidden" />
+                  </ScrollArea>
                 </div>
-                <ScrollArea className="w-full whitespace-nowrap">
-                  <div className="flex gap-4 pb-4 px-2 h-full">
-                    {premiumJobs.map(job => (
+              )}
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between px-2">
+                  <h3 className="text-xl md:text-2xl font-black text-foreground tracking-tighter uppercase">Эълонҳои ҷорӣ</h3>
+                  {currentUserProfile?.role === 'korfarmo' && (
+                    <Button onClick={() => setActiveView("create-job")} className="rounded-xl gap-2 h-12 px-6 text-sm font-black shadow-lg bg-primary">
+                      <Plus size={18} /> НАШРИ ЭЪЛОН
+                    </Button>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {filteredJobs.length > 0 ? (
+                    filteredJobs.map(job => (
                       <JobCard 
                         key={job.id} 
                         job={job} 
-                        compact 
                         onClick={() => handleJobClick(job.id)} 
                         onChat={() => handleStartChat(job.postedEmail)}
                         isOwner={user?.uid === job.postedUid}
                       />
-                    ))}
-                  </div>
-                  <ScrollBar orientation="horizontal" className="hidden" />
-                </ScrollArea>
-              </div>
-            )}
-
-            <div className="space-y-6">
-              <div className="flex items-center justify-between px-2">
-                <h3 className="text-xl md:text-2xl font-black text-foreground tracking-tighter uppercase">Эълонҳои ҷорӣ</h3>
-                {currentUserProfile?.role === 'korfarmo' && (
-                  <Button onClick={() => setActiveView("create-job")} className="rounded-xl gap-2 h-12 px-6 text-sm font-black shadow-lg bg-primary">
-                    <Plus size={18} /> НАШРИ ЭЪЛОН
-                  </Button>
-                )}
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                {filteredJobs.length > 0 ? (
-                  filteredJobs.map(job => (
-                    <JobCard 
-                      key={job.id} 
-                      job={job} 
-                      onClick={() => handleJobClick(job.id)} 
-                      onChat={() => handleStartChat(job.postedEmail)}
-                      isOwner={user?.uid === job.postedUid}
-                    />
-                  ))
-                ) : (
-                  <div className="col-span-full text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-primary/5">
-                    <p className="text-muted-foreground font-black uppercase tracking-widest text-xs opacity-50">Эълонҳо ёфт нашуданд</p>
-                  </div>
-                )}
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-primary/5">
+                      <p className="text-muted-foreground font-black uppercase tracking-widest text-xs opacity-50">Эълонҳо ёфт нашуданд</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

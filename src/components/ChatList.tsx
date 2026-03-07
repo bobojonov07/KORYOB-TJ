@@ -39,6 +39,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     const partners: any[] = [];
 
     Object.entries(chatsObj).forEach(([chatId, messages]: [string, any]) => {
+      // Танҳо чатҳоеро мегирем, ки ба корбари ҷорӣ тааллуқ доранд
       if (chatId.includes(myEncodedEmail)) {
         const parts = chatId.split('--');
         if (parts.length !== 2) return;
@@ -46,8 +47,11 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
         const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
         const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.');
         
-        const messageList = Object.entries(messages || {}).map(([id, val]: [string, any]) => ({ id, ...val }))
-          .sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime());
+        // Рӯйхати паёмҳоро аз рӯи вақт сорт мекунем
+        const messageList = Object.entries(messages || {})
+          .map(([id, val]: [string, any]) => ({ id, ...val }))
+          .filter(m => m.time && m.sender && m.text)
+          .sort((a, b) => Date.parse(a.time) - Date.parse(b.time));
         
         if (messageList.length === 0) return;
 
@@ -63,7 +67,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           name: userData?.name || partnerEmail.split('@')[0],
           role: userData?.role || 'korjob',
           lastSeen: userData?.lastSeen || null,
-          lastTime: new Date(lastMsg.time).getTime(),
+          lastTime: Date.parse(lastMsg.time), // Вақти охирин паём ҳамчун рақам
           lastText: lastMsg.text || "Паём...",
           hasUnread,
           chatId,
@@ -72,7 +76,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       }
     });
 
-    // СОРТКУНИИ ҚАТЪӢ: Охирин паём ҳамеша дар боло
+    // СОРТКУНИИ ҚАТЪӢ: Охирин паём (вақти калонтарин) дар боло
     let result = partners.sort((a, b) => b.lastTime - a.lastTime);
 
     if (showOnlyUnread) {

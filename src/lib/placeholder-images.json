@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "hero-bg",
-      "description": "Professional modern corporate office building exterior with glass facade, high resolution",
-      "imageUrl": "https://picsum.photos/seed/koryob-professional-work/1920/1080",
-      "imageHint": "modern office"
+      "description": "Professional modern skyscraper office building glass reflection architectural view, blue sky",
+      "imageUrl": "https://picsum.photos/seed/koryob-modern-hq/1920/1080",
+      "imageHint": "professional building"
     }
   ]
 }
