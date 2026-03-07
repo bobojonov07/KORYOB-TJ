@@ -24,6 +24,8 @@ import { signOut } from "firebase/auth";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import Image from "next/image";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const CITIES = ["Ҳама шаҳрҳо", "Душанбе", "Хуҷанд", "Бохтар", "Кӯлоб", "Истаравшан", "Исфара", "Конибодом", "Турсунзода", "Ваҳдат", "Роғун", "Норак", "Панҷакент", "Ҳисор"];
 
@@ -51,6 +53,8 @@ export default function KoryobTJ() {
 
   const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
   const hasUnreadMessages = !!unreadStatus;
+
+  const heroImg = PlaceHolderImages.find(img => img.id === 'hero-bg');
 
   useEffect(() => {
     if (user && userEncodedEmail && rtdb) {
@@ -228,25 +232,44 @@ export default function KoryobTJ() {
       <main className={cn("flex-1 overflow-y-auto", isFullScreenView ? "p-0 h-screen" : "container max-w-7xl mx-auto p-4 md:p-12")}>
         {activeView === "jobs" && (
           <div className="space-y-12">
-            <section className="bg-gradient-to-br from-primary/10 to-white p-6 md:p-16 rounded-[2.5rem] border border-primary/5 text-center space-y-6">
-              <div className="space-y-3">
-                <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tighter leading-tight">Кори орзуи худро <br /> <span className="text-primary">пайдо кунед</span></h2>
-                <p className="text-muted-foreground text-sm font-medium">Платформаи муосири корёбӣ дар Тоҷикистон</p>
-              </div>
-              <div className="flex flex-col md:flex-row gap-3 max-w-4xl mx-auto pt-4">
-                <div className="relative flex-[2]">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
-                  <Input placeholder="Ҷустуҷӯ..." className="pl-12 h-14 rounded-2xl bg-white border-none shadow-sm font-bold" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <section className="relative overflow-hidden p-6 md:p-20 rounded-[2.5rem] text-center space-y-6 min-h-[400px] flex flex-col justify-center items-center shadow-2xl border border-primary/10">
+              {heroImg && (
+                <div className="absolute inset-0 z-0">
+                  <Image 
+                    src={heroImg.imageUrl} 
+                    alt="Koryob Background" 
+                    fill 
+                    className="object-cover"
+                    data-ai-hint={heroImg.imageHint}
+                  />
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
                 </div>
-                <div className="flex-1">
-                  <Select value={cityFilter} onValueChange={setCityFilter}>
-                    <SelectTrigger className="h-14 rounded-2xl bg-white border-none shadow-sm font-bold">
-                      <div className="flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /><SelectValue placeholder="Шаҳр" /></div>
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      {CITIES.map(city => (<SelectItem key={city} value={city} className="font-bold">{city}</SelectItem>))}
-                    </SelectContent>
-                  </Select>
+              )}
+              <div className="relative z-10 space-y-4 max-w-2xl">
+                <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-tight drop-shadow-lg">
+                  Кори орзуи худро <br /> <span className="text-primary">пайдо кунед</span>
+                </h2>
+                <p className="text-white/80 text-lg font-bold tracking-wide">Платформаи муосири корёбӣ дар Тоҷикистон</p>
+                <div className="flex flex-col md:flex-row gap-3 pt-6 w-full">
+                  <div className="relative flex-[2]">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
+                    <Input 
+                      placeholder="Ҷустуҷӯ: вазифа, ширкат..." 
+                      className="pl-12 h-14 rounded-2xl bg-white/95 border-none shadow-xl font-bold text-foreground" 
+                      value={searchQuery} 
+                      onChange={(e) => setSearchQuery(e.target.value)} 
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Select value={cityFilter} onValueChange={setCityFilter}>
+                      <SelectTrigger className="h-14 rounded-2xl bg-white/95 border-none shadow-xl font-bold text-foreground">
+                        <div className="flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /><SelectValue placeholder="Шаҳр" /></div>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        {CITIES.map(city => (<SelectItem key={city} value={city} className="font-bold">{city}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </section>
@@ -277,7 +300,7 @@ export default function KoryobTJ() {
             )}
 
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between px-2">
                 <h3 className="text-xl md:text-2xl font-black text-foreground tracking-tighter uppercase">Эълонҳои ҷорӣ</h3>
                 {currentUserProfile?.role === 'korfarmo' && (
                   <Button onClick={() => setActiveView("create-job")} className="rounded-xl gap-2 h-12 px-6 text-sm font-black shadow-lg bg-primary">

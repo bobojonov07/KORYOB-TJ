@@ -1,0 +1,11 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Professional office workspace background for job portal hero section",
+      "imageUrl": "https://picsum.photos/seed/koryob-hero/1200/600",
+      "imageHint": "office workspace"
+    }
+  ]
+}
