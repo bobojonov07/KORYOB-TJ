@@ -31,6 +31,7 @@ import { ref, update } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 
 interface ProfileViewProps {
   profile?: UserProfile | null;
@@ -53,7 +54,7 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [newName, setNewName] = useState(profile?.name || "");
-  const [passData, setPassData] = useState({ current: "", new: "" });
+  const [passData, setPassData] = useState({ current: "", new: "", confirm: "" });
   const [updateLoading, setUpdateLoading] = useState(false);
   
   const myJobsCount = useMemo(() => {
@@ -88,6 +89,41 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
       setIsNameModalOpen(false);
     } catch (e) {
       toast({ variant: "destructive", title: "Хатогӣ", description: "Натавонистам номро иваз кунам" });
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
+  const handleUpdatePasswordAction = async () => {
+    if (!auth.currentUser || !profile.email) return;
+    
+    if (!passData.current || !passData.new || !passData.confirm) {
+      toast({ variant: "destructive", title: "Хатогӣ", description: "Ҳамаи майдонҳоро пур кунед" });
+      return;
+    }
+
+    if (passData.new !== passData.confirm) {
+      toast({ variant: "destructive", title: "Хатогӣ", description: "Пароли нав мувофиқат намекунад" });
+      return;
+    }
+
+    if (passData.new.length < 6) {
+      toast({ variant: "destructive", title: "Хатогӣ", description: "Пароли нав бояд на камтар аз 6 аломат бошад" });
+      return;
+    }
+
+    setUpdateLoading(true);
+    try {
+      const credential = EmailAuthProvider.credential(profile.email, passData.current);
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await updatePassword(auth.currentUser, passData.new);
+      
+      toast({ title: "Муваффақият", description: "Пароли шумо иваз шуд" });
+      setIsPassModalOpen(false);
+      setPassData({ current: "", new: "", confirm: "" });
+    } catch (error: any) {
+      console.error(error);
+      toast({ variant: "destructive", title: "Хатогӣ", description: "Пароли ҷорӣ нодуруст аст ё хатогии техникӣ" });
     } finally {
       setUpdateLoading(false);
     }
@@ -239,7 +275,10 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
                 <div className="flex items-center gap-3 font-black text-sm uppercase tracking-widest text-muted-foreground"><Pencil size={18} /> Тағйир додани ном</div>
                 <ChevronRight size={18} className="text-muted-foreground" />
               </button>
-              <button onClick={() => setIsPassModalOpen(true)} className="w-full flex items-center justify-between p-6 hover:bg-secondary/30 transition-colors border-b last:border-0">
+              <button onClick={() => {
+                setPassData({ current: "", new: "", confirm: "" });
+                setIsPassModalOpen(true);
+              }} className="w-full flex items-center justify-between p-6 hover:bg-secondary/30 transition-colors border-b last:border-0">
                 <div className="flex items-center gap-3 font-black text-sm uppercase tracking-widest text-muted-foreground"><KeyRound size={18} /> Иваз кардани парол</div>
                 <ChevronRight size={18} className="text-muted-foreground" />
               </button>
@@ -273,11 +312,19 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
           <DialogHeader><DialogTitle className="text-xl font-black tracking-tighter uppercase">Ивази парол</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
+              <Label className="font-black text-[10px] uppercase tracking-widest ml-1 text-muted-foreground">Пароли пешина</Label>
+              <Input type="password" value={passData.current} onChange={e => setPassData({...passData, current: e.target.value})} className="rounded-xl h-12 bg-secondary/20 border-none font-bold" />
+            </div>
+            <div className="space-y-2">
               <Label className="font-black text-[10px] uppercase tracking-widest ml-1 text-muted-foreground">Пароли нав</Label>
               <Input type="password" value={passData.new} onChange={e => setPassData({...passData, new: e.target.value})} className="rounded-xl h-12 bg-secondary/20 border-none font-bold" />
             </div>
-            <Button onClick={() => setIsPassModalOpen(false)} disabled={updateLoading} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
-              Сабт кардан
+            <div className="space-y-2">
+              <Label className="font-black text-[10px] uppercase tracking-widest ml-1 text-muted-foreground">Такрори пароли нав</Label>
+              <Input type="password" value={passData.confirm} onChange={e => setPassData({...passData, confirm: e.target.value})} className="rounded-xl h-12 bg-secondary/20 border-none font-bold" />
+            </div>
+            <Button onClick={handleUpdatePasswordAction} disabled={updateLoading} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
+              {updateLoading ? "Интизор..." : "Сабт кардан"}
             </Button>
           </div>
         </DialogContent>
@@ -297,3 +344,4 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string
     </div>
   );
 }
+
