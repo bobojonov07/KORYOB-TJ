@@ -71,7 +71,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       }
     });
 
-    // Сорткунии қатъӣ: Охирин суҳбат дар боло
+    // Сорткунии қатъӣ: Охирин суҳбат ҳамеша дар боло
     let result = partners.sort((a, b) => b.lastTime - a.lastTime);
 
     if (showOnlyUnread) {
@@ -93,15 +93,6 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
         toast({ variant: "destructive", title: "Хатогӣ", description: "Натавонистам чатро ҳазф кунам" });
       }
     }
-  };
-
-  const formatLastSeen = (timestamp: number | null) => {
-    if (!timestamp) return '';
-    const diff = Date.now() - timestamp;
-    if (diff < 5 * 60 * 1000) return 'Онлайн';
-    
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   if (usersLoading || chatsLoading) {

@@ -48,6 +48,10 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
       .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()) as any[];
   }, [messagesObj]);
 
+  const totalChatCharacters = useMemo(() => {
+    return messages.reduce((acc, msg) => acc + (msg.text?.length || 0), 0);
+  }, [messages]);
+
   const { data: partnerObj } = useRTDBData(partnerEncodedEmail ? `users/${partnerEncodedEmail}` : null);
   const partner = partnerObj as UserProfile | null;
 
@@ -85,8 +89,13 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
       return;
     }
 
-    if (trimmedText.length > 1000) {
-      toast({ variant: "destructive", title: "Лимити шумо ба охир расид", description: "Максимум 1000 аломат иҷозат дода мешавад." });
+    // Лимити умумии 1000 аломат барои тамоми суҳбат
+    if (totalChatCharacters + trimmedText.length > 1000) {
+      toast({ 
+        variant: "destructive", 
+        title: "Лимити суҳбат ба охир расид", 
+        description: `Шумораи умумии аломатҳо дар ин суҳбат аз 1000 гузашт. (Ҳозир: ${totalChatCharacters})` 
+      });
       return;
     }
 
@@ -206,16 +215,16 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
             onClick={handleSend} 
             size="icon" 
             className="rounded-full h-12 w-12 shrink-0 bg-primary hover:bg-primary/90 shadow-lg active:scale-95 transition-all" 
-            disabled={currentUserProfile?.isBlocked || !text.trim() || text.length > 1000}
+            disabled={currentUserProfile?.isBlocked || !text.trim() || (totalChatCharacters + text.trim().length > 1000)}
           >
             <Send size={20} />
           </Button>
         </div>
         <div className="flex justify-between items-center px-4">
-           <span className={cn("text-[9px] font-black uppercase tracking-widest", text.length > 1000 ? "text-destructive" : "text-muted-foreground")}>
-             {text.length} / 1000 аломат
+           <span className={cn("text-[9px] font-black uppercase tracking-widest", (totalChatCharacters + text.length > 1000) ? "text-destructive" : "text-muted-foreground")}>
+             Умумӣ: {totalChatCharacters + text.length} / 1000 аломат
            </span>
-           {text.length > 1000 && <span className="text-[9px] font-black text-destructive uppercase tracking-widest">Лимит ба охир расид!</span>}
+           {(totalChatCharacters + text.length > 1000) && <span className="text-[9px] font-black text-destructive uppercase tracking-widest">Лимити суҳбат ба охир расид!</span>}
         </div>
       </div>
 
