@@ -31,7 +31,7 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
 
   const pendingRequest = useMemo(() => {
     if (!requestsObj || !user) return null;
-    // Дархости фаъол - агар isPremium ҳоло ҳам false бошад дар коллексияи premiumRequests
+    // Дархости фаъол - агар isPremium ҳоло ҳам false бошад
     return Object.values(requestsObj).find((req: any) => req.uid === user.uid && req.isPremium === false);
   }, [requestsObj, user]);
 
@@ -64,7 +64,7 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
         userName: profile.name,
         receiptImage: receipt,
         timestamp: Date.now(),
-        isPremium: false // Ҳолати ибтидоӣ - маҳз false барои санҷиш
+        isPremium: false
       });
       setSubmitted(true);
       toast({ title: "Фиристода шуд", description: "Дархости шумо қабул шуд." });
@@ -75,6 +75,7 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
     }
   };
 
+  // Агар корбар аллакай Премиум бошад
   if (profile?.isPremium) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center p-6 text-center space-y-8">
@@ -94,6 +95,7 @@ export function PremiumPurchaseView({ onBack }: PremiumPurchaseViewProps) {
     );
   }
 
+  // Агар дархост дар ҳоли санҷиш бошад
   if (pendingRequest) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center p-6 text-center space-y-8">

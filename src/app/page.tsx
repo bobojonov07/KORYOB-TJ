@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, Menu, Home, List, Info, ShieldAlert, Heart, Crown, ChevronRight } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, Menu, Home, List, Info, ShieldAlert, Heart, Crown, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -56,6 +56,20 @@ export default function KoryobTJ() {
   const hasUnreadMessages = !!unreadStatus;
 
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-bg');
+
+  // Огоҳинома барои фаъол шудани Премиум
+  const lastPremiumStatus = useRef<boolean | undefined>(undefined);
+  useEffect(() => {
+    if (currentUserProfile) {
+      if (lastPremiumStatus.current === false && currentUserProfile.isPremium === true) {
+        toast({
+          title: "ПРЕМИУМ ФАЪОЛ ШУД!",
+          description: "Табрик! Акнун тамоми имкониятҳои VIP барои шумо кушодаанд.",
+        });
+      }
+      lastPremiumStatus.current = currentUserProfile.isPremium;
+    }
+  }, [currentUserProfile?.isPremium, toast, currentUserProfile]);
 
   useEffect(() => {
     if (user && userEncodedEmail && rtdb) {
