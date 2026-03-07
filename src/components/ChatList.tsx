@@ -73,7 +73,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       }
     });
 
-    // СОРТКУНИИ ҚАТЪӢ: Охирин паём ҳамеша дар боло
+    // СОРТКУНИИ ҚАТЪӢ: Охирин паём (фиристода ё қабулшуда) ҳамеша дар боло
     let result = partners.sort((a, b) => b.lastTime - a.lastTime);
 
     if (showOnlyUnread) {

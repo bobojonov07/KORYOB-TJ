@@ -3,9 +3,9 @@
   "placeholderImages": [
     {
       "id": "hero-bg",
-      "description": "Modern professional office workspace with people working, job portal background",
-      "imageUrl": "https://picsum.photos/seed/koryob-modern-job/1200/800",
-      "imageHint": "modern office"
+      "description": "Modern professional warm-toned office workspace, high quality desktop setup",
+      "imageUrl": "https://picsum.photos/seed/koryob-work-modern/1200/800",
+      "imageHint": "modern workspace"
     }
   ]
 }
