@@ -52,7 +52,7 @@ export function JobDetails({ job, onBack, onChat }: JobDetailsProps) {
   return (
     <div className={cn(
       "min-h-screen animate-in slide-in-from-right duration-500 flex flex-col pb-12",
-      job.isPremium ? "bg-orange-50/30" : "bg-[#FDFCFB]"
+      job.isPremium ? "bg-orange-50/20" : "bg-[#FDFCFB]"
     )}>
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
@@ -107,9 +107,13 @@ export function JobDetails({ job, onBack, onChat }: JobDetailsProps) {
         )}
 
         <section className={cn(
-          "p-6 md:p-10 rounded-[2.5rem] shadow-xl border space-y-8",
+          "p-6 md:p-10 rounded-[2.5rem] shadow-xl border space-y-8 relative overflow-hidden",
           job.isPremium ? "bg-white border-yellow-500/10" : "bg-white border-primary/5"
         )}>
+          {job.isPremium && (
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-500/5 rounded-full blur-3xl pointer-events-none"></div>
+          )}
+
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <div className="flex items-center gap-2 text-muted-foreground font-bold text-xs uppercase tracking-wide bg-secondary/40 px-4 py-2 rounded-xl">
               <MapPin className="text-primary w-4 h-4" /> {job.city}

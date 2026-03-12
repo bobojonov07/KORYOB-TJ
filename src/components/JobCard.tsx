@@ -99,58 +99,67 @@ export function JobCard({ job, onClick, onChat, isOwner, compact = false }: JobC
 
   return (
     <Card className={cn(
-      "hover:shadow-xl transition-all duration-300 rounded-[2rem] bg-white flex flex-col h-full border-none shadow-md overflow-hidden",
-      job.isPremium ? "ring-1 ring-yellow-500/30" : "border border-primary/5"
+      "hover:shadow-xl transition-all duration-300 rounded-[2rem] bg-white flex flex-col h-full border border-primary/5 shadow-md overflow-hidden",
+      job.isPremium && "ring-1 ring-yellow-500/30"
     )}>
-      <div className="relative h-48 w-full cursor-pointer overflow-hidden" onClick={onClick}>
-        {job.image ? (
+      {job.image && (
+        <div className="relative h-48 w-full cursor-pointer overflow-hidden" onClick={onClick}>
           <Image src={job.image} alt={job.title} fill className="object-cover hover:scale-105 transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full bg-primary/5 flex items-center justify-center">
-            <Briefcase size={48} className="text-primary/10" />
-          </div>
-        )}
-        <div className="absolute bottom-3 left-4">
-           <Badge className="bg-white/90 text-primary border-none px-3 py-1 rounded-lg font-bold text-[9px] uppercase tracking-wider shadow-sm">
-              <MapPin size={10} className="mr-1" /> {job.city}
-           </Badge>
+          {user && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleFavorite}
+              className={cn(
+                "absolute top-3 right-3 rounded-xl h-10 w-10 transition-all active:scale-110",
+                isFavorite ? "text-red-500 bg-white shadow-md" : "text-white bg-black/20 hover:bg-black/30"
+              )}
+            >
+              <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
+            </Button>
+          )}
         </div>
-        {user && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggleFavorite}
-            className={cn(
-              "absolute top-3 right-3 rounded-xl h-10 w-10 transition-all active:scale-110",
-              isFavorite ? "text-red-500 bg-white shadow-md" : "text-white bg-black/20 hover:bg-black/30"
-            )}
-          >
-            <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
-          </Button>
-        )}
-      </div>
+      )}
 
       <CardHeader className="p-5 pb-2">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-lg font-bold truncate leading-tight cursor-pointer hover:text-primary transition-colors" onClick={onClick}>
-              {job.title}
-            </CardTitle>
-            {job.isPremium && <Crown size={14} className="text-yellow-500 fill-yellow-500 shrink-0" />}
+        <div className="flex justify-between items-start gap-2">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg font-bold truncate leading-tight cursor-pointer hover:text-primary transition-colors" onClick={onClick}>
+                {job.title}
+              </CardTitle>
+              {job.isPremium && <Crown size={14} className="text-yellow-500 fill-yellow-500 shrink-0" />}
+            </div>
+            <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+              <Building2 size={12} className="text-primary/60" /> {job.company}
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
-            <Building2 size={12} className="text-primary/60" /> {job.company}
-          </p>
+          {!job.image && user && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleFavorite}
+              className={cn(
+                "rounded-xl h-9 w-9 transition-all active:scale-110",
+                isFavorite ? "text-red-500 bg-red-50" : "text-muted-foreground/30 hover:text-red-500"
+              )}
+            >
+              <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
+            </Button>
+          )}
         </div>
       </CardHeader>
       
       <CardContent className="p-5 pt-2 flex-1 space-y-4">
         <div className="flex flex-wrap gap-2">
-          <div className="flex items-center gap-1.5 bg-primary/5 px-3 py-1.5 rounded-lg">
+          <Badge variant="outline" className="border-primary/20 text-primary font-bold text-[10px] py-1">
+            <MapPin size={10} className="mr-1" /> {job.city}
+          </Badge>
+          <div className="flex items-center gap-1.5 bg-primary/5 px-3 py-1 rounded-lg">
             <Banknote className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-bold">{job.salary ? `${job.salary} TJS` : 'Маош —'}</span>
+            <span className="text-[11px] font-bold">{job.salary ? `${job.salary} TJS` : 'Маош —'}</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-secondary/50 px-3 py-1.5 rounded-lg text-muted-foreground">
+          <div className="flex items-center gap-1.5 bg-secondary/50 px-3 py-1 rounded-lg text-muted-foreground">
             <Clock className="w-3.5 h-3.5" />
             <span className="text-[10px] font-bold">{formatTajikTime(job.postedAt)}</span>
           </div>
