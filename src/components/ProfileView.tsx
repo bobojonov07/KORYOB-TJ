@@ -174,20 +174,20 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
   };
 
   return (
-    <div className="max-w-4xl mx-auto md:py-8 space-y-6 h-full flex flex-col bg-[#FDFCFB] animate-in fade-in duration-700">
-      <header className="md:hidden flex items-center gap-4 p-5 border-b bg-white sticky top-0 z-30 shadow-sm">
+    <div className="max-w-4xl mx-auto md:py-8 space-y-6 h-full flex flex-col bg-[#FDFCFB] animate-in fade-in duration-700 overflow-x-hidden w-full">
+      <header className="md:hidden flex items-center gap-4 p-5 border-b bg-white sticky top-0 z-30 shadow-sm w-full">
         <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50 h-10 w-10">
           <ChevronLeft size={20} />
         </Button>
         <h2 className="text-xl font-black tracking-tighter uppercase">Профил</h2>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 md:p-0 space-y-8 pb-32">
+      <div className="flex-1 overflow-y-auto p-4 md:p-0 space-y-8 pb-32 w-full">
         
         {!isPremium && profile.role === 'korfarmo' && (
           <div 
             onClick={onUpgrade}
-            className="bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600 p-8 rounded-[3rem] text-white flex items-center justify-between cursor-pointer hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-orange-200 relative overflow-hidden group"
+            className="bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600 p-8 rounded-[3rem] text-white flex items-center justify-between cursor-pointer hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-orange-200 relative overflow-hidden group w-full"
           >
             <div className="absolute -right-10 -top-10 w-48 h-48 bg-white/20 rounded-full blur-3xl group-hover:scale-110 transition-transform"></div>
             <div className="space-y-2 relative z-10">
@@ -201,7 +201,7 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
         )}
 
         <div className={cn(
-          "relative flex flex-col items-center text-center p-12 rounded-[3.5rem] border shadow-2xl transition-all duration-700 overflow-hidden",
+          "relative flex flex-col items-center text-center p-12 rounded-[3.5rem] border shadow-2xl transition-all duration-700 overflow-hidden w-full max-w-full",
           isPremium 
             ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black border-yellow-500/30" 
             : "bg-white border-primary/5"
@@ -221,7 +221,7 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
                 else toast({ variant: "destructive", title: "Танҳо барои Премиум", description: "Иловаи акс дар профил баъд аз хариди Премиум дастрас мешавад." });
               }}
               className={cn(
-                "relative w-40 h-40 rounded-full flex items-center justify-center text-5xl font-black border-4 shadow-2xl overflow-hidden cursor-pointer transition-all duration-500 group",
+                "relative w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center text-5xl font-black border-4 shadow-2xl overflow-hidden cursor-pointer transition-all duration-500 group",
                 isPremium 
                   ? "border-yellow-400 bg-gray-800 hover:scale-105" 
                   : "border-white bg-primary/10 opacity-70 grayscale"
@@ -253,14 +253,14 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
             )}
           </div>
 
-          <div className="relative z-10 mt-8 space-y-3">
+          <div className="relative z-10 mt-8 space-y-3 w-full">
             <h2 className={cn(
-              "text-4xl font-black tracking-tighter uppercase flex items-center justify-center gap-3",
+              "text-2xl md:text-4xl font-black tracking-tighter uppercase flex items-center justify-center gap-3 break-words px-4",
               isPremium ? "text-white" : "text-foreground"
             )}>
               {profile.name}
             </h2>
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-3 px-4">
               <p className={cn(
                 "font-black uppercase tracking-widest text-[10px] px-4 py-1.5 rounded-xl border",
                 isPremium 
@@ -278,15 +278,15 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
           </div>
         </div>
 
-        <div className="grid gap-8">
-          <Card className="rounded-[3rem] border-primary/5 shadow-xl border overflow-hidden bg-white">
-            <CardHeader className="bg-secondary/20 p-8 border-b border-primary/5">
+        <div className="grid gap-8 w-full">
+          <Card className="rounded-[3rem] border-primary/5 shadow-xl border overflow-hidden bg-white w-full">
+            <CardHeader className="bg-secondary/20 p-6 md:p-8 border-b border-primary/5">
               <CardTitle className="text-xl font-black flex items-center gap-4 tracking-tighter uppercase text-primary">
                 <div className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20"><User size={20} /></div>
                 МАЪЛУМОТИ ПРОФИЛ
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8 space-y-2">
+            <CardContent className="p-6 md:p-8 space-y-2">
               <InfoItem icon={<Mail size={20} />} label="Почта" value={profile.email} />
               <InfoItem icon={<Phone size={20} />} label="Телефон" value={profile.phone || "—"} />
               <InfoItem icon={<Calendar size={20} />} label="Санаи сабт" value={profile.createdAt ? format(new Date(profile.createdAt), "dd.MM.yyyy") : "—"} />
@@ -296,15 +296,15 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
             </CardContent>
           </Card>
 
-          <Card className="rounded-[3rem] border-primary/5 shadow-xl border overflow-hidden bg-white">
-            <CardHeader className="bg-secondary/20 p-8 border-b border-primary/5">
+          <Card className="rounded-[3rem] border-primary/5 shadow-xl border overflow-hidden bg-white w-full">
+            <CardHeader className="bg-secondary/20 p-6 md:p-8 border-b border-primary/5">
               <CardTitle className="text-xl font-black flex items-center gap-4 tracking-tighter uppercase text-primary">
                 <div className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20"><Settings2 size={20} /></div>
                 ТАНЗИМОТИ ҲИСОБ
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="w-full flex items-center justify-between p-8 border-b group">
+              <div className="w-full flex items-center justify-between p-6 md:p-8 border-b group">
                 <div className="flex items-center gap-4 font-black text-sm uppercase tracking-widest text-foreground">
                   <Bell size={20} className="text-primary" /> ОГОҲИНОМАҲО
                 </div>
@@ -314,18 +314,18 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
                   className="data-[state=checked]:bg-primary"
                 />
               </div>
-              <button onClick={() => setIsNameModalOpen(true)} className="w-full flex items-center justify-between p-8 hover:bg-primary hover:text-white transition-all duration-300 border-b last:border-0 group">
+              <button onClick={() => setIsNameModalOpen(true)} className="w-full flex items-center justify-between p-6 md:p-8 hover:bg-primary hover:text-white transition-all duration-300 border-b last:border-0 group">
                 <div className="flex items-center gap-4 font-black text-sm uppercase tracking-widest"><Pencil size={20} className="text-primary group-hover:text-white" /> ТАҒЙИРИ НОМ</div>
                 <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
               </button>
               <button onClick={() => {
                 setPassData({ current: "", new: "", confirm: "" });
                 setIsPassModalOpen(true);
-              }} className="w-full flex items-center justify-between p-8 hover:bg-primary hover:text-white transition-all duration-300 border-b last:border-0 group">
+              }} className="w-full flex items-center justify-between p-6 md:p-8 hover:bg-primary hover:text-white transition-all duration-300 border-b last:border-0 group">
                 <div className="flex items-center gap-4 font-black text-sm uppercase tracking-widest"><KeyRound size={20} className="text-primary group-hover:text-white" /> ИВАЗИ ПАРОЛ</div>
                 <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
               </button>
-              <div className="p-10 bg-destructive/5">
+              <div className="p-8 md:p-10 bg-destructive/5 w-full">
                 <Button onClick={onLogout} variant="destructive" className="w-full h-16 rounded-[1.5rem] gap-4 text-xl font-black shadow-2xl shadow-destructive/30 uppercase tracking-tighter active:scale-95 transition-all">
                   <LogOut size={24} /> БАРОМАД АЗ ҲИСОБ
                 </Button>
@@ -333,7 +333,7 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
             </CardContent>
           </Card>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 w-full">
             {profile.role === 'korfarmo' && (
               <Card className="rounded-[2.5rem] border-primary/5 cursor-pointer hover:bg-primary hover:text-white transition-all duration-500 group shadow-xl border bg-white" onClick={onViewMyJobs}>
                 <CardHeader className="flex-row items-center justify-between space-y-0 p-8">
@@ -412,12 +412,12 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
   return (
-    <div className="flex justify-between items-center py-6 border-b last:border-0 border-primary/5">
+    <div className="flex flex-col md:flex-row md:justify-between md:items-center py-4 md:py-6 border-b last:border-0 border-primary/5 gap-2">
       <div className="flex items-center gap-4 text-muted-foreground font-black text-[11px] uppercase tracking-widest">
         <div className="text-primary/60">{icon}</div>
         {label}
       </div>
-      <div className="font-black text-sm text-foreground tracking-tight">{value}</div>
+      <div className="font-black text-sm text-foreground tracking-tight break-all md:text-right">{value}</div>
     </div>
   );
 }

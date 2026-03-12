@@ -64,10 +64,8 @@ export default function KoryobTJ() {
   const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
   const hasUnreadMessages = !!unreadStatus;
 
-  // Browser Notifications Permission & Service Worker Logic
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window && user && currentUserProfile?.notificationsEnabled !== false) {
-      // Register simple service worker for better background handling if supported
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed', err));
       }
@@ -100,7 +98,6 @@ export default function KoryobTJ() {
 
   const lastNotifiedTime = useRef<number>(0);
 
-  // Background Notification Listener (Optimized for persistent display)
   useEffect(() => {
     if (unreadStatus && typeof unreadStatus === 'object' && currentUserProfile?.notificationsEnabled !== false) {
       const { senderName, text, timestamp } = unreadStatus as any;
@@ -109,7 +106,6 @@ export default function KoryobTJ() {
         lastNotifiedTime.current = timestamp;
         
         if (Notification.permission === 'granted') {
-          // Notify if tab is hidden OR user is not in the chat with that person
           if (document.visibilityState !== 'visible' || activeView !== 'chat') {
             const n = new Notification(`KORYOB.TJ: ${senderName}`, {
               body: text || "Шумо паёми нав доред",
@@ -119,7 +115,7 @@ export default function KoryobTJ() {
               renotify: true,
               silent: false,
               vibrate: [200, 100, 200, 100, 200],
-              requireInteraction: true // Keeps notification until clicked on mobile
+              requireInteraction: true
             });
             
             n.onclick = () => {
@@ -249,9 +245,9 @@ export default function KoryobTJ() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] flex flex-col pb-24 md:pb-0 overflow-x-hidden">
+    <div className="min-h-screen bg-[#FDFCFB] flex flex-col pb-24 md:pb-0 overflow-x-hidden w-full max-w-full">
       {!isFullScreenView && (
-        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b px-4 md:px-12 py-4 flex items-center justify-between shadow-sm">
+        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b px-4 md:px-12 py-4 flex items-center justify-between shadow-sm w-full">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveView("jobs"); setActiveChatEmail(null); }}>
             <div className="bg-primary text-white p-2 rounded-xl shadow-lg">
               <Briefcase size={24} />
@@ -319,10 +315,10 @@ export default function KoryobTJ() {
         </header>
       )}
 
-      <main className={cn("flex-1 overflow-y-auto", isFullScreenView ? "p-0 h-screen" : "container max-w-7xl mx-auto p-4 md:p-12 md:px-0")}>
+      <main className={cn("flex-1 overflow-y-auto w-full max-w-full overflow-x-hidden", isFullScreenView ? "p-0 h-screen" : "container max-w-7xl mx-auto p-4 md:p-12 md:px-0")}>
         {activeView === "jobs" && (
-          <div className="space-y-12">
-            <section className="relative overflow-hidden p-6 md:p-24 rounded-none text-center space-y-6 min-h-[500px] flex flex-col justify-center items-center shadow-lg border-b border-primary/10">
+          <div className="space-y-12 w-full">
+            <section className="relative overflow-hidden p-6 md:p-24 rounded-none text-center space-y-6 min-h-[500px] flex flex-col justify-center items-center shadow-lg border-b border-primary/10 w-full max-w-full">
               {heroImg && (
                 <div className="absolute inset-0 z-0">
                   <Image 
@@ -336,12 +332,12 @@ export default function KoryobTJ() {
                   <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px]"></div>
                 </div>
               )}
-              <div className="relative z-10 space-y-6 max-w-3xl">
-                <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-[1.1] drop-shadow-2xl">
+              <div className="relative z-10 space-y-6 max-w-full px-4">
+                <h2 className="text-3xl md:text-7xl font-black text-white tracking-tighter leading-[1.1] drop-shadow-2xl">
                   Кори орзуи худро <br /> <span className="text-primary">пайдо кунед</span>
                 </h2>
-                <p className="text-white/95 text-xl font-bold tracking-wide max-w-xl mx-auto">Платформаи муосири корёбӣ ва кордиҳӣ дар тамоми Тоҷикистон</p>
-                <div className="flex flex-col md:flex-row gap-4 pt-8 w-full">
+                <p className="text-white/95 text-lg md:text-xl font-bold tracking-wide max-w-xl mx-auto">Платформаи муосири корёбӣ ва кордиҳӣ дар тамоми Тоҷикистон</p>
+                <div className="flex flex-col md:flex-row gap-4 pt-8 w-full max-w-3xl mx-auto">
                   <div className="relative flex-[2]">
                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary w-6 h-6" />
                     <Input 
@@ -365,9 +361,9 @@ export default function KoryobTJ() {
               </div>
             </section>
 
-            <div className="px-4 md:px-0 space-y-12">
+            <div className="px-4 md:px-0 space-y-12 w-full">
               {premiumJobs.length > 0 && (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full">
                   <div className="flex items-center justify-between px-2">
                     <h3 className="text-xl font-black flex items-center gap-2 uppercase tracking-tighter">
                       <Crown className="text-yellow-500 fill-yellow-500" /> VIP PREMIUM ЭЪЛОНҲО
@@ -391,7 +387,7 @@ export default function KoryobTJ() {
                 </div>
               )}
 
-              <div className="space-y-6">
+              <div className="space-y-6 w-full">
                 <div className="flex items-center justify-between px-2">
                   <h3 className="text-xl md:text-2xl font-black text-foreground tracking-tighter uppercase">Эълонҳои ҷорӣ</h3>
                   {currentUserProfile?.role === 'korfarmo' && (
@@ -423,7 +419,7 @@ export default function KoryobTJ() {
         )}
 
         {activeView === "chat" && (
-          <div className="h-full md:h-[calc(100vh-200px)]">
+          <div className="h-full md:h-[calc(100vh-200px)] w-full">
             <div className="flex h-full bg-white md:rounded-[2.5rem] md:shadow-2xl overflow-hidden md:border border-primary/5">
               <div className={cn("flex flex-col border-r w-full md:w-1/3", activeChatEmail && "hidden md:flex")}>
                 <ChatList activeChatEmail={activeChatEmail} onSelect={setActiveChatEmail} onBack={() => setActiveView("jobs")} />
@@ -450,7 +446,7 @@ export default function KoryobTJ() {
       </main>
 
       {user && !isFullScreenView && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t px-8 py-4 flex items-center justify-between z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t px-8 py-4 flex items-center justify-between z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] w-full">
           <MobileNavTab icon={<Home size={24} />} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />
           <div className="relative">
             <MobileNavTab icon={<MessageCircle size={24} />} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
