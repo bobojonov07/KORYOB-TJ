@@ -77,9 +77,17 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   
   const maxLimit = (isPremium || partnerIsPremium) ? 3000 : 1000;
 
+  // Авто-скролл ба паёми охирин
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: "smooth"
+          });
+        }
+      }, 100);
     }
   }, [messages]);
 
@@ -232,7 +240,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
           return (
             <div key={msg.id || i} className={cn("flex flex-col max-w-[90%] md:max-w-[85%] group animate-in slide-in-from-bottom-2 duration-300", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
               <div className={cn(
-                "p-3 md:p-4 rounded-[1.2rem] md:rounded-[1.5rem] text-sm md:text-[15px] font-medium shadow-md break-words relative flex flex-col gap-2 transition-all duration-300 w-full", 
+                "p-3 md:p-4 rounded-[1.2rem] md:rounded-[1.5rem] text-sm md:text-[15px] font-medium shadow-md break-words relative flex flex-col gap-2 transition-all duration-300", 
                 isMine 
                   ? "bg-primary text-white rounded-tr-none hover:bg-primary/90" 
                   : "bg-white text-foreground rounded-tl-none border border-primary/5 hover:border-primary/20"
