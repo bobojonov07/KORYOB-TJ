@@ -145,9 +145,10 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     await set(newMsgRef, msg);
     
     if (partnerEncodedEmail) {
-      // Use an object with a timestamp to trigger the listener reliably
+      // Trigger notification for the partner with message text
       set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), {
         senderName: currentUserProfile.name,
+        text: trimmedText, // Included the message text for the notification
         timestamp: Date.now()
       });
     }

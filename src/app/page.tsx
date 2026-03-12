@@ -52,8 +52,6 @@ export default function KoryobTJ() {
   const { data: currentUserProfileObj } = useRTDBData(userEncodedEmail ? `users/${userEncodedEmail}` : null);
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
-  const { data: requestsObj } = useRTDBData("premiumRequests");
-  
   const isUserPremium = useMemo(() => {
     let premium = currentUserProfile?.isPremium === true;
     if (premium && currentUserProfile?.premiumUntil) {
@@ -66,7 +64,7 @@ export default function KoryobTJ() {
   const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
   const hasUnreadMessages = !!unreadStatus;
 
-  // Browser Notifications Logic
+  // Browser Notifications Permission Logic
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window && user && currentUserProfile?.notificationsEnabled !== false) {
       if (Notification.permission === 'default') {
@@ -97,21 +95,24 @@ export default function KoryobTJ() {
 
   const lastNotifiedTime = useRef<number>(0);
 
+  // Background Notification Listener
   useEffect(() => {
     if (unreadStatus && typeof unreadStatus === 'object' && currentUserProfile?.notificationsEnabled !== false) {
-      const { senderName, timestamp } = unreadStatus as any;
+      const { senderName, text, timestamp } = unreadStatus as any;
       
       if (timestamp && timestamp > lastNotifiedTime.current) {
         lastNotifiedTime.current = timestamp;
         
         if (Notification.permission === 'granted') {
-          // Notify only if tab is hidden OR user is not in the chat view
+          // Notify only if tab is hidden OR user is not currently in the chat view with that person
           if (document.visibilityState !== 'visible' || activeView !== 'chat') {
-            const n = new Notification("KORYOB.TJ: Паёми нав", {
-              body: `Шумо аз ${senderName} паёми нав доред`,
+            const n = new Notification(`KORYOB.TJ: ${senderName}`, {
+              body: text || "Шумо паёми нав доред",
               icon: "/icon.png",
               tag: 'new-message',
-              renotify: true
+              renotify: true,
+              silent: false,
+              vibrate: [200, 100, 200]
             });
             
             n.onclick = () => {
