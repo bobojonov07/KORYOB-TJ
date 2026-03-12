@@ -81,14 +81,34 @@ export default function KoryobTJ() {
   const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
   const hasUnreadMessages = !!unreadStatus;
 
-  // Browser Notifications Logic
+  // Browser Notifications Logic with timely message notice
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window && user) {
       if (Notification.permission === 'default') {
-        Notification.requestPermission();
+        toast({
+          title: "Огоҳиномаҳоро фаъол созед",
+          description: "Барои дидани сари вақт паёмҳо ва огоҳ шудан аз хабарҳои нав, лутфан огоҳиномаҳоро фаъол созед.",
+          duration: 10000,
+          action: (
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="font-black text-[10px] uppercase rounded-lg"
+              onClick={() => {
+                Notification.requestPermission().then(permission => {
+                  if (permission === 'granted') {
+                    toast({ title: "Раҳмат!", description: "Огоҳиномаҳо фаъол шуданд." });
+                  }
+                });
+              }}
+            >
+              Иҷозат додан
+            </Button>
+          ),
+        });
       }
     }
-  }, [user]);
+  }, [user, toast]);
 
   useEffect(() => {
     if (unreadStatus && typeof unreadStatus === 'string') {
