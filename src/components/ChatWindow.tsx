@@ -145,8 +145,11 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     await set(newMsgRef, msg);
     
     if (partnerEncodedEmail) {
-      // Сабти номи фиристонанда барои огоҳинома
-      set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), currentUserProfile.name);
+      // Use an object with a timestamp to trigger the listener reliably
+      set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), {
+        senderName: currentUserProfile.name,
+        timestamp: Date.now()
+      });
     }
   };
 

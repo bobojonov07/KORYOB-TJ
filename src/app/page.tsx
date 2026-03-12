@@ -60,28 +60,13 @@ export default function KoryobTJ() {
       const expiry = new Date(currentUserProfile.premiumUntil).getTime();
       if (expiry < Date.now()) premium = false;
     }
-    if (!premium && requestsObj && user) {
-      const hasAcceptedRequest = Object.values(requestsObj).some((req: any) => req.uid === user.uid && req.isPremium === true);
-      if (hasAcceptedRequest) premium = true;
-    }
     return premium;
-  }, [currentUserProfile, requestsObj, user]);
-
-  const lastPremiumStatus = useRef<boolean>(false);
-  useEffect(() => {
-    if (isUserPremium && lastPremiumStatus.current === false) {
-      toast({
-        title: "ПРЕМИУМ ФАЪОЛ ШУД!",
-        description: "Табрик! Акнун тамоми имкониятҳои VIP барои шумо кушодаанд.",
-      });
-    }
-    lastPremiumStatus.current = isUserPremium;
-  }, [isUserPremium, toast]);
+  }, [currentUserProfile]);
 
   const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
   const hasUnreadMessages = !!unreadStatus;
 
-  // Browser Notifications Logic with timely message notice
+  // Browser Notifications Logic
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window && user && currentUserProfile?.notificationsEnabled !== false) {
       if (Notification.permission === 'default') {
@@ -110,16 +95,34 @@ export default function KoryobTJ() {
     }
   }, [user, toast, currentUserProfile?.notificationsEnabled]);
 
+  const lastNotifiedTime = useRef<number>(0);
+
   useEffect(() => {
-    if (unreadStatus && typeof unreadStatus === 'string' && currentUserProfile?.notificationsEnabled !== false) {
-      if (Notification.permission === 'granted' && document.visibilityState !== 'visible') {
-        new Notification("KORYOB.TJ: Паёми нав", {
-          body: `Шумо аз ${unreadStatus} паёми нав доред`,
-          icon: "/icon.png"
-        });
+    if (unreadStatus && typeof unreadStatus === 'object' && currentUserProfile?.notificationsEnabled !== false) {
+      const { senderName, timestamp } = unreadStatus as any;
+      
+      if (timestamp && timestamp > lastNotifiedTime.current) {
+        lastNotifiedTime.current = timestamp;
+        
+        if (Notification.permission === 'granted') {
+          // Notify only if tab is hidden OR user is not in the chat view
+          if (document.visibilityState !== 'visible' || activeView !== 'chat') {
+            const n = new Notification("KORYOB.TJ: Паёми нав", {
+              body: `Шумо аз ${senderName} паёми нав доред`,
+              icon: "/icon.png",
+              tag: 'new-message',
+              renotify: true
+            });
+            
+            n.onclick = () => {
+              window.focus();
+              setActiveView('chat');
+            };
+          }
+        }
       }
     }
-  }, [unreadStatus, currentUserProfile?.notificationsEnabled]);
+  }, [unreadStatus, currentUserProfile?.notificationsEnabled, activeView]);
 
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-bg');
 
