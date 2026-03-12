@@ -64,9 +64,14 @@ export default function KoryobTJ() {
   const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
   const hasUnreadMessages = !!unreadStatus;
 
-  // Browser Notifications Permission Logic
+  // Browser Notifications Permission & Service Worker Logic
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window && user && currentUserProfile?.notificationsEnabled !== false) {
+      // Register simple service worker for better background handling if supported
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed', err));
+      }
+
       if (Notification.permission === 'default') {
         toast({
           title: "Огоҳиномаҳоро фаъол созед",
@@ -95,7 +100,7 @@ export default function KoryobTJ() {
 
   const lastNotifiedTime = useRef<number>(0);
 
-  // Background Notification Listener
+  // Background Notification Listener (Optimized for persistent display)
   useEffect(() => {
     if (unreadStatus && typeof unreadStatus === 'object' && currentUserProfile?.notificationsEnabled !== false) {
       const { senderName, text, timestamp } = unreadStatus as any;
@@ -104,20 +109,23 @@ export default function KoryobTJ() {
         lastNotifiedTime.current = timestamp;
         
         if (Notification.permission === 'granted') {
-          // Notify only if tab is hidden OR user is not currently in the chat view with that person
+          // Notify if tab is hidden OR user is not in the chat with that person
           if (document.visibilityState !== 'visible' || activeView !== 'chat') {
             const n = new Notification(`KORYOB.TJ: ${senderName}`, {
               body: text || "Шумо паёми нав доред",
               icon: "/icon.png",
+              badge: "/icon.png",
               tag: 'new-message',
               renotify: true,
               silent: false,
-              vibrate: [200, 100, 200]
+              vibrate: [200, 100, 200, 100, 200],
+              requireInteraction: true // Keeps notification until clicked on mobile
             });
             
             n.onclick = () => {
               window.focus();
               setActiveView('chat');
+              n.close();
             };
           }
         }
