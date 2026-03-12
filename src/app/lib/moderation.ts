@@ -3,16 +3,30 @@
  * Simple moderation utility for filtering bad words and handling blocks.
  */
 
-// Basic list of forbidden words (can be extended)
+// Рӯйхати калимаҳои мамнӯъ (дақиқтар карда шуд, то бо феълҳо омехта нашавад)
 const FORBIDDEN_WORDS = [
-  'лаънат', 'ҳаром', 'кун', 'ганда', 'аҳмақ', 'шарманда', 'ҳаромхур',
+  // Русӣ ва байналмилалӣ
   'сука', 'блять', 'хуй', 'пиздец', 'гандон', 'далбаеб', 'тварь',
-  'fuck', 'shit', 'bitch', 'asshole'
+  'fuck', 'shit', 'bitch', 'asshole',
+  
+  // Тоҷикӣ (ҳақоратҳои возеҳ)
+  'ҳаромхур', 'кунте', 'лаънатӣ', 'падарлаънат', 'модарлаънат',
+  'ҷалаб', 'қусте', 'касиф', 'хабис', 'нокас', 'ҳаромзада', 'куте'
 ];
 
 export function containsForbiddenWords(text: string): boolean {
   const lowerText = text.toLowerCase();
-  return FORBIDDEN_WORDS.some(word => lowerText.includes(word));
+  
+  // Санҷиши калимаҳо ба таври дақиқ
+  return FORBIDDEN_WORDS.some(word => {
+    // Агар калима кӯтоҳ бошад (масалан 3 ҳарф), онро танҳо ҳамчун калимаи алоҳида месанҷем
+    if (word.length <= 3) {
+      const regex = new RegExp(`\\b${word}\\b`, 'i');
+      return regex.test(lowerText);
+    }
+    // Барои калимаҳои дарозтар, мавҷудияти онҳоро дар дохили матн месанҷем
+    return lowerText.includes(word);
+  });
 }
 
 export const MODERATION_RULES = {
