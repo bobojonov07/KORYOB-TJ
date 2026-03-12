@@ -23,6 +23,27 @@ const encodeEmail = (email: string) => {
   return encodeURIComponent(email.toLowerCase()).replace(/\./g, '%2E');
 };
 
+function formatChatListTime(timestamp: number) {
+  const date = new Date(timestamp);
+  const now = new Date();
+  
+  const isToday = date.toDateString() === now.toDateString();
+  
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+
+  if (isToday) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  if (isYesterday) {
+    return "Дирӯз";
+  }
+  
+  // Барои рӯзҳои пештар: 12 июн
+  return date.toLocaleDateString('tg-TJ', { day: 'numeric', month: 'short' });
+}
+
 export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
   const { user } = useUser();
   const rtdb = useRTDB();
@@ -39,7 +60,6 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     const partners: any[] = [];
 
     Object.entries(chatsObj).forEach(([chatId, messages]: [string, any]) => {
-      // Танҳо чатҳоеро мегирем, ки ба корбари ҷорӣ тааллуқ доранд
       if (chatId.includes(myEncodedEmail)) {
         const parts = chatId.split('--');
         if (parts.length !== 2) return;
@@ -47,7 +67,6 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
         const partnerEncoded = parts[0] === myEncodedEmail ? parts[1] : parts[0];
         const partnerEmail = decodeURIComponent(partnerEncoded).replace(/%2E/g, '.');
         
-        // Рӯйхати паёмҳоро аз рӯи вақт сорт мекунем
         const messageList = Object.entries(messages || {})
           .map(([id, val]: [string, any]) => ({ id, ...val }))
           .filter(m => m.time && m.sender && m.text)
@@ -67,7 +86,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
           name: userData?.name || partnerEmail.split('@')[0],
           role: userData?.role || 'korjob',
           lastSeen: userData?.lastSeen || null,
-          lastTime: new Date(lastMsg.time).getTime() || 0, // Вақти охирин паём ҳамчун рақам
+          lastTime: new Date(lastMsg.time).getTime() || 0,
           lastText: lastMsg.text || "Паём...",
           hasUnread,
           chatId,
@@ -76,7 +95,6 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
       }
     });
 
-    // СОРТКУНИИ ҚАТЪӢ: Охирин паём (вақти калонтарин) ҳамеша дар боло
     let result = partners.sort((a, b) => b.lastTime - a.lastTime);
 
     if (showOnlyUnread) {
@@ -84,7 +102,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
     }
 
     return result;
-  }, [usersObj, chatsObj, user?.email, showOnlyUnread, usersObj]);
+  }, [chatsObj, user?.email, showOnlyUnread, usersObj]);
 
   const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
     e.stopPropagation();
@@ -171,7 +189,7 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
                       </Badge>
                     </div>
                     <span className="text-[9px] text-muted-foreground/60 font-black whitespace-nowrap ml-2">
-                      {new Date(u.lastTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {formatChatListTime(u.lastTime)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-2">

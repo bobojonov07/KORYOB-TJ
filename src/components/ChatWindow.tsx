@@ -24,6 +24,20 @@ const encodeEmail = (email: string) => {
   return encodeURIComponent(email.toLowerCase()).replace(/\./g, '%2E');
 };
 
+function formatMessageTime(dateStr: string) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  
+  const isToday = date.toDateString() === now.toDateString();
+  
+  if (isToday) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  
+  // Барои паёмҳои куҳна: 12 июн, 14:30
+  return date.toLocaleDateString('tg-TJ', { day: 'numeric', month: 'short' }) + ", " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   const rtdb = useRTDB();
   const { user } = useUser();
@@ -59,7 +73,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   const { data: currentUserProfileObj } = useRTDBData(myEncodedEmail ? `users/${myEncodedEmail}` : null);
   const currentUserProfile = currentUserProfileObj as UserProfile | null;
 
-  // Лимити 3000 аломат: агар ҳатто яке аз иштирокчиён Премиум бошад
   const isPremium = currentUserProfile?.isPremium === true;
   const partnerIsPremium = partner?.isPremium === true;
   
@@ -185,7 +198,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
         {messages.map((msg, i) => {
           const isMine = msg.sender?.toLowerCase() === user?.email?.toLowerCase();
-          const time = new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const timeDisplay = formatMessageTime(msg.time);
           return (
             <div key={msg.id || i} className={cn("flex flex-col max-w-[85%] group", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
               <div className={cn(
@@ -194,7 +207,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
               )}>
                 <span>{msg.text}</span>
                 <div className="flex items-center justify-end gap-1 mt-0.5">
-                  <span className="text-[9px] opacity-60 font-bold">{time}</span>
+                  <span className="text-[9px] opacity-60 font-bold">{timeDisplay}</span>
                   {isMine && (
                     <span className={cn(msg.read ? "text-[#00b8d4]" : "text-gray-400")}>
                       {msg.read ? <CheckCheck size={12} /> : <Check size={12} />}
