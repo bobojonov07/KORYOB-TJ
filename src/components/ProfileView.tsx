@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useRTDBData, useRTDB, useAuth } from "@/firebase";
 import { 
   User, 
@@ -24,7 +25,8 @@ import {
   LogOut, 
   Crown, 
   Sparkles,
-  Settings2
+  Settings2,
+  Bell
 } from "lucide-react";
 import { format, isValid } from "date-fns";
 import { ref, update } from "firebase/database";
@@ -94,6 +96,24 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
       toast({ variant: "destructive", title: "Хатогӣ", description: "Натавонистам номро иваз кунам" });
     } finally {
       setUpdateLoading(false);
+    }
+  };
+
+  const handleToggleNotifications = async (enabled: boolean) => {
+    if (!rtdb || !profile.email) return;
+    try {
+      const encodedEmail = encodeURIComponent(profile.email.toLowerCase()).replace(/\./g, '%2E');
+      await update(ref(rtdb, `users/${encodedEmail}`), { notificationsEnabled: enabled });
+      toast({ 
+        title: enabled ? "Огоҳиномаҳо фаъол шуданд" : "Огоҳиномаҳо хомӯш шуданд",
+        description: enabled ? "Акнун шумо паёмҳои навро дар браузер мебинед." : "Шумо дигар дар браузер огоҳинома намегиред."
+      });
+
+      if (enabled && 'Notification' in window && Notification.permission !== 'granted') {
+        Notification.requestPermission();
+      }
+    } catch (e) {
+      toast({ variant: "destructive", title: "Хатогӣ", description: "Натавонистам танзимотро иваз кунам" });
     }
   };
 
@@ -276,6 +296,43 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
             </CardContent>
           </Card>
 
+          <Card className="rounded-[3rem] border-primary/5 shadow-xl border overflow-hidden bg-white">
+            <CardHeader className="bg-secondary/20 p-8 border-b border-primary/5">
+              <CardTitle className="text-xl font-black flex items-center gap-4 tracking-tighter uppercase text-primary">
+                <div className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20"><Settings2 size={20} /></div>
+                ТАНЗИМОТИ ҲИСОБ
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="w-full flex items-center justify-between p-8 border-b group">
+                <div className="flex items-center gap-4 font-black text-sm uppercase tracking-widest text-foreground">
+                  <Bell size={20} className="text-primary" /> ОГОҲИНОМАҲО
+                </div>
+                <Switch 
+                  checked={profile.notificationsEnabled !== false} 
+                  onCheckedChange={handleToggleNotifications}
+                  className="data-[state=checked]:bg-primary"
+                />
+              </div>
+              <button onClick={() => setIsNameModalOpen(true)} className="w-full flex items-center justify-between p-8 hover:bg-primary hover:text-white transition-all duration-300 border-b last:border-0 group">
+                <div className="flex items-center gap-4 font-black text-sm uppercase tracking-widest"><Pencil size={20} className="text-primary group-hover:text-white" /> ТАҒЙИРИ НОМ</div>
+                <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
+              </button>
+              <button onClick={() => {
+                setPassData({ current: "", new: "", confirm: "" });
+                setIsPassModalOpen(true);
+              }} className="w-full flex items-center justify-between p-8 hover:bg-primary hover:text-white transition-all duration-300 border-b last:border-0 group">
+                <div className="flex items-center gap-4 font-black text-sm uppercase tracking-widest"><KeyRound size={20} className="text-primary group-hover:text-white" /> ИВАЗИ ПАРОЛ</div>
+                <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
+              </button>
+              <div className="p-10 bg-destructive/5">
+                <Button onClick={onLogout} variant="destructive" className="w-full h-16 rounded-[1.5rem] gap-4 text-xl font-black shadow-2xl shadow-destructive/30 uppercase tracking-tighter active:scale-95 transition-all">
+                  <LogOut size={24} /> БАРОМАД АЗ ҲИСОБ
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid md:grid-cols-2 gap-6">
             {profile.role === 'korfarmo' && (
               <Card className="rounded-[2.5rem] border-primary/5 cursor-pointer hover:bg-primary hover:text-white transition-all duration-500 group shadow-xl border bg-white" onClick={onViewMyJobs}>
@@ -309,33 +366,6 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
               </CardHeader>
             </Card>
           </div>
-
-          <Card className="rounded-[3rem] border-primary/5 shadow-xl border overflow-hidden bg-white">
-            <CardHeader className="bg-secondary/20 p-8 border-b border-primary/5">
-              <CardTitle className="text-xl font-black flex items-center gap-4 tracking-tighter uppercase text-primary">
-                <div className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20"><Settings2 size={20} /></div>
-                ТАНЗИМОТИ ҲИСОБ
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <button onClick={() => setIsNameModalOpen(true)} className="w-full flex items-center justify-between p-8 hover:bg-primary hover:text-white transition-all duration-300 border-b last:border-0 group">
-                <div className="flex items-center gap-4 font-black text-sm uppercase tracking-widest"><Pencil size={20} className="text-primary group-hover:text-white" /> ТАҒЙИРИ НОМ</div>
-                <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
-              </button>
-              <button onClick={() => {
-                setPassData({ current: "", new: "", confirm: "" });
-                setIsPassModalOpen(true);
-              }} className="w-full flex items-center justify-between p-8 hover:bg-primary hover:text-white transition-all duration-300 border-b last:border-0 group">
-                <div className="flex items-center gap-4 font-black text-sm uppercase tracking-widest"><KeyRound size={20} className="text-primary group-hover:text-white" /> ИВАЗИ ПАРОЛ</div>
-                <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
-              </button>
-              <div className="p-10 bg-destructive/5">
-                <Button onClick={onLogout} variant="destructive" className="w-full h-16 rounded-[1.5rem] gap-4 text-xl font-black shadow-2xl shadow-destructive/30 uppercase tracking-tighter active:scale-95 transition-all">
-                  <LogOut size={24} /> БАРОМАД АЗ ҲИСОБ
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 

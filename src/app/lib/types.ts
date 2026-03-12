@@ -17,6 +17,7 @@ export interface UserProfile {
   isPremium?: boolean;
   premiumUntil?: string;
   profileImage?: string; // Data URI
+  notificationsEnabled?: boolean; // User preference for browser notifications
 }
 
 export interface JobListing {

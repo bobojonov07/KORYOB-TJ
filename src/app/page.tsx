@@ -83,7 +83,7 @@ export default function KoryobTJ() {
 
   // Browser Notifications Logic with timely message notice
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window && user) {
+    if (typeof window !== 'undefined' && 'Notification' in window && user && currentUserProfile?.notificationsEnabled !== false) {
       if (Notification.permission === 'default') {
         toast({
           title: "Огоҳиномаҳоро фаъол созед",
@@ -108,10 +108,10 @@ export default function KoryobTJ() {
         });
       }
     }
-  }, [user, toast]);
+  }, [user, toast, currentUserProfile?.notificationsEnabled]);
 
   useEffect(() => {
-    if (unreadStatus && typeof unreadStatus === 'string') {
+    if (unreadStatus && typeof unreadStatus === 'string' && currentUserProfile?.notificationsEnabled !== false) {
       if (Notification.permission === 'granted' && document.visibilityState !== 'visible') {
         new Notification("KORYOB.TJ: Паёми нав", {
           body: `Шумо аз ${unreadStatus} паёми нав доред`,
@@ -119,7 +119,7 @@ export default function KoryobTJ() {
         });
       }
     }
-  }, [unreadStatus]);
+  }, [unreadStatus, currentUserProfile?.notificationsEnabled]);
 
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-bg');
 
