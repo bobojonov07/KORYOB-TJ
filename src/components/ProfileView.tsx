@@ -23,7 +23,8 @@ import {
   Phone, 
   LogOut, 
   Crown, 
-  Sparkles 
+  Sparkles,
+  Settings2
 } from "lucide-react";
 import { format, isValid } from "date-fns";
 import { ref, update } from "firebase/database";
@@ -153,140 +154,184 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
   };
 
   return (
-    <div className="max-w-3xl mx-auto md:py-6 space-y-6 h-full flex flex-col bg-[#FDFCFB]">
-      <header className="md:hidden flex items-center gap-4 p-4 border-b bg-white sticky top-0 z-20">
-        <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50">
+    <div className="max-w-4xl mx-auto md:py-8 space-y-6 h-full flex flex-col bg-[#FDFCFB] animate-in fade-in duration-700">
+      <header className="md:hidden flex items-center gap-4 p-5 border-b bg-white sticky top-0 z-30 shadow-sm">
+        <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full bg-secondary/50 h-10 w-10">
           <ChevronLeft size={20} />
         </Button>
-        <h2 className="text-lg font-black tracking-tight uppercase">Профил</h2>
+        <h2 className="text-xl font-black tracking-tighter uppercase">Профил</h2>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 md:p-0 space-y-6 pb-24">
+      <div className="flex-1 overflow-y-auto p-4 md:p-0 space-y-8 pb-32">
         
         {!isPremium && profile.role === 'korfarmo' && (
           <div 
             onClick={onUpgrade}
-            className="bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600 p-6 rounded-[2.5rem] text-white flex items-center justify-between cursor-pointer hover:scale-[1.02] transition-all shadow-xl shadow-orange-200 relative overflow-hidden group"
+            className="bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600 p-8 rounded-[3rem] text-white flex items-center justify-between cursor-pointer hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-orange-200 relative overflow-hidden group"
           >
-            <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform"></div>
-            <div className="space-y-1 relative z-10">
-              <h3 className="font-black text-xl flex items-center gap-2 uppercase tracking-tighter"><Crown size={24} fill="white" /> PREMIUM ХАРЕД</h3>
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-90">Нашри то 5 эълон + Акси профил + Чат 3000 аломат</p>
+            <div className="absolute -right-10 -top-10 w-48 h-48 bg-white/20 rounded-full blur-3xl group-hover:scale-110 transition-transform"></div>
+            <div className="space-y-2 relative z-10">
+              <h3 className="font-black text-2xl flex items-center gap-3 uppercase tracking-tighter">
+                <Crown size={32} className="fill-white" /> ПРЕМИУМ ХАРЕД
+              </h3>
+              <p className="text-xs font-black uppercase tracking-widest opacity-90">Лимити то 5 эълон + Акси профил + VIP Статус</p>
             </div>
-            <ChevronRight className="relative z-10" />
+            <ChevronRight className="relative z-10 w-8 h-8" />
           </div>
         )}
 
-        <div className="flex flex-col items-center text-center space-y-4 bg-white p-10 rounded-[2.5rem] border shadow-sm border-primary/5">
-          <div className="relative">
+        <div className={cn(
+          "relative flex flex-col items-center text-center p-12 rounded-[3.5rem] border shadow-2xl transition-all duration-700 overflow-hidden",
+          isPremium 
+            ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black border-yellow-500/30" 
+            : "bg-white border-primary/5"
+        )}>
+          {isPremium && (
+            <div className="absolute inset-0 opacity-20 pointer-events-none">
+              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,123,0,0.4),transparent)]"></div>
+              <div className="absolute -top-24 -left-24 w-64 h-64 bg-yellow-500/20 rounded-full blur-[100px]"></div>
+              <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-orange-500/20 rounded-full blur-[100px]"></div>
+            </div>
+          )}
+
+          <div className="relative z-10">
             <div 
               onClick={() => {
                 if (isPremium) fileInputRef.current?.click();
                 else toast({ variant: "destructive", title: "Танҳо барои Премиум", description: "Иловаи акс дар профил баъд аз хариди Премиум дастрас мешавад." });
               }}
               className={cn(
-                "relative w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-black border-4 shadow-xl overflow-hidden cursor-pointer transition-all",
-                isPremium ? "border-yellow-400 hover:opacity-80" : "border-white opacity-60 grayscale"
+                "relative w-40 h-40 rounded-full flex items-center justify-center text-5xl font-black border-4 shadow-2xl overflow-hidden cursor-pointer transition-all duration-500 group",
+                isPremium 
+                  ? "border-yellow-400 bg-gray-800 hover:scale-105" 
+                  : "border-white bg-primary/10 opacity-70 grayscale"
               )}
             >
               {profile.profileImage ? (
-                <Image src={profile.profileImage} alt="Profile" fill className="object-cover" />
+                <Image src={profile.profileImage} alt="Profile" fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
               ) : (
-                profile.name?.[0]?.toUpperCase() || '?'
+                <span className={isPremium ? "text-yellow-400" : "text-primary"}>
+                  {profile.name?.[0]?.toUpperCase() || '?'}
+                </span>
               )}
               {!isPremium && (
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                   <KeyRound size={32} className="text-white opacity-80" />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                   <KeyRound size={40} className="text-white opacity-80" />
+                </div>
+              )}
+              {isPremium && (
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                  <Pencil className="text-white w-8 h-8" />
                 </div>
               )}
               <input type="file" ref={fileInputRef} onChange={handleProfileImageChange} accept="image/*" className="hidden" />
             </div>
-            {!isPremium && profile.role === 'korfarmo' && (
-              <p className="text-[9px] font-black text-primary uppercase mt-2 tracking-widest flex items-center justify-center gap-1">
-                <Sparkles size={10} /> Акси профил (Premium)
-              </p>
+            {isPremium && (
+              <div className="absolute -bottom-2 -right-2 bg-yellow-500 text-white p-2 rounded-2xl shadow-xl border-2 border-gray-900 animate-bounce">
+                <Crown size={20} fill="currentColor" />
+              </div>
             )}
           </div>
-          <div>
-            <h2 className="text-3xl font-black tracking-tighter uppercase flex items-center justify-center gap-2">
+
+          <div className="relative z-10 mt-8 space-y-3">
+            <h2 className={cn(
+              "text-4xl font-black tracking-tighter uppercase flex items-center justify-center gap-3",
+              isPremium ? "text-white" : "text-foreground"
+            )}>
               {profile.name}
-              {isPremium && <Crown size={20} className="text-yellow-500 fill-yellow-500" />}
             </h2>
-            <div className="flex items-center justify-center gap-2 mt-2">
-              <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px] bg-secondary/50 px-3 py-1 rounded-lg">
+            <div className="flex items-center justify-center gap-3">
+              <p className={cn(
+                "font-black uppercase tracking-widest text-[10px] px-4 py-1.5 rounded-xl border",
+                isPremium 
+                  ? "bg-white/10 text-white border-white/20" 
+                  : "bg-secondary/50 text-muted-foreground border-primary/5"
+              )}>
                 {profile.role === 'korfarmo' ? 'Корфармо' : 'Корҷӯ'}
               </p>
               {isPremium && (
-                <p className="bg-yellow-500 text-white font-black uppercase tracking-widest text-[10px] px-3 py-1 rounded-lg flex items-center gap-1">
-                  <Crown size={10} fill="currentColor" /> VIP PREMIUM
+                <p className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-black uppercase tracking-widest text-[10px] px-4 py-1.5 rounded-xl flex items-center gap-2 shadow-lg shadow-yellow-500/20">
+                  <Sparkles size={12} fill="currentColor" /> VIP ПРЕМИУМ
                 </p>
               )}
             </div>
           </div>
         </div>
 
-        <div className="grid gap-6">
-          <Card className="rounded-[2.5rem] border-primary/5 shadow-sm border">
-            <CardHeader>
-              <CardTitle className="text-xl font-black flex items-center gap-3 tracking-tighter uppercase">
-                <div className="bg-primary/10 p-2.5 rounded-2xl text-primary"><User size={20} /></div>
-                Маълумоти умумӣ
+        <div className="grid gap-8">
+          <Card className="rounded-[3rem] border-primary/5 shadow-xl border overflow-hidden bg-white">
+            <CardHeader className="bg-secondary/20 p-8 border-b border-primary/5">
+              <CardTitle className="text-xl font-black flex items-center gap-4 tracking-tighter uppercase text-primary">
+                <div className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20"><User size={20} /></div>
+                МАЪЛУМОТИ ПРОФИЛ
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <InfoItem icon={<Mail size={18} />} label="Почта" value={profile.email} />
-              <InfoItem icon={<Phone size={18} />} label="Телефон" value={profile.phone || "—"} />
-              <InfoItem icon={<Calendar size={18} />} label="Санаи сабт" value={profile.createdAt ? format(new Date(profile.createdAt), "dd.MM.yyyy") : "—"} />
+            <CardContent className="p-8 space-y-2">
+              <InfoItem icon={<Mail size={20} />} label="Почта" value={profile.email} />
+              <InfoItem icon={<Phone size={20} />} label="Телефон" value={profile.phone || "—"} />
+              <InfoItem icon={<Calendar size={20} />} label="Санаи сабт" value={profile.createdAt ? format(new Date(profile.createdAt), "dd.MM.yyyy") : "—"} />
               {isPremium && (
-                 <InfoItem icon={<Crown size={18} />} label="Мӯҳлати Премиум" value={formattedPremiumDate} />
+                 <InfoItem icon={<Crown size={20} />} label="Мӯҳлати Премиум" value={formattedPremiumDate} />
               )}
             </CardContent>
           </Card>
 
-          {profile.role === 'korfarmo' && (
-            <Card className="rounded-[2.5rem] border-primary/5 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm border" onClick={onViewMyJobs}>
-              <CardHeader className="flex-row items-center justify-between space-y-0 p-6">
-                <CardTitle className="text-xl font-black flex items-center gap-3 tracking-tighter uppercase">
-                  <div className="bg-primary/10 p-2.5 rounded-2xl text-primary"><Briefcase size={20} /></div>
-                  Эълонҳои ман ({myJobsCount} / {isPremium ? 5 : 1})
-                </CardTitle>
-                <ChevronRight className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
+          <div className="grid md:grid-cols-2 gap-6">
+            {profile.role === 'korfarmo' && (
+              <Card className="rounded-[2.5rem] border-primary/5 cursor-pointer hover:bg-primary hover:text-white transition-all duration-500 group shadow-xl border bg-white" onClick={onViewMyJobs}>
+                <CardHeader className="flex-row items-center justify-between space-y-0 p-8">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-primary/10 group-hover:bg-white/20 p-3 rounded-2xl text-primary group-hover:text-white transition-colors">
+                      <Briefcase size={24} />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg font-black tracking-tighter uppercase">ЭЪЛОНҲОИ МАН</CardTitle>
+                      <p className="text-[10px] font-black uppercase opacity-60">Ҳамагӣ: {myJobsCount} / {isPremium ? 5 : 1}</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="group-hover:translate-x-2 transition-transform" />
+                </CardHeader>
+              </Card>
+            )}
+
+            <Card className="rounded-[2.5rem] border-primary/5 cursor-pointer hover:bg-primary hover:text-white transition-all duration-500 group shadow-xl border bg-white" onClick={onAbout}>
+              <CardHeader className="flex-row items-center justify-between space-y-0 p-8">
+                <div className="flex items-center gap-4">
+                  <div className="bg-primary/10 group-hover:bg-white/20 p-3 rounded-2xl text-primary group-hover:text-white transition-colors">
+                    <Info size={24} />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-black tracking-tighter uppercase">ОИДИ БАРНОМА</CardTitle>
+                    <p className="text-[10px] font-black uppercase opacity-60">KORYOB.TJ v2.0</p>
+                  </div>
+                </div>
+                <ChevronRight className="group-hover:translate-x-2 transition-transform" />
               </CardHeader>
             </Card>
-          )}
+          </div>
 
-          <Card className="rounded-[2.5rem] border-primary/5 cursor-pointer hover:bg-primary/5 transition-all group shadow-sm border" onClick={onAbout}>
-            <CardHeader className="flex-row items-center justify-between space-y-0 p-6">
-              <CardTitle className="text-xl font-black flex items-center gap-3 tracking-tighter uppercase">
-                <div className="bg-primary/10 p-2.5 rounded-2xl text-primary"><Info size={20} /></div>
-                Дар бораи барнома
-              </CardTitle>
-              <ChevronRight className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
-            </CardHeader>
-          </Card>
-
-          <Card className="rounded-[2.5rem] border-primary/5 shadow-sm border overflow-hidden">
-            <CardHeader>
-              <CardTitle className="text-xl font-black flex items-center gap-3 tracking-tighter uppercase">
-                <div className="bg-primary/10 p-2.5 rounded-2xl text-primary"><KeyRound size={20} /></div>
-                Танзимот
+          <Card className="rounded-[3rem] border-primary/5 shadow-xl border overflow-hidden bg-white">
+            <CardHeader className="bg-secondary/20 p-8 border-b border-primary/5">
+              <CardTitle className="text-xl font-black flex items-center gap-4 tracking-tighter uppercase text-primary">
+                <div className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20"><Settings2 size={20} /></div>
+                ТАНЗИМОТИ ҲИСОБ
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 border-t">
-              <button onClick={() => setIsNameModalOpen(true)} className="w-full flex items-center justify-between p-6 hover:bg-secondary/30 transition-colors border-b last:border-0">
-                <div className="flex items-center gap-3 font-black text-sm uppercase tracking-widest text-muted-foreground"><Pencil size={18} /> Тағйир додани ном</div>
-                <ChevronRight size={18} className="text-muted-foreground" />
+            <CardContent className="p-0">
+              <button onClick={() => setIsNameModalOpen(true)} className="w-full flex items-center justify-between p-8 hover:bg-primary hover:text-white transition-all duration-300 border-b last:border-0 group">
+                <div className="flex items-center gap-4 font-black text-sm uppercase tracking-widest"><Pencil size={20} className="text-primary group-hover:text-white" /> ТАҒЙИРИ НОМ</div>
+                <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
               </button>
               <button onClick={() => {
                 setPassData({ current: "", new: "", confirm: "" });
                 setIsPassModalOpen(true);
-              }} className="w-full flex items-center justify-between p-6 hover:bg-secondary/30 transition-colors border-b last:border-0">
-                <div className="flex items-center gap-3 font-black text-sm uppercase tracking-widest text-muted-foreground"><KeyRound size={18} /> Иваз кардани парол</div>
-                <ChevronRight size={18} className="text-muted-foreground" />
+              }} className="w-full flex items-center justify-between p-8 hover:bg-primary hover:text-white transition-all duration-300 border-b last:border-0 group">
+                <div className="flex items-center gap-4 font-black text-sm uppercase tracking-widest"><KeyRound size={20} className="text-primary group-hover:text-white" /> ИВАЗИ ПАРОЛ</div>
+                <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
               </button>
-              <div className="p-6 bg-destructive/5">
-                <Button onClick={onLogout} variant="destructive" className="w-full h-14 rounded-2xl gap-3 text-lg font-black shadow-lg shadow-destructive/20 uppercase tracking-tighter active:scale-95 transition-all">
-                  <LogOut size={20} /> Баромад аз ҳисоб
+              <div className="p-10 bg-destructive/5">
+                <Button onClick={onLogout} variant="destructive" className="w-full h-16 rounded-[1.5rem] gap-4 text-xl font-black shadow-2xl shadow-destructive/30 uppercase tracking-tighter active:scale-95 transition-all">
+                  <LogOut size={24} /> БАРОМАД АЗ ҲИСОБ
                 </Button>
               </div>
             </CardContent>
@@ -295,38 +340,38 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
       </div>
 
       <Dialog open={isNameModalOpen} onOpenChange={setIsNameModalOpen}>
-        <DialogContent className="rounded-3xl max-w-sm border-none p-8">
-          <DialogHeader><DialogTitle className="text-xl font-black tracking-tighter uppercase">Тағйири ном</DialogTitle></DialogHeader>
-          <div className="space-y-4 py-4">
+        <DialogContent className="rounded-[2.5rem] max-w-sm border-none p-10">
+          <DialogHeader><DialogTitle className="text-2xl font-black tracking-tighter uppercase text-primary">Тағйири ном</DialogTitle></DialogHeader>
+          <div className="space-y-6 py-6">
             <div className="space-y-2">
-              <Label className="font-black text-[10px] uppercase tracking-widest ml-1 text-muted-foreground">Номи нав</Label>
-              <Input value={newName} onChange={e => setNewName(e.target.value)} className="rounded-xl h-12 bg-secondary/20 border-none font-bold" />
+              <Label className="font-black text-[10px] uppercase tracking-widest ml-1 text-muted-foreground">Номи нави шумо</Label>
+              <Input value={newName} onChange={e => setNewName(e.target.value)} className="rounded-2xl h-14 bg-secondary/30 border-none font-bold text-lg" />
             </div>
-            <Button onClick={handleUpdateName} disabled={updateLoading} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
-              {updateLoading ? "Сабт..." : "Сабт кардан"}
+            <Button onClick={handleUpdateName} disabled={updateLoading} className="w-full h-14 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/20">
+              {updateLoading ? "САБТ..." : "САБТ КАРДАН"}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isPassModalOpen} onOpenChange={setIsPassModalOpen}>
-        <DialogContent className="rounded-3xl max-w-sm border-none p-8">
-          <DialogHeader><DialogTitle className="text-xl font-black tracking-tighter uppercase">Ивази парол</DialogTitle></DialogHeader>
-          <div className="space-y-4 py-4">
+        <DialogContent className="rounded-[2.5rem] max-w-sm border-none p-10">
+          <DialogHeader><DialogTitle className="text-2xl font-black tracking-tighter uppercase text-primary">Ивази парол</DialogTitle></DialogHeader>
+          <div className="space-y-6 py-6">
             <div className="space-y-2">
               <Label className="font-black text-[10px] uppercase tracking-widest ml-1 text-muted-foreground">Пароли пешина</Label>
-              <Input type="password" value={passData.current} onChange={e => setPassData({...passData, current: e.target.value})} className="rounded-xl h-12 bg-secondary/20 border-none font-bold" />
+              <Input type="password" value={passData.current} onChange={e => setPassData({...passData, current: e.target.value})} className="rounded-2xl h-14 bg-secondary/30 border-none font-bold" />
             </div>
             <div className="space-y-2">
               <Label className="font-black text-[10px] uppercase tracking-widest ml-1 text-muted-foreground">Пароли нав</Label>
-              <Input type="password" value={passData.new} onChange={e => setPassData({...passData, new: e.target.value})} className="rounded-xl h-12 bg-secondary/20 border-none font-bold" />
+              <Input type="password" value={passData.new} onChange={e => setPassData({...passData, new: e.target.value})} className="rounded-2xl h-14 bg-secondary/30 border-none font-bold" />
             </div>
             <div className="space-y-2">
               <Label className="font-black text-[10px] uppercase tracking-widest ml-1 text-muted-foreground">Такрори пароли нав</Label>
-              <Input type="password" value={passData.confirm} onChange={e => setPassData({...passData, confirm: e.target.value})} className="rounded-xl h-12 bg-secondary/20 border-none font-bold" />
+              <Input type="password" value={passData.confirm} onChange={e => setPassData({...passData, confirm: e.target.value})} className="rounded-2xl h-14 bg-secondary/30 border-none font-bold" />
             </div>
-            <Button onClick={handleUpdatePasswordAction} disabled={updateLoading} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
-              {updateLoading ? "Интизор..." : "Сабт кардан"}
+            <Button onClick={handleUpdatePasswordAction} disabled={updateLoading} className="w-full h-14 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/20">
+              {updateLoading ? "Интизор..." : "ИВАЗ КАРДАН"}
             </Button>
           </div>
         </DialogContent>
@@ -337,8 +382,8 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
   return (
-    <div className="flex justify-between items-center py-4 border-b last:border-0 border-primary/5">
-      <div className="flex items-center gap-3 text-muted-foreground font-black text-[10px] uppercase tracking-widest">
+    <div className="flex justify-between items-center py-6 border-b last:border-0 border-primary/5">
+      <div className="flex items-center gap-4 text-muted-foreground font-black text-[11px] uppercase tracking-widest">
         <div className="text-primary/60">{icon}</div>
         {label}
       </div>
