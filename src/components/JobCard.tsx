@@ -1,11 +1,10 @@
-
 "use client";
 
 import { JobListing, UserProfile } from "@/app/lib/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Clock, Banknote, Building2, MapPin, Heart, ArrowRight, Crown, Sparkles, ChevronRight } from "lucide-react";
+import { Eye, Clock, Banknote, Building2, MapPin, Heart, ArrowRight, Crown, Sparkles, ChevronRight, Briefcase } from "lucide-react";
 import { useUser, useRTDB, useRTDBData } from "@/firebase";
 import { ref, update, runTransaction } from "firebase/database";
 import { cn } from "@/lib/utils";
