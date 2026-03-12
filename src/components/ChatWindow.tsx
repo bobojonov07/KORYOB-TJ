@@ -145,7 +145,8 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     await set(newMsgRef, msg);
     
     if (partnerEncodedEmail) {
-      set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), true);
+      // Сабти номи фиристонанда барои огоҳинома
+      set(ref(rtdb, `userNotifications/${partnerEncodedEmail}`), currentUserProfile.name);
     }
   };
 
@@ -161,7 +162,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     const now = Date.now();
     const diff = now - timestamp;
     
-    // Агар камтар аз 5 дақиқа бошад - Онлайн
     if (diff < 5 * 60 * 1000) return <span className="text-green-500 font-black animate-pulse">● Онлайн</span>;
     
     const mins = Math.floor(diff / (1000 * 60));

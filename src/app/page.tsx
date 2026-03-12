@@ -54,29 +54,21 @@ export default function KoryobTJ() {
 
   const { data: requestsObj } = useRTDBData("premiumRequests");
   
-  // Автоматикӣ Премиумро месанҷад ва хомӯш мекунад агар мӯҳлат гузарад
   const isUserPremium = useMemo(() => {
     let premium = currentUserProfile?.isPremium === true;
-    
-    // Санҷиши мӯҳлат
     if (premium && currentUserProfile?.premiumUntil) {
       const expiry = new Date(currentUserProfile.premiumUntil).getTime();
-      if (expiry < Date.now()) {
-        premium = false; // Мӯҳлат гузашт
-      }
+      if (expiry < Date.now()) premium = false;
     }
-
     if (!premium && requestsObj && user) {
       const hasAcceptedRequest = Object.values(requestsObj).some((req: any) => req.uid === user.uid && req.isPremium === true);
       if (hasAcceptedRequest) premium = true;
     }
-    
     return premium;
   }, [currentUserProfile, requestsObj, user]);
 
   const lastPremiumStatus = useRef<boolean>(false);
   useEffect(() => {
-    // Огоҳинома вақте Премиум фаъол мешавад
     if (isUserPremium && lastPremiumStatus.current === false) {
       toast({
         title: "ПРЕМИУМ ФАЪОЛ ШУД!",
@@ -88,6 +80,26 @@ export default function KoryobTJ() {
 
   const { data: unreadStatus } = useRTDBData(userEncodedEmail ? `userNotifications/${userEncodedEmail}` : null);
   const hasUnreadMessages = !!unreadStatus;
+
+  // Browser Notifications Logic
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window && user) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (unreadStatus && typeof unreadStatus === 'string') {
+      if (Notification.permission === 'granted' && document.visibilityState !== 'visible') {
+        new Notification("KORYOB.TJ: Паёми нав", {
+          body: `Шумо аз ${unreadStatus} паёми нав доред`,
+          icon: "/icon.png"
+        });
+      }
+    }
+  }, [unreadStatus]);
 
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-bg');
 
