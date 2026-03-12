@@ -158,9 +158,23 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
 
   const formatLastSeen = (timestamp: number | null) => {
     if (!timestamp) return '—';
-    const diff = Date.now() - timestamp;
+    const now = Date.now();
+    const diff = now - timestamp;
+    
+    // Агар камтар аз 5 дақиқа бошад - Онлайн
     if (diff < 5 * 60 * 1000) return <span className="text-green-500 font-black animate-pulse">● Онлайн</span>;
-    return `Дида шуд: ${new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    
+    const mins = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const weeks = Math.floor(days / 7);
+
+    if (mins < 60) return `Дида шуд: ${mins} дақ. пеш`;
+    if (hours < 24) return `Дида шуд: ${hours} соат пеш`;
+    if (days < 7) return `Дида шуд: ${days} рӯз пеш`;
+    if (weeks < 4) return `Дида шуд: ${weeks} ҳафта пеш`;
+    
+    return `Дида шуд: ${new Date(timestamp).toLocaleDateString('tg-TJ', { day: 'numeric', month: 'short' })}`;
   };
 
   return (
