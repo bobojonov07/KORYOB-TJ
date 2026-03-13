@@ -19,6 +19,7 @@ import { MyJobsView } from "@/components/MyJobsView";
 import { AboutView } from "@/components/AboutView";
 import { FavoritesView } from "@/components/FavoritesView";
 import { PremiumPurchaseView } from "@/components/PremiumPurchaseView";
+import { AdSenseBanner } from "@/components/AdSenseBanner";
 import { useToast } from "@/hooks/use-toast";
 import { signOut } from "firebase/auth";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -65,10 +66,6 @@ export default function KoryobTJ() {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window && user && currentUserProfile?.notificationsEnabled !== false) {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed', err));
-      }
-
       if (Notification.permission === 'default') {
         toast({
           title: "Огоҳиномаҳоро фаъол созед",
@@ -100,10 +97,8 @@ export default function KoryobTJ() {
   useEffect(() => {
     if (unreadStatus && typeof unreadStatus === 'object' && currentUserProfile?.notificationsEnabled !== false) {
       const { senderName, text, timestamp } = unreadStatus as any;
-      
       if (timestamp && timestamp > lastNotifiedTime.current) {
         lastNotifiedTime.current = timestamp;
-        
         if (Notification.permission === 'granted') {
           if (document.visibilityState !== 'visible' || activeView !== 'chat') {
             const n = new Notification(`KORYOB.TJ: ${senderName}`, {
@@ -116,7 +111,6 @@ export default function KoryobTJ() {
               vibrate: [200, 100, 200, 100, 200],
               requireInteraction: true
             });
-            
             n.onclick = () => {
               window.focus();
               setActiveView('chat');
@@ -143,7 +137,6 @@ export default function KoryobTJ() {
   const filteredJobs = useMemo(() => {
     if (!jobsData) return [];
     let list = jobsData.filter(j => j.active && !j.isPremium);
-    
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       list = list.filter(j => 
@@ -391,6 +384,9 @@ export default function KoryobTJ() {
                   </div>
                 </a>
               </section>
+
+              {/* AdSense Banner Example */}
+              <AdSenseBanner adSlot="1234567890" />
 
               {premiumJobs.length > 0 && (
                 <div className="space-y-6 w-full animate-in fade-in slide-in-from-left-4 duration-700">
