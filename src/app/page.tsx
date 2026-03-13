@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -206,15 +205,15 @@ export default function KoryobTJ() {
 
   if (currentUserProfile?.isBlocked) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-6">
-        <div className="max-w-md w-full bg-white rounded-[2.5rem] p-8 text-center shadow-2xl space-y-6 border border-destructive/20 overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center bg-background p-6 page-transition">
+        <div className="max-w-md w-full glass rounded-[3rem] p-10 text-center shadow-2xl space-y-8 border-destructive/20">
           <div className="bg-destructive/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto text-destructive animate-pulse">
             <ShieldAlert size={56} />
           </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-black uppercase tracking-tighter">Аккаунт Блок шуд</h2>
+          <div className="space-y-3">
+            <h2 className="text-2xl font-black uppercase tracking-tight">Аккаунт Блок шуд</h2>
             <p className="text-muted-foreground font-bold text-sm leading-relaxed">
-              {currentUserProfile.blockReason || "Аз сабаби вориди акси бардурӯғ аккаунти шумо блок шуд"}
+              {currentUserProfile.blockReason || "Аз сабаби ворид кардани маълумоти бардурӯғ аккаунти шумо блок карда шуд."}
             </p>
           </div>
           <Button onClick={handleLogout} className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs" variant="destructive">
@@ -245,23 +244,23 @@ export default function KoryobTJ() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] flex flex-col pb-24 md:pb-0 overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-background flex flex-col pb-24 md:pb-0 overflow-x-hidden w-full max-w-full">
       {!isFullScreenView && (
-        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b px-4 md:px-12 py-4 flex items-center justify-between shadow-sm w-full">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveView("jobs"); setActiveChatEmail(null); }}>
-            <div className="bg-primary text-white p-2 rounded-xl shadow-lg">
-              <Briefcase size={24} />
+        <header className="sticky top-0 z-50 glass border-b px-6 md:px-12 py-4 flex items-center justify-between shadow-sm w-full">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => { setActiveView("jobs"); setActiveChatEmail(null); }}>
+            <div className="bg-primary text-white p-2.5 rounded-[1rem] shadow-2xl group-hover:rotate-12 transition-transform">
+              <Briefcase size={26} />
             </div>
-            <h1 className="text-xl md:text-2xl font-black text-primary tracking-tighter">KORYOB.TJ</h1>
+            <h1 className="text-2xl font-black text-primary tracking-tighter uppercase">KORYOB.TJ</h1>
           </div>
 
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-4">
             <NavButton icon={<Home size={20}/>} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />
             {user && (
               <>
                 <div className="relative">
                   <NavButton icon={<MessageCircle size={20}/>} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
-                  {hasUnreadMessages && <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-white"></div>}
+                  {hasUnreadMessages && <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-white animate-pulse"></div>}
                 </div>
                 <NavButton icon={<Heart size={20}/>} label="Писандидаҳо" active={activeView === 'favorites'} onClick={() => setActiveView("favorites")} />
                 {currentUserProfile?.role === 'korfarmo' && (
@@ -272,9 +271,9 @@ export default function KoryobTJ() {
             )}
             <NavButton icon={<Info size={20}/>} label="Оиди мо" active={activeView === 'about'} onClick={() => setActiveView("about")} />
             {!user ? (
-              <Button onClick={() => setActiveView("auth")} className="rounded-xl font-black px-6">Воридшавӣ</Button>
+              <Button onClick={() => setActiveView("auth")} className="rounded-[1.2rem] font-black px-8 h-12 shadow-xl shadow-primary/20">Воридшавӣ</Button>
             ) : (
-              <Button variant="ghost" onClick={handleLogout} className="text-destructive font-black gap-2 hover:bg-destructive/10 rounded-xl">
+              <Button variant="ghost" onClick={handleLogout} className="text-destructive font-black gap-2 hover:bg-destructive/10 rounded-[1.2rem] px-6">
                 <LogOut size={18} /> Баромад
               </Button>
             )}
@@ -282,29 +281,29 @@ export default function KoryobTJ() {
 
           <div className="md:hidden flex items-center gap-3">
             {!user ? (
-              <Button onClick={() => setActiveView("auth")} size="sm" className="rounded-xl font-black">Воридшавӣ</Button>
+              <Button onClick={() => setActiveView("auth")} size="sm" className="rounded-xl font-black h-10 px-6">Воридшавӣ</Button>
             ) : (
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="rounded-xl h-10 w-10 relative">
-                    <Menu size={22} className="text-primary" />
-                    {hasUnreadMessages && <div className="absolute top-2 right-2 w-2.5 h-2.5 bg-primary rounded-full border border-white"></div>}
+                  <Button variant="outline" size="icon" className="rounded-2xl h-11 w-11 relative bg-white/50 border-primary/10">
+                    <Menu size={24} className="text-primary" />
+                    {hasUnreadMessages && <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full border border-white"></div>}
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[85%] rounded-l-[2.5rem] p-6">
-                  <SheetHeader><SheetTitle className="text-left font-black text-primary text-xl tracking-tighter uppercase">МЕНЮ</SheetTitle></SheetHeader>
-                  <div className="flex flex-col gap-3 mt-8">
-                    <MobileNavItem icon={<Home size={20}/>} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />
-                    <MobileNavItem icon={<MessageCircle size={20}/>} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
-                    <MobileNavItem icon={<Heart size={20}/>} label="Писандидаҳо" active={activeView === 'favorites'} onClick={() => setActiveView("favorites")} />
+                <SheetContent side="right" className="w-[85%] rounded-l-[3rem] p-8 glass border-none">
+                  <SheetHeader><SheetTitle className="text-left font-black text-primary text-2xl tracking-tighter uppercase mb-6">МЕНЮ</SheetTitle></SheetHeader>
+                  <div className="flex flex-col gap-4">
+                    <MobileNavItem icon={<Home size={22}/>} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />
+                    <MobileNavItem icon={<MessageCircle size={22}/>} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
+                    <MobileNavItem icon={<Heart size={22}/>} label="Писандидаҳо" active={activeView === 'favorites'} onClick={() => setActiveView("favorites")} />
                     {currentUserProfile?.role === 'korfarmo' && (
-                      <MobileNavItem icon={<List size={20}/>} label="Эълонҳои ман" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} />
+                      <MobileNavItem icon={<List size={22}/>} label="Эълонҳои ман" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} />
                     )}
-                    <MobileNavItem icon={<UserIcon size={20}/>} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
-                    <MobileNavItem icon={<Info size={20}/>} label="Оиди мо" active={activeView === 'about'} onClick={() => setActiveView("about")} />
-                    <div className="mt-auto pt-6 border-t">
-                      <Button variant="ghost" className="w-full justify-start gap-4 h-12 text-md font-black rounded-xl text-destructive" onClick={handleLogout}>
-                        <LogOut size={20} /> Баромад
+                    <MobileNavItem icon={<UserIcon size={22}/>} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
+                    <MobileNavItem icon={<Info size={22}/>} label="Оиди мо" active={activeView === 'about'} onClick={() => setActiveView("about")} />
+                    <div className="mt-auto pt-8 border-t border-primary/5">
+                      <Button variant="ghost" className="w-full justify-start gap-5 h-14 text-md font-black rounded-2xl text-destructive" onClick={handleLogout}>
+                        <LogOut size={22} /> Баромад
                       </Button>
                     </div>
                   </div>
@@ -315,45 +314,45 @@ export default function KoryobTJ() {
         </header>
       )}
 
-      <main className={cn("flex-1 overflow-y-auto w-full max-w-full overflow-x-hidden", isFullScreenView ? "p-0 h-screen" : "container max-w-7xl mx-auto p-4 md:p-12 md:px-0")}>
+      <main className={cn("flex-1 overflow-y-auto w-full max-w-full overflow-x-hidden page-transition", isFullScreenView ? "p-0 h-screen" : "container max-w-7xl mx-auto p-4 md:p-12 md:px-0")}>
         {activeView === "jobs" && (
-          <div className="space-y-12 w-full">
-            <section className="relative overflow-hidden p-6 md:p-24 rounded-none text-center space-y-6 min-h-[500px] flex flex-col justify-center items-center shadow-lg border-b border-primary/10 w-full max-w-full">
+          <div className="space-y-16 w-full">
+            <section className="relative overflow-hidden p-8 md:p-32 rounded-none text-center space-y-8 min-h-[600px] flex flex-col justify-center items-center shadow-2xl border-b border-primary/5 w-full max-w-full">
               {heroImg && (
                 <div className="absolute inset-0 z-0">
                   <Image 
                     src={heroImg.imageUrl} 
                     alt="Koryob Background" 
                     fill 
-                    className="object-cover"
+                    className="object-cover scale-105"
                     priority
                     data-ai-hint={heroImg.imageHint}
                   />
-                  <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px]"></div>
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 backdrop-blur-[2px]"></div>
                 </div>
               )}
-              <div className="relative z-10 space-y-6 max-w-full px-4">
-                <h2 className="text-3xl md:text-7xl font-black text-white tracking-tighter leading-[1.1] drop-shadow-2xl">
+              <div className="relative z-10 space-y-8 max-w-full px-4 animate-in fade-in slide-in-from-top-4 duration-1000">
+                <h2 className="text-4xl md:text-8xl font-black text-white tracking-tighter leading-[1] drop-shadow-2xl uppercase">
                   Кори орзуи худро <br /> <span className="text-primary">пайдо кунед</span>
                 </h2>
-                <p className="text-white/95 text-lg md:text-xl font-bold tracking-wide max-w-xl mx-auto">Платформаи муосири корёбӣ ва кордиҳӣ дар тамоми Тоҷикистон</p>
-                <div className="flex flex-col md:flex-row gap-4 pt-8 w-full max-w-3xl mx-auto">
-                  <div className="relative flex-[2]">
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary w-6 h-6" />
+                <p className="text-white/80 text-lg md:text-2xl font-bold tracking-wide max-w-2xl mx-auto uppercase">Платформаи муосири корёбӣ дар тамоми Тоҷикистон</p>
+                <div className="flex flex-col md:flex-row gap-5 pt-10 w-full max-w-4xl mx-auto">
+                  <div className="relative flex-[2] group">
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-primary w-7 h-7 group-focus-within:scale-110 transition-transform" />
                     <Input 
                       placeholder="Ҷустуҷӯ: вазифа, ширкат..." 
-                      className="pl-14 h-16 rounded-2xl bg-white/95 border-none shadow-2xl font-bold text-lg text-foreground" 
+                      className="pl-16 h-16 md:h-20 rounded-[1.5rem] bg-white/95 border-none shadow-2xl font-black text-lg text-foreground transition-all focus:bg-white" 
                       value={searchQuery} 
                       onChange={(e) => setSearchQuery(e.target.value)} 
                     />
                   </div>
                   <div className="flex-1">
                     <Select value={cityFilter} onValueChange={setCityFilter}>
-                      <SelectTrigger className="h-16 rounded-2xl bg-white/95 border-none shadow-2xl font-bold text-lg text-foreground">
-                        <div className="flex items-center gap-3"><MapPin className="w-6 h-6 text-primary" /><SelectValue placeholder="Шаҳр" /></div>
+                      <SelectTrigger className="h-16 md:h-20 rounded-[1.5rem] bg-white/95 border-none shadow-2xl font-black text-lg text-foreground px-8">
+                        <div className="flex items-center gap-4"><MapPin className="w-6 h-6 text-primary" /><SelectValue placeholder="Шаҳр" /></div>
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        {CITIES.map(city => (<SelectItem key={city} value={city} className="font-bold">{city}</SelectItem>))}
+                      <SelectContent className="rounded-[1.5rem] p-2 glass">
+                        {CITIES.map(city => (<SelectItem key={city} value={city} className="font-black rounded-xl uppercase text-xs tracking-widest">{city}</SelectItem>))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -361,16 +360,16 @@ export default function KoryobTJ() {
               </div>
             </section>
 
-            <div className="px-4 md:px-0 space-y-12 w-full">
+            <div className="px-6 md:px-0 space-y-20 w-full">
               {premiumJobs.length > 0 && (
-                <div className="space-y-4 w-full">
+                <div className="space-y-6 w-full animate-in fade-in slide-in-from-left-4 duration-700">
                   <div className="flex items-center justify-between px-2">
-                    <h3 className="text-xl font-black flex items-center gap-2 uppercase tracking-tighter">
-                      <Crown className="text-yellow-500 fill-yellow-500" /> VIP PREMIUM ЭЪЛОНҲО
+                    <h3 className="text-2xl font-black flex items-center gap-3 uppercase tracking-tighter">
+                      <Crown className="text-primary fill-primary animate-subtle-float" /> VIP PREMIUM ЭЪЛОНҲО
                     </h3>
                   </div>
                   <ScrollArea className="w-full whitespace-nowrap">
-                    <div className="flex gap-6 pb-6 px-2 h-full">
+                    <div className="flex gap-8 pb-10 px-2 h-full">
                       {premiumJobs.map(job => (
                         <JobCard 
                           key={job.id} 
@@ -387,16 +386,16 @@ export default function KoryobTJ() {
                 </div>
               )}
 
-              <div className="space-y-6 w-full">
-                <div className="flex items-center justify-between px-2">
-                  <h3 className="text-xl md:text-2xl font-black text-foreground tracking-tighter uppercase">Эълонҳои ҷорӣ</h3>
+              <div className="space-y-10 w-full">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 px-2">
+                  <h3 className="text-2xl md:text-4xl font-black text-foreground tracking-tighter uppercase">Эълонҳои ҷорӣ</h3>
                   {currentUserProfile?.role === 'korfarmo' && (
-                    <Button onClick={() => setActiveView("create-job")} className="rounded-xl gap-2 h-12 px-6 text-sm font-black shadow-lg bg-primary">
-                      <Plus size={18} /> НАШРИ ЭЪЛОН
+                    <Button onClick={() => setActiveView("create-job")} className="rounded-[1.5rem] gap-3 h-14 px-8 text-sm font-black shadow-2xl shadow-primary/20 bg-primary hover:scale-[1.05] transition-all">
+                      <Plus size={20} /> НАШРИ ЭЪЛОН
                     </Button>
                   )}
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                   {filteredJobs.length > 0 ? (
                     filteredJobs.map(job => (
                       <JobCard 
@@ -408,8 +407,8 @@ export default function KoryobTJ() {
                       />
                     ))
                   ) : (
-                    <div className="col-span-full text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-primary/5">
-                      <p className="text-muted-foreground font-black uppercase tracking-widest text-xs opacity-50">Эълонҳо ёфт нашуданд</p>
+                    <div className="col-span-full text-center py-32 glass rounded-[3.5rem] border-2 border-dashed border-primary/10">
+                      <p className="text-muted-foreground font-black uppercase tracking-[0.3em] text-xs opacity-40">Эълонҳо ёфт нашуданд</p>
                     </div>
                   )}
                 </div>
@@ -419,18 +418,18 @@ export default function KoryobTJ() {
         )}
 
         {activeView === "chat" && (
-          <div className="h-full md:h-[calc(100vh-200px)] w-full">
-            <div className="flex h-full bg-white md:rounded-[2.5rem] md:shadow-2xl overflow-hidden md:border border-primary/5">
-              <div className={cn("flex flex-col border-r w-full md:w-1/3", activeChatEmail && "hidden md:flex")}>
+          <div className="h-full md:h-[calc(100vh-220px)] w-full page-transition">
+            <div className="flex h-full bg-white md:rounded-[3.5rem] md:shadow-2xl overflow-hidden md:border border-primary/5">
+              <div className={cn("flex flex-col border-r border-primary/5 w-full md:w-1/3 glass", activeChatEmail && "hidden md:flex")}>
                 <ChatList activeChatEmail={activeChatEmail} onSelect={setActiveChatEmail} onBack={() => setActiveView("jobs")} />
               </div>
               <div className={cn("flex flex-col w-full md:w-2/3", !activeChatEmail && "hidden md:flex")}>
                 {activeChatEmail ? (
                   <ChatWindow partnerEmail={activeChatEmail} onBack={() => setActiveChatEmail(null)} />
                 ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-secondary/5">
-                    <MessageCircle size={48} className="opacity-10 mb-4" />
-                    <p className="font-black uppercase tracking-widest text-xs">Суҳбатро интихоб кунед</p>
+                  <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground/30 bg-secondary/5">
+                    <MessageCircle size={100} className="mb-8 opacity-10 animate-subtle-float" />
+                    <p className="font-black uppercase tracking-[0.3em] text-xs">Суҳбатро интихоб кунед</p>
                   </div>
                 )}
               </div>
@@ -446,13 +445,13 @@ export default function KoryobTJ() {
       </main>
 
       {user && !isFullScreenView && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t px-8 py-4 flex items-center justify-between z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] w-full">
-          <MobileNavTab icon={<Home size={24} />} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />
+        <div className="md:hidden fixed bottom-0 left-0 right-0 glass border-t px-10 py-5 flex items-center justify-between z-50 rounded-t-[3rem] shadow-[0_-15px_50px_rgba(0,0,0,0.1)] w-full">
+          <MobileNavTab icon={<Home size={28} />} label="Асосӣ" active={activeView === 'jobs'} onClick={() => {setActiveView("jobs"); setActiveChatEmail(null);}} />
           <div className="relative">
-            <MobileNavTab icon={<MessageCircle size={24} />} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
-            {hasUnreadMessages && <div className="absolute top-0 right-1 w-3 h-3 bg-primary rounded-full border-2 border-white"></div>}
+            <MobileNavTab icon={<MessageCircle size={28} />} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
+            {hasUnreadMessages && <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-primary rounded-full border-2 border-white animate-pulse"></div>}
           </div>
-          <MobileNavTab icon={<UserIcon size={24} />} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
+          <MobileNavTab icon={<UserIcon size={28} />} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
         </div>
       )}
     </div>
@@ -461,7 +460,7 @@ export default function KoryobTJ() {
 
 function NavButton({ icon, label, active, onClick }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void }) {
   return (
-    <button onClick={onClick} className={cn("flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-black text-sm uppercase tracking-tighter", active ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-secondary")}>
+    <button onClick={onClick} className={cn("flex items-center gap-3 px-6 py-2.5 rounded-[1.2rem] transition-all font-black text-[11px] uppercase tracking-widest", active ? "bg-primary text-white shadow-xl shadow-primary/30 scale-105" : "text-muted-foreground/80 hover:bg-secondary hover:text-primary")}>
       {icon} <span>{label}</span>
     </button>
   );
@@ -469,7 +468,7 @@ function NavButton({ icon, label, active, onClick }: { icon: React.ReactNode, la
 
 function MobileNavItem({ icon, label, active, onClick }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void }) {
   return (
-    <Button variant="ghost" className={cn("justify-start gap-4 h-14 text-md font-black rounded-2xl uppercase tracking-widest", active && "bg-primary/10 text-primary")} onClick={onClick}>
+    <Button variant="ghost" className={cn("justify-start gap-5 h-16 text-md font-black rounded-[1.5rem] uppercase tracking-widest border-none", active ? "bg-primary text-white shadow-xl shadow-primary/30" : "bg-secondary/30 text-muted-foreground/70")} onClick={onClick}>
       {icon} {label}
     </Button>
   );
@@ -477,9 +476,9 @@ function MobileNavItem({ icon, label, active, onClick }: { icon: React.ReactNode
 
 function MobileNavTab({ icon, label, active, onClick }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void }) {
   return (
-    <button onClick={onClick} className={cn("flex flex-col items-center gap-1 transition-all", active ? 'text-primary scale-110' : 'text-muted-foreground/60')}>
+    <button onClick={onClick} className={cn("flex flex-col items-center gap-1.5 transition-all duration-300", active ? 'text-primary scale-110' : 'text-muted-foreground/40')}>
       {icon}
-      <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
+      <span className="text-[10px] font-black uppercase tracking-[0.2em]">{label}</span>
     </button>
   );
 }

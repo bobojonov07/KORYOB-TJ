@@ -67,31 +67,33 @@ export function JobCard({ job, onClick, onChat, isOwner, compact = false }: JobC
     return (
       <div 
         onClick={onClick}
-        className="shrink-0 w-64 bg-white rounded-3xl border border-primary/10 shadow-lg p-4 space-y-3 cursor-pointer hover:scale-[1.02] transition-all relative overflow-hidden"
+        className="shrink-0 w-64 glass rounded-[2rem] p-5 space-y-4 cursor-pointer hover:scale-[1.03] active:scale-95 transition-all duration-300 relative overflow-hidden group shadow-2xl"
       >
-        <div className="relative h-32 w-full rounded-2xl overflow-hidden bg-gray-100">
+        <div className="relative h-36 w-full rounded-2xl overflow-hidden bg-secondary/30">
           {job.image ? (
-            <Image src={job.image} alt={job.title} fill className="object-cover" />
+            <Image src={job.image} alt={job.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-primary/5">
-               <Briefcase className="text-primary/20" size={32} />
+            <div className="w-full h-full flex items-center justify-center">
+               <Briefcase className="text-primary/10 group-hover:text-primary/20 transition-colors" size={40} />
             </div>
           )}
           {job.isPremium && (
-            <div className="absolute top-2 right-2 bg-yellow-500 text-white p-1.5 rounded-lg shadow-lg">
+            <div className="absolute top-2 right-2 bg-primary text-white p-1.5 rounded-lg shadow-xl animate-pulse">
               <Crown size={12} fill="currentColor" />
             </div>
           )}
         </div>
         <div className="space-y-1">
-          <h3 className="font-bold text-sm truncate leading-tight">{job.title}</h3>
-          <p className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
-            <Building2 size={10} /> {job.company}
+          <h3 className="font-black text-sm truncate tracking-tight text-foreground group-hover:text-primary transition-colors">{job.title}</h3>
+          <p className="text-[10px] text-muted-foreground font-bold flex items-center gap-1.5">
+            <Building2 size={10} className="text-primary/60" /> {job.company}
           </p>
         </div>
-        <div className="flex items-center justify-between pt-2 border-t">
-          <span className="text-xs font-bold text-primary">{job.salary ? `${job.salary} TJS` : '—'}</span>
-          <ChevronRight size={14} className="text-muted-foreground" />
+        <div className="flex items-center justify-between pt-3 border-t border-primary/5">
+          <span className="text-xs font-black text-primary">{job.salary ? `${job.salary} TJS` : 'Маош —'}</span>
+          <div className="bg-primary/10 p-1 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
+            <ChevronRight size={14} />
+          </div>
         </div>
       </div>
     );
@@ -99,39 +101,41 @@ export function JobCard({ job, onClick, onChat, isOwner, compact = false }: JobC
 
   return (
     <Card className={cn(
-      "hover:shadow-xl transition-all duration-300 rounded-[2rem] bg-white flex flex-col h-full border border-primary/5 shadow-md overflow-hidden",
-      job.isPremium && "ring-1 ring-yellow-500/30"
+      "group hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] bg-white border border-primary/5 shadow-xl overflow-hidden flex flex-col h-full",
+      job.isPremium && "ring-1 ring-primary/20 bg-gradient-to-br from-white to-primary/5"
     )}>
       {job.image && (
-        <div className="relative h-48 w-full cursor-pointer overflow-hidden" onClick={onClick}>
-          <Image src={job.image} alt={job.title} fill className="object-cover hover:scale-105 transition-transform duration-500" />
+        <div className="relative h-56 w-full cursor-pointer overflow-hidden" onClick={onClick}>
+          <Image src={job.image} alt={job.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           {user && (
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={toggleFavorite}
               className={cn(
-                "absolute top-3 right-3 rounded-xl h-10 w-10 transition-all active:scale-110",
-                isFavorite ? "text-red-500 bg-white shadow-md" : "text-white bg-black/20 hover:bg-black/30"
+                "absolute top-4 right-4 rounded-2xl h-11 w-11 transition-all active:scale-125 z-10",
+                isFavorite ? "text-red-500 bg-white shadow-xl" : "text-white bg-black/20 backdrop-blur-md hover:bg-black/40"
               )}
             >
-              <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
+              <Heart size={20} fill={isFavorite ? "currentColor" : "none"} />
             </Button>
           )}
         </div>
       )}
 
-      <CardHeader className="p-5 pb-2">
-        <div className="flex justify-between items-start gap-2">
-          <div className="space-y-1">
+      <CardHeader className="p-6 pb-2">
+        <div className="flex justify-between items-start gap-4">
+          <div className="space-y-1.5 flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-lg font-bold truncate leading-tight cursor-pointer hover:text-primary transition-colors" onClick={onClick}>
+              <CardTitle className="text-xl font-black truncate tracking-tighter cursor-pointer hover:text-primary transition-colors leading-tight" onClick={onClick}>
                 {job.title}
               </CardTitle>
-              {job.isPremium && <Crown size={14} className="text-yellow-500 fill-yellow-500 shrink-0" />}
+              {job.isPremium && <Crown size={16} className="text-primary animate-subtle-float" fill="currentColor" />}
             </div>
-            <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
-              <Building2 size={12} className="text-primary/60" /> {job.company}
+            <p className="text-xs text-muted-foreground font-black uppercase tracking-widest flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary/40"></div>
+              {job.company}
             </p>
           </div>
           {!job.image && user && (
@@ -140,42 +144,43 @@ export function JobCard({ job, onClick, onChat, isOwner, compact = false }: JobC
               size="icon" 
               onClick={toggleFavorite}
               className={cn(
-                "rounded-xl h-9 w-9 transition-all active:scale-110",
-                isFavorite ? "text-red-500 bg-red-50" : "text-muted-foreground/30 hover:text-red-500"
+                "rounded-2xl h-10 w-10 transition-all active:scale-125",
+                isFavorite ? "text-red-500 bg-red-50" : "text-muted-foreground/30 hover:text-red-500 hover:bg-red-50"
               )}
             >
-              <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
+              <Heart size={20} fill={isFavorite ? "currentColor" : "none"} />
             </Button>
           )}
         </div>
       </CardHeader>
       
-      <CardContent className="p-5 pt-2 flex-1 space-y-4">
+      <CardContent className="p-6 pt-2 flex-1 space-y-5">
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className="border-primary/20 text-primary font-bold text-[10px] py-1">
-            <MapPin size={10} className="mr-1" /> {job.city}
-          </Badge>
-          <div className="flex items-center gap-1.5 bg-primary/5 px-3 py-1 rounded-lg">
-            <Banknote className="w-3.5 h-3.5 text-primary" />
-            <span className="text-[11px] font-bold">{job.salary ? `${job.salary} TJS` : 'Маош —'}</span>
+          <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-xl border border-primary/5">
+            <MapPin size={12} className="text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-tight">{job.city}</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-secondary/50 px-3 py-1 rounded-lg text-muted-foreground">
-            <Clock className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-bold">{formatTajikTime(job.postedAt)}</span>
+          <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-xl border border-primary/10">
+            <Banknote size={12} className="text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-tight text-primary">{job.salary ? `${job.salary} TJS` : 'Маош —'}</span>
+          </div>
+          <div className="flex items-center gap-2 bg-secondary/30 px-3 py-1.5 rounded-xl text-muted-foreground/60">
+            <Clock size={12} />
+            <span className="text-[9px] font-black uppercase tracking-widest">{formatTajikTime(job.postedAt)}</span>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed font-medium">
+        <p className="text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed font-medium">
           {job.desc}
         </p>
       </CardContent>
 
-      <CardFooter className="p-5 pt-0 mt-auto">
+      <CardFooter className="p-6 pt-0 mt-auto">
         <Button 
           variant="default" 
-          className="w-full rounded-xl font-bold h-10 shadow-md transition-all gap-2 text-xs" 
+          className="w-full rounded-2xl font-black h-12 shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 gap-3 text-xs uppercase tracking-widest" 
           onClick={onClick}
         >
-          ТАФСИЛОТ <ArrowRight size={14} />
+          ТАФСИЛОТ <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
         </Button>
       </CardFooter>
     </Card>

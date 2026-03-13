@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -77,7 +76,6 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
   
   const maxLimit = (isPremium || partnerIsPremium) ? 3000 : 1000;
 
-  // Авто-скролл ба паёми охирин
   useEffect(() => {
     if (scrollRef.current) {
       setTimeout(() => {
@@ -180,28 +178,28 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const weeks = Math.floor(days / 7);
 
-    if (mins < 60) return `Дида шуд: ${mins} дақ. пеш`;
-    if (hours < 24) return `Дида шуд: ${hours} соат пеш`;
-    if (days < 7) return `Дида шуд: ${days} рӯз пеш`;
-    if (weeks < 4) return `Дида шуд: ${weeks} ҳафта пеш`;
+    if (mins < 60) return `${mins} дақ. пеш`;
+    if (hours < 24) return `${hours} соат пеш`;
+    if (days < 7) return `${days} рӯз пеш`;
+    if (weeks < 4) return `${weeks} ҳафта пеш`;
     
-    return `Дида шуд: ${new Date(timestamp).toLocaleDateString('tg-TJ', { day: 'numeric', month: 'short' })}`;
+    return `${new Date(timestamp).toLocaleDateString('tg-TJ', { day: 'numeric', month: 'short' })}`;
   };
 
   return (
     <div className={cn(
-      "flex flex-col h-full w-full max-w-full overflow-hidden",
-      isPremium ? "bg-gray-50/80" : "bg-[#fdfcfb]"
+      "flex flex-col h-full w-full max-w-full overflow-hidden transition-all duration-500",
+      isPremium ? "bg-[#FDFCFB]" : "bg-white"
     )}>
-      <div className="p-4 border-b bg-white flex items-center justify-between sticky top-0 z-30 shadow-md w-full">
-        <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
-          <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full hover:bg-gray-100 h-9 w-9 md:h-10 md:w-10 shrink-0">
+      <div className="p-4 border-b glass flex items-center justify-between sticky top-0 z-30 shadow-sm w-full">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full hover:bg-secondary h-10 w-10 shrink-0">
             <ArrowLeft size={20} />
           </Button>
-          <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+          <div className="flex items-center gap-3 overflow-hidden">
             <div className={cn(
-              "relative w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black overflow-hidden border-2 shadow-sm transition-all shrink-0",
-              partner?.isPremium ? "border-yellow-400" : "border-primary/10 bg-primary/5"
+              "relative w-11 h-11 rounded-full flex items-center justify-center font-black overflow-hidden border-2 shadow-inner transition-all shrink-0",
+              partner?.isPremium ? "border-primary animate-glow" : "border-primary/10 bg-secondary/50"
             )}>
               {partner?.profileImage ? (
                 <Image src={partner.profileImage} alt={partner.name} fill className="object-cover" />
@@ -210,45 +208,36 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
               )}
             </div>
             <div className="flex flex-col overflow-hidden">
-              <h3 className="font-black text-sm md:text-base leading-none flex items-center gap-2 truncate">
+              <h3 className="font-black text-sm leading-tight flex items-center gap-1.5 truncate">
                 <span className="truncate">{partner?.name || partnerEmail.split('@')[0]}</span>
-                {partner?.isPremium && <Crown size={14} className="text-yellow-500 fill-yellow-500 shrink-0" />}
+                {partner?.isPremium && <Crown size={14} className="text-primary fill-primary shrink-0" />}
               </h3>
-              <span className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-wider mt-1 truncate">
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-0.5 truncate">
                 {formatLastSeen(partner?.lastSeen || null)}
               </span>
             </div>
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
+        <Button variant="ghost" size="icon" onClick={() => setIsReportOpen(true)} className="text-muted-foreground/40 hover:text-destructive transition-colors shrink-0">
           <AlertTriangle size={20} />
         </Button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 relative w-full max-w-full overflow-x-hidden">
-        {isPremium && (
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none select-none flex items-center justify-center overflow-hidden">
-             <div className="grid grid-cols-4 gap-20 rotate-12 scale-150">
-                {Array.from({length: 20}).map((_, i) => <Crown key={i} size={80} />)}
-             </div>
-          </div>
-        )}
-        
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 relative w-full max-w-full overflow-x-hidden scroll-smooth">
         {messages.map((msg, i) => {
           const isMine = msg.sender?.toLowerCase() === user?.email?.toLowerCase();
-          const timeDisplay = formatMessageTime(msg.time);
           return (
-            <div key={msg.id || i} className={cn("flex flex-col max-w-[90%] md:max-w-[85%] group animate-in slide-in-from-bottom-2 duration-300", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
+            <div key={msg.id || i} className={cn("flex flex-col max-w-[85%] group page-transition", isMine ? "ml-auto items-end" : "mr-auto items-start")}>
               <div className={cn(
-                "p-3 md:p-4 rounded-[1.2rem] md:rounded-[1.5rem] text-sm md:text-[15px] font-medium shadow-md break-words relative flex flex-col gap-2 transition-all duration-300", 
+                "p-4 rounded-[1.8rem] text-[15px] font-medium shadow-md break-words relative flex flex-col gap-2 transition-all duration-300", 
                 isMine 
-                  ? "bg-primary text-white rounded-tr-none hover:bg-primary/90" 
-                  : "bg-white text-foreground rounded-tl-none border border-primary/5 hover:border-primary/20"
+                  ? "bg-primary text-white rounded-tr-none hover:shadow-primary/30" 
+                  : "glass text-foreground rounded-tl-none hover:shadow-xl"
               )}>
                 <span className="leading-relaxed whitespace-pre-wrap">{msg.text}</span>
                 <div className="flex items-center justify-end gap-2 mt-1">
-                  <span className={cn("text-[8px] md:text-[9px] font-black uppercase tracking-widest", isMine ? "text-white/70" : "text-muted-foreground/50")}>
-                    {timeDisplay}
+                  <span className={cn("text-[9px] font-black uppercase tracking-widest", isMine ? "text-white/70" : "text-muted-foreground/50")}>
+                    {formatMessageTime(msg.time)}
                   </span>
                   {isMine && (
                     <span className={cn(msg.read ? "text-white" : "text-white/40")}>
@@ -259,7 +248,7 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
                 <button 
                   onClick={() => handleDeleteMessage(msg.id)}
                   className={cn(
-                    "absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-destructive p-2 transition-all hover:scale-110",
+                    "absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-destructive p-2 transition-all hover:scale-125",
                     isMine ? "-left-10" : "-right-10"
                   )}
                 >
@@ -270,60 +259,60 @@ export function ChatWindow({ partnerEmail, onBack }: ChatWindowProps) {
           );
         })}
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center py-24 opacity-20">
-            <div className="bg-primary/10 p-8 md:p-10 rounded-full animate-pulse">
-              <MessageCircle size={60} className="md:size-[80px] text-primary" />
+          <div className="h-full flex flex-col items-center justify-center py-24 opacity-30">
+            <div className="bg-primary/10 p-12 rounded-full animate-pulse">
+              <MessageCircle size={80} className="text-primary" />
             </div>
-            <p className="font-black mt-6 uppercase tracking-[0.2em] text-[10px] md:text-xs">Суҳбатро оғоз кунед</p>
+            <p className="font-black mt-8 uppercase tracking-[0.3em] text-xs">Оғози суҳбат</p>
           </div>
         )}
       </div>
 
-      <div className="p-4 md:p-6 bg-white border-t sticky bottom-0 z-30 flex flex-col gap-3 md:gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.02)] w-full max-w-full">
-        <div className="flex gap-3 md:gap-4 items-center w-full">
-          <div className="relative flex-1 overflow-hidden">
+      <div className="p-4 md:p-8 bg-white border-t glass sticky bottom-0 z-30 flex flex-col gap-4 w-full max-w-full">
+        <div className="flex gap-4 items-center w-full">
+          <div className="relative flex-1">
             <Input 
               placeholder="Нависед..." 
-              className="rounded-[1.5rem] md:rounded-[1.8rem] h-12 md:h-14 bg-secondary/30 border-none font-bold px-6 md:px-8 text-sm md:text-base focus-visible:ring-primary shadow-inner w-full" 
+              className="rounded-full h-14 bg-secondary/50 border-none font-bold px-8 text-base focus-visible:ring-primary shadow-inner w-full transition-all" 
               value={text} 
               onChange={e => setText(e.target.value)} 
               onKeyDown={e => e.key === 'Enter' && handleSend()}
               disabled={currentUserProfile?.isBlocked}
             />
             {isPremium && (
-              <Sparkles className="absolute right-4 md:right-5 top-1/2 -translate-y-1/2 text-yellow-500 w-4 h-4 md:w-5 md:h-5 pointer-events-none" />
+              <Sparkles className="absolute right-5 top-1/2 -translate-y-1/2 text-primary w-5 h-5 pointer-events-none" />
             )}
           </div>
           <Button 
             onClick={handleSend} 
             size="icon" 
-            className="rounded-full h-12 w-12 md:h-14 md:w-14 shrink-0 bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 active:scale-90 transition-all" 
+            className="rounded-full h-14 w-14 shrink-0 bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 active:scale-90 transition-all" 
             disabled={currentUserProfile?.isBlocked || !text.trim() || (totalChatCharacters + text.trim().length > maxLimit)}
           >
-            <Send size={20} className="md:size-[24px]" />
+            <Send size={24} />
           </Button>
         </div>
-        <div className="flex justify-between items-center px-4 md:px-6">
-           <div className="flex items-center gap-2 flex-1 max-w-[150px] md:max-w-none">
+        <div className="flex justify-between items-center px-6">
+           <div className="flex items-center gap-3 flex-1">
              <div className={cn(
-               "h-1 w-full max-w-[120px] md:max-w-[200px] rounded-full bg-secondary overflow-hidden border border-black/5",
+               "h-1.5 w-full max-w-[200px] rounded-full bg-secondary overflow-hidden border border-black/5 shadow-inner",
                (totalChatCharacters + text.length > maxLimit) && "bg-destructive/20"
              )}>
                 <div 
                   className={cn(
-                    "h-full transition-all duration-300",
+                    "h-full transition-all duration-500",
                     (totalChatCharacters + text.length > maxLimit) ? "bg-destructive" : "bg-primary"
                   )} 
                   style={{ width: `${Math.min(100, ((totalChatCharacters + text.length) / maxLimit) * 100)}%` }}
                 ></div>
              </div>
-             <span className={cn("text-[8px] md:text-[9px] font-black uppercase tracking-[0.1em] shrink-0", (totalChatCharacters + text.length > maxLimit) ? "text-destructive" : "text-muted-foreground")}>
+             <span className={cn("text-[10px] font-black uppercase tracking-widest shrink-0", (totalChatCharacters + text.length > maxLimit) ? "text-destructive" : "text-muted-foreground/60")}>
                {totalChatCharacters + text.length} / {maxLimit}
              </span>
            </div>
            {(totalChatCharacters + text.length > maxLimit) && (
-             <span className="text-[8px] md:text-[9px] font-black text-destructive uppercase tracking-widest flex items-center gap-1 shrink-0">
-               <AlertTriangle size={10} /> Лимит!
+             <span className="text-[10px] font-black text-destructive uppercase tracking-widest flex items-center gap-2 shrink-0 animate-pulse">
+               <AlertTriangle size={14} /> ЛИМИТИ ПАЁМ
              </span>
            )}
         </div>
