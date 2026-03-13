@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Instagram, Send, MessageCircle, Info, ShieldAlert, Code, Sparkles } from "lucide-react";
+import { ArrowLeft, Instagram, Send, MessageCircle, Info, ShieldAlert, Code, Sparkles, ExternalLink } from "lucide-react";
 
 interface AboutViewProps {
   onBack: () => void;
@@ -47,6 +47,29 @@ export function AboutView({ onBack }: AboutViewProps) {
             <p className="text-muted-foreground leading-relaxed text-sm font-bold">
               KORYOB.TJ бо мақсади осон ва тезтар кардани раванди дарёфти кор барои ҳамватанони мо сохта шудааст. Мо мехоҳем, ки ҳар як сокини Тоҷикистон тавонад кори мувофиқи худро бидуни миёнаравҳо пайдо кунад.
             </p>
+          </div>
+
+          {/* HUNAR-YOB AD SECTION */}
+          <div className="relative overflow-hidden bg-gradient-to-r from-[#1a237e] to-[#4a148c] p-8 rounded-[2.5rem] text-white space-y-4 shadow-xl border border-white/10 group">
+            <div className="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+            <div className="flex items-center gap-2 bg-white/10 w-fit px-3 py-1 rounded-lg">
+              <Sparkles size={14} className="text-yellow-400" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Тавсияи мо</span>
+            </div>
+            <h3 className="text-2xl font-black tracking-tighter uppercase leading-none">
+              HUNAR-YOB.STORE
+            </h3>
+            <p className="text-white/80 text-xs font-bold leading-relaxed">
+              Агар ҳунар доред ва намедонед дар куҷо эълон кунед, ё мутахассис меҷӯед, ба вебсайти нави мо гузаред!
+            </p>
+            <a 
+              href="https://www.hunar-yob.store" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 bg-white text-[#1a237e] px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-tighter hover:bg-yellow-400 transition-all active:scale-95"
+            >
+              ГУЗАШТАН БА САЙТ <ExternalLink size={16} />
+            </a>
           </div>
 
           <div className="bg-destructive/5 border border-destructive/10 p-6 rounded-[2rem] space-y-4">

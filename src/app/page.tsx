@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, Menu, Home, List, Info, ShieldAlert, Heart, Crown, ChevronRight, Sparkles } from "lucide-react";
+import { Search, MapPin, Plus, MessageCircle, User as UserIcon, LogOut, Briefcase, Menu, Home, List, Info, ShieldAlert, Heart, Crown, ChevronRight, Sparkles, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -297,7 +297,7 @@ export default function KoryobTJ() {
                     <MobileNavItem icon={<MessageCircle size={22}/>} label="Чат" active={activeView === 'chat'} onClick={() => setActiveView("chat")} />
                     <MobileNavItem icon={<Heart size={22}/>} label="Писандидаҳо" active={activeView === 'favorites'} onClick={() => setActiveView("favorites")} />
                     {currentUserProfile?.role === 'korfarmo' && (
-                      <MobileNavItem icon={<List size={22}/>} label="Эълонҳои ман" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} />
+                      <MobileNavItem icon={<UserIcon size={22}/>} label="Эълонҳои ман" active={activeView === 'my-jobs'} onClick={() => setActiveView("my-jobs")} />
                     )}
                     <MobileNavItem icon={<UserIcon size={22}/>} label="Профил" active={activeView === 'profile'} onClick={() => setActiveView("profile")} />
                     <MobileNavItem icon={<Info size={22}/>} label="Оиди мо" active={activeView === 'about'} onClick={() => setActiveView("about")} />
@@ -361,6 +361,37 @@ export default function KoryobTJ() {
             </section>
 
             <div className="px-6 md:px-0 space-y-20 w-full">
+              {/* HUNAR-YOB AD BANNER */}
+              <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                <a 
+                  href="https://www.hunar-yob.store" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group relative block w-full p-8 md:p-12 rounded-[3.5rem] overflow-hidden bg-gradient-to-br from-[#1a237e] via-[#311b92] to-[#4a148c] shadow-2xl hover:scale-[1.01] transition-all duration-500"
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.1),transparent)]"></div>
+                  <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/5 rounded-full blur-[100px] group-hover:scale-150 transition-transform duration-1000"></div>
+                  
+                  <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="space-y-4 text-center md:text-left">
+                      <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10">
+                        <Sparkles className="text-yellow-400 w-4 h-4" />
+                        <span className="text-white font-black text-[10px] uppercase tracking-widest">ЛОИҲАИ НАВ</span>
+                      </div>
+                      <h3 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase leading-none">
+                        HUNAR-YOB.STORE
+                      </h3>
+                      <p className="text-white/70 font-bold text-sm md:text-lg max-w-xl leading-relaxed">
+                        Агар ҳунар доред ва намедонед дар куҷо эълон кунед, ё мутахассис меҷӯед, ба вебсайти нави мо гузаред!
+                      </p>
+                    </div>
+                    <div className="bg-white text-[#1a237e] p-6 rounded-[2.5rem] font-black text-sm md:text-md uppercase tracking-tighter flex items-center gap-4 shadow-2xl group-hover:bg-yellow-400 transition-colors">
+                      ГУЗАШТАН <ExternalLink size={24} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                    </div>
+                  </div>
+                </a>
+              </section>
+
               {premiumJobs.length > 0 && (
                 <div className="space-y-6 w-full animate-in fade-in slide-in-from-left-4 duration-700">
                   <div className="flex items-center justify-between px-2">
