@@ -385,7 +385,7 @@ export default function KoryobTJ() {
                 </a>
               </section>
 
-              {/* AdSense Banner Example */}
+              {/* Verified AdSense Banner */}
               <AdSenseBanner adSlot="1234567890" />
 
               {premiumJobs.length > 0 && (
@@ -440,6 +440,9 @@ export default function KoryobTJ() {
                   )}
                 </div>
               </div>
+              
+              {/* Bottom AdSense Banner */}
+              <AdSenseBanner adSlot="0987654321" />
             </div>
           </div>
         )}
