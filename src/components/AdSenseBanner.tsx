@@ -20,7 +20,7 @@ export function AdSenseBanner({ adSlot, adFormat = "auto", fullWidthResponsive =
   }, []);
 
   return (
-    <div className="w-full my-8 overflow-hidden flex justify-center bg-secondary/5 rounded-[2.5rem] border border-dashed border-primary/10 py-6 px-4">
+    <div className="w-full my-8 overflow-hidden flex justify-center bg-secondary/5 rounded-[2.5rem] border border-dashed border-primary/10 py-6 px-4 relative">
       <ins
         className="adsbygoogle"
         style={{ display: "block", minWidth: "250px", minHeight: "90px" }}
