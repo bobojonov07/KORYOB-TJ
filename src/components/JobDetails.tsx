@@ -11,6 +11,7 @@ import { ReportDialog } from "./ReportDialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { AdSenseBanner } from "./AdSenseBanner";
 
 interface JobDetailsProps {
   job: JobListing;
@@ -133,6 +134,8 @@ export function JobDetails({ job, onBack, onChat }: JobDetailsProps) {
             <DetailItem icon={<Phone size={16} className="text-primary" />} label="Телефон" value={job.phone || '—'} isPremium={job.isPremium} />
             <DetailItem icon={<User size={16} className="text-primary" />} label="Нашркунанда" value={job.postedBy} isPremium={job.isPremium} />
           </div>
+
+          <AdSenseBanner adSlot="5754332317" adFormat="fluid" adLayout="in-article" />
 
           <div className="space-y-4 pt-4">
             <h3 className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
