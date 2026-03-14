@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -11,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import { AdSenseBanner } from "./AdSenseBanner";
 
 interface ChatListProps {
   activeChatEmail: string | null;
@@ -225,6 +225,11 @@ export function ChatList({ activeChatEmail, onSelect, onBack }: ChatListProps) {
               </p>
             </div>
           )}
+          
+          {/* AdSense Unit in Chat List */}
+          <div className="p-4">
+             <AdSenseBanner adSlot="3128168974" adFormat="fluid" adLayoutKey="-fb+5w+4e-db+86" />
+          </div>
         </div>
       </ScrollArea>
     </div>

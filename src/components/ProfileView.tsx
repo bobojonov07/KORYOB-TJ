@@ -33,6 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
+import { AdSenseBanner } from "./AdSenseBanner";
 
 interface ProfileViewProps {
   profile?: UserProfile | null;
@@ -360,6 +361,9 @@ export function ProfileView({ profile, isPremium, loading, onViewMyJobs, onAbout
               </CardHeader>
             </Card>
           </div>
+
+          {/* AdSense Unit in Profile */}
+          <AdSenseBanner adSlot="3128168974" adFormat="fluid" adLayoutKey="-fb+5w+4e-db+86" />
         </div>
       </div>
 

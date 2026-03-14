@@ -413,6 +413,9 @@ export default function KoryobTJ() {
                 </div>
               )}
 
+              {/* In-feed Ad after Premium Jobs */}
+              <AdSenseBanner adSlot="3128168974" adFormat="fluid" adLayoutKey="-fb+5w+4e-db+86" />
+
               <div className="space-y-10 w-full">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 px-2">
                   <h3 className="text-2xl md:text-4xl font-black text-foreground tracking-tighter uppercase">Эълонҳои ҷорӣ</h3>
@@ -424,14 +427,21 @@ export default function KoryobTJ() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                   {filteredJobs.length > 0 ? (
-                    filteredJobs.map(job => (
-                      <JobCard 
-                        key={job.id} 
-                        job={job} 
-                        onClick={() => handleJobClick(job.id)} 
-                        onChat={() => handleStartChat(job.postedEmail)}
-                        isOwner={user?.uid === job.postedUid}
-                      />
+                    filteredJobs.map((job, index) => (
+                      <div key={job.id} className="contents">
+                        <JobCard 
+                          job={job} 
+                          onClick={() => handleJobClick(job.id)} 
+                          onChat={() => handleStartChat(job.postedEmail)}
+                          isOwner={user?.uid === job.postedUid}
+                        />
+                        {/* Insert an ad after every 6 jobs in the list */}
+                        {(index + 1) % 6 === 0 && (
+                          <div className="col-span-full">
+                             <AdSenseBanner adSlot="3128168974" adFormat="fluid" adLayoutKey="-fb+5w+4e-db+86" />
+                          </div>
+                        )}
+                      </div>
                     ))
                   ) : (
                     <div className="col-span-full text-center py-32 glass rounded-[3.5rem] border-2 border-dashed border-primary/10">

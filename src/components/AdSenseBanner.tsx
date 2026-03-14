@@ -6,10 +6,11 @@ interface AdSenseBannerProps {
   adSlot: string;
   adFormat?: "auto" | "fluid" | "rectangle" | "autorelaxed";
   adLayout?: "in-article" | string;
+  adLayoutKey?: string;
   fullWidthResponsive?: boolean;
 }
 
-export function AdSenseBanner({ adSlot, adFormat = "auto", adLayout, fullWidthResponsive = true }: AdSenseBannerProps) {
+export function AdSenseBanner({ adSlot, adFormat = "auto", adLayout, adLayoutKey, fullWidthResponsive = true }: AdSenseBannerProps) {
   useEffect(() => {
     try {
       // @ts-ignore
@@ -20,7 +21,7 @@ export function AdSenseBanner({ adSlot, adFormat = "auto", adLayout, fullWidthRe
   }, []);
 
   return (
-    <div className="w-full my-8 overflow-hidden flex justify-center bg-secondary/5 rounded-[2.5rem] border border-dashed border-primary/10 py-6 px-4 relative min-h-[100px]">
+    <div className="w-full my-6 overflow-hidden flex justify-center bg-secondary/5 rounded-[2.5rem] border border-dashed border-primary/10 py-6 px-4 relative min-h-[100px]">
       <ins
         className="adsbygoogle"
         style={{ display: "block", textAlign: "center" }}
@@ -28,6 +29,7 @@ export function AdSenseBanner({ adSlot, adFormat = "auto", adLayout, fullWidthRe
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
         data-ad-layout={adLayout}
+        data-ad-layout-key={adLayoutKey}
         data-full-width-responsive={fullWidthResponsive.toString()}
       />
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-5">
