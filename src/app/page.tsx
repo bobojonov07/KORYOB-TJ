@@ -354,6 +354,9 @@ export default function KoryobTJ() {
             </section>
 
             <div className="px-6 md:px-0 space-y-20 w-full">
+              {/* AdSense Unit 1 */}
+              <AdSenseBanner adSlot="2827818474" />
+
               {/* HUNAR-YOB AD BANNER */}
               <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000">
                 <a 
@@ -384,9 +387,6 @@ export default function KoryobTJ() {
                   </div>
                 </a>
               </section>
-
-              {/* Verified AdSense Banner */}
-              <AdSenseBanner adSlot="1234567890" />
 
               {premiumJobs.length > 0 && (
                 <div className="space-y-6 w-full animate-in fade-in slide-in-from-left-4 duration-700">
@@ -441,8 +441,8 @@ export default function KoryobTJ() {
                 </div>
               </div>
               
-              {/* Bottom AdSense Banner */}
-              <AdSenseBanner adSlot="0987654321" />
+              {/* AdSense Unit 2 (Bottom) */}
+              <AdSenseBanner adSlot="2827818474" />
             </div>
           </div>
         )}
