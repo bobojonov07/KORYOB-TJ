@@ -441,8 +441,8 @@ export default function KoryobTJ() {
                 </div>
               </div>
               
-              {/* AdSense Unit 2 (Bottom) */}
-              <AdSenseBanner adSlot="2827818474" />
+              {/* AdSense Unit 2 (Bottom - Autorelaxed) */}
+              <AdSenseBanner adSlot="1538787532" adFormat="autorelaxed" />
             </div>
           </div>
         )}
